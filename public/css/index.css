@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@source "../../views";
+
+.sidebar-collapsed #sidebar {
+  width: 5rem !important;
+}
+.sidebar-collapsed #sidebarTitle,
+.sidebar-collapsed .nav-text {
+  display: none !important;
+}
+.sidebar-collapsed .nav-link {
+  justify-content: center !important;
+}
+.sidebar-collapsed .nav-link .nav-icon {
+  margin-right: 0 !important;
+}
+.sidebar-collapsed .ml-72 {
+  margin-left: 5rem !important;
+}
