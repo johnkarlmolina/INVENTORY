@@ -77,18 +77,14 @@
 </nav>
 
 <script>
-// Apply sidebar state immediately before page renders
-(function() {
+$(function() {
+  // Apply sidebar state immediately
   const sidebarState = localStorage.getItem('sidebarCollapsed');
   if (sidebarState === 'true') {
-    document.documentElement.classList.add('sidebar-collapsed');
+    $('html').addClass('sidebar-collapsed');
   }
-})();
-</script>
-
-
-<script>
-$(document).ready(function() {
+  
+  // Toggle button handler
   const $toggleBtn = $('#toggleSidebar');
   
   function collapseSidebar() {
