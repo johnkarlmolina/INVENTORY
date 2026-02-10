@@ -2,11 +2,25 @@
 
 @source "../../views";
 
+#sidebar {
+  transition: width 0.3s ease-in-out;
+}
+
+#sidebarTitle,
+.nav-text {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.ml-72 {
+  transition: margin-left 0.3s ease-in-out;
+}
+
 .sidebar-collapsed #sidebar {
   width: 5rem !important;
 }
 .sidebar-collapsed #sidebarTitle,
 .sidebar-collapsed .nav-text {
+  opacity: 0 !important;
   display: none !important;
 }
 .sidebar-collapsed .nav-link {
