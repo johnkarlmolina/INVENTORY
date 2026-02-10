@@ -1,4 +1,6 @@
+<script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="/css/index.css">
+
 
 <nav id="sidebar" style="background-color: #0F828C;" class="w-72 text-white h-screen fixed left-0 top-0 overflow-y-auto shadow-xl">
   <div class="p-6 border-b border-white/10 flex justify-between items-center">
@@ -77,13 +79,19 @@
 </nav>
 
 <script>
+
+  // Apply sidebar state immediately to prevent flash
+if (localStorage.getItem('sidebarCollapsed') === 'true') {
+  document.documentElement.classList.add('sidebar-collapsed');
+}
+
 $(function() {
-  // Apply sidebar state immediately
-  const sidebarState = localStorage.getItem('sidebarCollapsed');
-  if (sidebarState === 'true') {
+  // Reapply with jQuery for consistency
+  if (localStorage.getItem('sidebarCollapsed') === 'true') {
     $('html').addClass('sidebar-collapsed');
   }
-  
+});
+$(function() {
   // Toggle button handler
   const $toggleBtn = $('#toggleSidebar');
   
