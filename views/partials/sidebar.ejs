@@ -1,6 +1,3 @@
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 <nav id="sidebar" style="background-color: #0F828C; z-index: 1000;" class="w-72 text-white h-screen fixed left-0 top-0 overflow-y-auto overflow-x-hidden shadow-xl transition-all duration-300">
   <div id="sidebarHeader" class="p-6 border-b border-white/10 flex justify-between items-center">
     <h2 id="sidebarTitle" class="text-xl font-semibold tracking-wide">IT INVENTORY</h2>
@@ -78,68 +75,113 @@
 </nav>
 
 <script>
-  $(function () {
-    const $sidebar = $('#sidebar');
-    const $header = $('#sidebarHeader');
-    const $toggleBtn = $('#toggleSidebar');
-    const $sidebarTitle = $('#sidebarTitle');
-    const $links = $('.sidebar-link');
-    const $icons = $('.sidebar-icon');
-    const $texts = $('.sidebar-text');
+  const $sidebar = $('#sidebar');
+  const $header = $('#sidebarHeader');
+  const $toggleBtn = $('#toggleSidebar');
+  const $sidebarTitle = $('#sidebarTitle');
+  const $links = $('.sidebar-link');
+  const $icons = $('.sidebar-icon');
+  const $texts = $('.sidebar-text');
 
-    if ($sidebar.length === 0 || $toggleBtn.length === 0) return;
+  if ($sidebar.length && $toggleBtn.length) {
+    let savedCollapsed = false;
+    try {
+      savedCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+    } catch (e) {
+      savedCollapsed = false;
+    }
 
-    function applyCollapsedUI(isCollapsed) {
-      const $main = $('main');
+    const sidebarHadTransitionAll = $sidebar.hasClass('transition-all');
+    const sidebarHadDuration300 = $sidebar.hasClass('duration-300');
 
+    function applySidebarOnly(isCollapsed) {
+      $('body').toggleClass('sidebar-collapsed', !!isCollapsed);
       if (isCollapsed) {
         $sidebar.removeClass('w-72').addClass('w-20');
-        $main.removeClass('ml-72').addClass('ml-20');
-
         $header.removeClass('justify-between').addClass('justify-center');
         $sidebarTitle.addClass('hidden');
         $texts.addClass('hidden');
-
         $links.removeClass('px-8').addClass('px-0 justify-center');
         $icons.removeClass('mr-4');
       } else {
         $sidebar.removeClass('w-20').addClass('w-72');
-        $main.removeClass('ml-20').addClass('ml-72');
-
         $header.removeClass('justify-center').addClass('justify-between');
         $sidebarTitle.removeClass('hidden');
         $texts.removeClass('hidden');
-
         $links.removeClass('px-0 justify-center').addClass('px-8');
         $icons.addClass('mr-4');
       }
+    }
 
-      // When sidebar width changes, the main content width changes too.
-      // DataTables (especially with scrollX) needs a width recalculation to keep header/body aligned.
+    function applyMainOnly(isCollapsed, noAnimation) {
+      const $main = $('main');
+      if ($main.length === 0) return;
+
+      const mainHadTransitionAll = $main.hasClass('transition-all');
+      const mainHadDuration300 = $main.hasClass('duration-300');
+
+      if (noAnimation) $main.removeClass('transition-all duration-300');
+
+      if (isCollapsed) {
+        $main.removeClass('ml-72').addClass('ml-20');
+      } else {
+        $main.removeClass('ml-20').addClass('ml-72');
+      }
+
+      if (noAnimation) {
+        if (mainHadTransitionAll) $main.addClass('transition-all');
+        if (mainHadDuration300) $main.addClass('duration-300');
+      }
+    }
+
+    function adjustDataTablesAfterLayout(delayMs) {
+      const delay = typeof delayMs === 'number' ? delayMs : 320;
       window.clearTimeout(window.__sidebarDtAdjustTimer);
       window.__sidebarDtAdjustTimer = window.setTimeout(function () {
         $(window).trigger('resize');
         if ($.fn && $.fn.dataTable) {
           try {
-            $.fn.dataTable
-              .tables({ visible: true, api: true })
-              .columns.adjust();
+            $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
           } catch (e) {
             // ignore
           }
         }
-      }, 320);
+      }, delay);
     }
 
-    const savedCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-    applyCollapsedUI(savedCollapsed);
+    function applyCollapsedUI(isCollapsed, opts) {
+      const options = opts || {};
+      applySidebarOnly(isCollapsed);
+      applyMainOnly(isCollapsed, !!options.noAnimation);
+      if (!options.skipDtAdjust) adjustDataTablesAfterLayout(options.dtDelayMs);
+    }
 
-    $toggleBtn.on('click', function (e) {
-      e.preventDefault();
-      const isCollapsed = $sidebar.hasClass('w-20');
-      const next = !isCollapsed;
-      localStorage.setItem('sidebarCollapsed', String(next));
-      applyCollapsedUI(next);
+    // SNAP sidebar to saved state immediately (prevents open/close animation on navigation)
+    $sidebar.removeClass('transition-all duration-300');
+    applySidebarOnly(savedCollapsed);
+
+    $(function () {
+      // Sync main margin without animating
+      applyMainOnly(savedCollapsed, true);
+
+      // Restore sidebar transitions for user-initiated toggles
+      if (sidebarHadTransitionAll) $sidebar.addClass('transition-all');
+      if (sidebarHadDuration300) $sidebar.addClass('duration-300');
+
+      // Bind toggle (should animate)
+      $toggleBtn.on('click', function (e) {
+        e.preventDefault();
+        const next = !$sidebar.hasClass('w-20');
+        try {
+          localStorage.setItem('sidebarCollapsed', String(next));
+        } catch (err) {
+          // ignore
+        }
+        applyCollapsedUI(next);
+      });
+
+      // Final safety: ensure state is applied (no animation)
+      applyCollapsedUI(savedCollapsed, { noAnimation: true, skipDtAdjust: false, dtDelayMs: 0 });
     });
-  });
+  }
 </script>
