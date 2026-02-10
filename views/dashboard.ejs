@@ -6,14 +6,273 @@
   <title>Dashboard - IT Inventory</title>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+  <!-- DataTables JS -->
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
 </head>
 <body class="bg-gray-100">
   <div class="flex min-h-screen">
     <%- include('partials/sidebar', { page: 'dashboard' }) %>
     
-    <main class="ml-72 flex-1 p-8">
-      <h1 style="color: #0F828C;" class="text-3xl font-semibold">Dashboard Page</h1>
+    <main class="ml-72 flex-1 p-8 relative" style="z-index: 1; min-width: 0; max-width: 100%;">
+      <div class="mb-6">
+        <h1 style="color: #0F828C;" class="text-3xl font-semibold">Dashboard</h1>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full overflow-hidden">
+        <table id="dashboardTable" class="min-w-full divide-y divide-gray-200 display" style="width:100%">
+            <thead style="background-color: #0F828C;">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">PC Number</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Brand</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Model</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Serial</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Property Tag</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">OS Version</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Processor</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">RAM</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">OS License</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">User</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Department</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Date of Purchase</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Date of Entry</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Office License</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">PC Status</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">PC Location</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <!-- Sample row - replace with dynamic data -->
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">PC-001</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Dell</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">OptiPlex 7090</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">SN123456789</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">PT-2024-001</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Windows 11 Pro</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Intel i7-11700</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">16GB</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">LIC-WIN-001</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">John Doe</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">IT Department</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">2024-01-15</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">2024-01-20</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">LIC-OFF-001</td>
+                <td class="px-4 py-3 whitespace-nowrap">
+                  <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                </td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Office 301</td>
+                <td class="px-4 py-3 whitespace-nowrap text-sm">
+                  <div class="flex gap-1">
+                    <!-- Update Button -->
+                    <button class="relative inline-flex items-center justify-center p-1.5 rounded-md cursor-pointer bg-transparent border-none text-blue-600 hover:text-blue-800 hover:bg-black/5 transition-colors" title="Update">
+                      <i class="fas fa-edit text-lg"></i>
+                    </button>
+                    
+                    <!-- Update File Button -->
+                    <button class="relative inline-flex items-center justify-center p-1.5 rounded-md cursor-pointer bg-transparent border-none text-green-600 hover:text-green-800 hover:bg-black/5 transition-colors" title="Update File">
+                      <i class="fas fa-file-upload text-lg"></i>
+                    </button>
+                    
+                    <!-- Delete Button -->
+                    <button class="relative inline-flex items-center justify-center p-1.5 rounded-md cursor-pointer bg-transparent border-none text-red-600 hover:text-red-800 hover:bg-black/5 transition-colors" title="Delete">
+                      <i class="fas fa-trash-alt text-lg"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Add more rows as needed -->
+            </tbody>
+          </table>
+      </div>
     </main>
   </div>
+  
+  <style>
+    /* Tooltip for buttons with title attribute */
+    button[title]:hover::after {
+      content: attr(title);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0.25rem 0.5rem;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      border-radius: 0.25rem;
+      margin-bottom: 0.25rem;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    /* DataTable wrapper positioning */
+    .dataTables_wrapper {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+    }
+    
+    /* DataTable header styling */
+    #dashboardTable thead th {
+      background-color: #0F828C !important;
+      color: white !important;
+      font-weight: 600;
+      padding: 16px 12px !important;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      vertical-align: middle;
+    }
+    
+    #dashboardTable tbody td {
+      padding: 16px 12px !important;
+      font-size: 0.875rem;
+      vertical-align: middle;
+    }
+    
+    #dashboardTable tbody tr:hover {
+      background-color: #f9fafb !important;
+    }
+    
+    /* DataTable controls styling */
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter {
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+    
+    .dataTables_wrapper .dataTables_length {
+      float: left;
+    }
+    
+    .dataTables_wrapper .dataTables_filter {
+      float: right;
+    }
+    
+    .dataTables_wrapper .dataTables_length label,
+    .dataTables_wrapper .dataTables_filter label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0;
+      font-size: 0.875rem;
+      font-weight: normal;
+    }
+    
+    .dataTables_wrapper .dataTables_length select {
+      padding: 6px 32px 6px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      margin: 0;
+      background-color: white;
+      font-size: 0.875rem;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input {
+      padding: 7px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 0.5rem;
+      margin: 0;
+      font-size: 0.875rem;
+      width: 250px;
+    }
+    
+    .dataTables_wrapper .dataTables_filter input:focus {
+      outline: none;
+      border-color: #0F828C;
+      ring: 2px;
+      ring-color: rgba(15, 130, 140, 0.2);
+    }
+    
+    /* Pagination styling */
+    .dataTables_wrapper .dataTables_paginate {
+      margin-top: 1rem;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+      padding: 4px 8px !important;
+      margin: 0 1px;
+      border-radius: 0.25rem !important;
+      border: 1px solid #d1d5db !important;
+      background: white !important;
+      color: #374151 !important;
+      font-size: 0.75rem;
+      min-width: 32px;
+      text-align: center;
+      display: inline-block;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current {
+      background: #0F828C !important;
+      color: white !important;
+      border-color: #0F828C !important;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+      background: #f3f4f6 !important;
+      color: #111827 !important;
+      border-color: #9ca3af !important;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+      background: #0d6d75 !important;
+      color: white !important;
+      border-color: #0d6d75 !important;
+    }
+    
+    .dataTables_wrapper .dataTables_paginate .paginate_button.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .dataTables_wrapper .dataTables_info {
+      padding-top: 1rem;
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+    
+    /* Table layout */
+    table.dataTable {
+      border-collapse: separate !important;
+      border-spacing: 0;
+      width: 100% !important;
+    }
+  </style>
+  
+  <script>
+    $(document).ready(function() {
+      $('#dashboardTable').DataTable({
+        "pageLength": 10,
+        "ordering": true,
+        "searching": true,
+        "info": true,
+        "responsive": false,
+        "autoWidth": false,
+        "language": {
+          "search": "Search PC:",
+          "lengthMenu": "Show _MENU_ entries",
+          "info": "Showing _START_ to _END_ of _TOTAL_ entries",
+          "infoEmpty": "Showing 0 to 0 of 0 entries",
+          "infoFiltered": "(filtered from _MAX_ total entries)",
+          "zeroRecords": "No matching records found",
+          "emptyTable": "No data available in table",
+          "paginate": {
+            "first": "First",
+            "last": "Last",
+            "next": "Next",
+            "previous": "Previous"
+          }
+        },
+        "columnDefs": [
+          { "orderable": false, "targets": [16] } // Disable sorting on Actions column
+        ]
+      });
+    });
+  </script>
 </body>
 </html>

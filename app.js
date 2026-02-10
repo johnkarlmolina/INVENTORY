@@ -5,6 +5,7 @@ app.set("view engine", "ejs");
 
 // static files
 app.use(express.static("public"));
+app.use('/fontawesome', express.static('node_modules/@fortawesome/fontawesome-free'));
 
 // Redirect root to dashboard
 app.get("/", (req, res) => {

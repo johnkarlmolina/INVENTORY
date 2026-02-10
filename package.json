@@ -13,6 +13,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.1.0",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
     "jquery": "^4.0.0",
