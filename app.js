@@ -1,3 +1,5 @@
+// Kinukuha yung Express framework
+// require() = Node way ng pag-import ng package
 const express = require("express");
 const app = express();
 

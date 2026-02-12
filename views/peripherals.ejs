@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,14 +9,145 @@
   <script src="https://kit.fontawesome.com/ec23f4a8b0.js" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- DataTables (Default) -->
+  <link href="https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.min.css" rel="stylesheet">
+  <script src="https://cdn.datatables.net/2.1.2/js/dataTables.min.js"></script>
 </head>
-<body class="bg-gray-100">
+
+<body class="bg-gray-100 overflow-x-hidden">
   <div class="flex min-h-screen">
     <%- include('partials/sidebar', { page: 'peripherals' }) %>
     
-    <main class="ml-72 flex-1 p-8">
-      <h1 style="color: #0F828C;" class="text-3xl font-semibold">Peripherals</h1>
+    <main class="ml-72 flex-1 p-8 transition-all duration-300 overflow-x-hidden"
+      style="min-width: 0; max-width: 100%;">
+      <div class="mb-6">
+        <h1 style="color: #0F828C;" class="text-4xl font-bold">Peripherals</h1>
+        <p style="color: #777777;" class="text-2x1">Peripherals inventory overview</p>
+      </div>
+
+      <!-- Button Container -->
+      <div class="flex justify-end mb-4">
+        <button id="#"
+          class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
+          <i class="fas fa-plus text-lg"></i>
+          <span class="font-semibold">Add Peripheral</span>
+        </button>
+      </div>
+        
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full overflow-hidden">
+        <table id="peripheralsTable" class="min-w-full divide-y divide-gray-200 display">
+          <thead style="background-color: #0F828C;">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Brand</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Model</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Date of Purchase</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Date of Entry</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">User</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Department</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Type of Peripheral</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Serial No.</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Property Tag</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Peripheral No.</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Peripheral Status</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Peripheral Location</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <!-- Sample row - replace with dynamic data -->
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Logitech</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">MX Master 3</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">2024-01-15</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">2024-01-20</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">John Doe</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">IT Department</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Mouse</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">SN123456789</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">PT-2024-001</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">PERI-001</td>
+              <td class="px-4 py-3 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Office 301</td>
+              <td class="px-4 py-3 whitespace-nowrap text-sm">
+                <div class="flex gap-1">
+                  <!-- Update Button -->
+                  <button
+                    class="relative inline-flex items-center justify-center p-1.5 rounded-md cursor-pointer bg-transparent border-none text-blue-600 hover:text-blue-800 hover:bg-black/5 transition-colors"
+                    title="Update">
+                    <i class="fas fa-edit text-lg"></i>
+                  </button>
+
+                  <!-- Update File Button -->
+                  <button
+                    class="relative inline-flex items-center justify-center p-1.5 rounded-md cursor-pointer bg-transparent border-none text-green-600 hover:text-green-800 hover:bg-black/5 transition-colors"
+                    title="Update File">
+                    <i class="fas fa-file-upload text-lg"></i>
+                  </button>
+
+                  <!-- Delete Button -->
+                  <button
+                    class="relative inline-flex items-center justify-center p-1.5 rounded-md cursor-pointer bg-transparent border-none text-red-600 hover:text-red-800 hover:bg-black/5 transition-colors"
+                    title="Delete">
+                    <i class="fas fa-trash text-red-600 text-lg"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <!-- Add more rows as needed -->
+          </tbody>
+        </table>
+      </div>
     </main>
   </div>
+
+
+  <script>
+    $(document).ready(function () {
+      const peripheralsDt = new DataTable('#peripheralsTable', {
+        pageLength: 10,
+        ordering: false,
+        searching: true,
+        info: true,
+        scrollX: true,
+        scrollCollapse: true,
+        responsive: false,
+        autoWidth: true,
+        language: {
+          search: 'Search:',
+          lengthMenu: 'Show _MENU_ entries',
+          info: 'Showing _START_ to _END_ of _TOTAL_ entries',
+          infoEmpty: 'Showing 0 to 0 of 0 entries',
+          infoFiltered: '(filtered from _MAX_ total entries)',
+          zeroRecords: 'No matching records found',
+          emptyTable: 'No data available in table',
+          paginate: {
+            first: 'First',
+            last: 'Last',
+            next: 'Next',
+            previous: 'Previous'
+          }
+        }
+      });
+
+      // Ensure widths are correct after first layout/paint.
+      setTimeout(function () {
+        try {
+          peripheralsDt.columns.adjust();
+        } catch (e) {
+          // ignore
+        }
+      }, 0);
+      setTimeout(function () {
+        try {
+          peripheralsDt.columns.adjust();
+        } catch (e) {
+          // ignore
+        }
+      }, 350);
+    });
+  </script>
 </body>
+
 </html>
