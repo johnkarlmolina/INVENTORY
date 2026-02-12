@@ -34,120 +34,141 @@
           </button>
         </div>
           
-        <div class="bg-white rounded-lg shadow-lg p-6 w-full overflow-hidden">
-          <table id="dashboardTable" class="min-w-full divide-y divide-gray-200 display">
-            <thead style="background-color: #0F828C;">
-              <tr>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">PC Number</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Brand</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Model</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Serial</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Property Tag
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">OS Version
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Processor</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">RAM</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">OS License
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">User</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Department
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Date of
-                  Purchase</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Date of Entry
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Office License
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">PC Status</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">PC Location
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <!-- Sample row - replace with dynamic data -->
-              <tr class="hover:bg-gray-50 transition-colors">
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">PC-001</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Dell</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">OptiPlex 7090</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">SN123456789</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">PT-2024-001</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Windows 11 Pro</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Intel i7-11700</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">16GB</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">LIC-WIN-001</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">John Doe</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">IT Department</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">2024-01-15</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">2024-01-20</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">LIC-OFF-001</td>
-                <td class="px-4 py-3 whitespace-nowrap">
-                  <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
-                </td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">Office 301</td>
-                <td class="px-4 py-3 whitespace-nowrap text-sm">
-                  <div class="flex gap-1">
-                    <!-- Update Button -->
-                    <button
-                      class="relative inline-flex items-center justify-center p-1.5 rounded-md cursor-pointer bg-transparent border-none text-blue-600 hover:text-blue-800 hover:bg-black/5 transition-colors"
-                      title="Update">
-                      <i class="fas fa-edit text-lg"></i>
-                    </button>
-
-                    <!-- Update File Button -->
-                    <button
-                      class="relative inline-flex items-center justify-center p-1.5 rounded-md cursor-pointer bg-transparent border-none text-green-600 hover:text-green-800 hover:bg-black/5 transition-colors"
-                      title="Update File">
-                      <i class="fas fa-file-upload text-lg"></i>
-                    </button>
-
-                    <!-- Delete Button -->
-                    <button
-                      class="relative inline-flex items-center justify-center p-1.5 rounded-md cursor-pointer bg-transparent border-none text-red-600 hover:text-red-800 hover:bg-black/5 transition-colors"
-                      title="Delete">
-                      <i class="fas fa-trash text-red-600 text-lg"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <!-- Add more rows as needed -->
-            </tbody>
-
-
-          </table>
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full overflow-x-auto">
+          <div class="w-full overflow-x-auto">
+            <table id="dashboardTable" class="display nowrap" style="width:100%">
+              <thead style="background-color: #0F828C;">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">PC Number</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Brand</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Model</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Serial</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Property Tag</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">OS Version</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Processor</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">RAM</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">OS License</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">User</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Department</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Date of Purchase</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Date of Entry</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Office License</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">PC Status</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">PC Location</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Actions</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
         </div>
       </main>
   </div>
 
 
   <script>
-    $(document).ready(function () {
-      const dashboardDt = new DataTable('#dashboardTable', {
-        pageLength: 10,
-        ordering: false,
-        searching: true,
-        info: true,
-        scrollX: true,
-        scrollCollapse: true,
-        responsive: false,
-        autoWidth: true,
-        language: {
-          search: 'Search:',
-          lengthMenu: 'Show _MENU_ entries',
-          info: 'Showing _START_ to _END_ of _TOTAL_ entries',
-          infoEmpty: 'Showing 0 to 0 of 0 entries',
-          infoFiltered: '(filtered from _MAX_ total entries)',
-          zeroRecords: 'No matching records found',
-          emptyTable: 'No data available in table',
-          paginate: {
-            first: 'First',
-            last: 'Last',
-            next: 'Next',
-            previous: 'Previous'
+     $(function () {
+    const table = new DataTable('#dashboardTable', {
+      ajax: {
+        url: '/api/computers',
+        dataSrc: '' // because we return an array
+      },
+      columns: [
+        { data: 'pc_no' },
+        { data: 'brand' },
+        { data: 'model' },
+        { data: 'serial_number' },
+        { data: 'property_tag' },
+        { data: 'os_version' },
+        { data: 'procie' },
+        { data: 'ram' },
+        { data: 'os_license' },
+        { data: 'pc_user' },
+        { data: 'user_dept' },
+        { data: 'date_of_purchase' },
+        { data: 'date_of_entry' },
+        { data: 'office_license' },
+        { data: 'pc_status' },
+        { data: 'pc_location' },
+
+        // Actions column (buttons)
+        {
+          data: 'computer_id',
+          orderable: false,
+          searchable: false,
+          render: function (id) {
+            return `
+              <div class="flex gap-1">
+                <button class="editBtn p-1.5 text-blue-600 hover:text-blue-800" data-id="${id}" title="Update">
+                  <i class="fas fa-edit text-lg"></i>
+                </button>
+                <button class="fileBtn p-1.5 text-green-600 hover:text-green-800" data-id="${id}" title="Update File">
+                  <i class="fas fa-file-upload text-lg"></i>
+                </button>
+                <button class="deleteBtn p-1.5 text-red-600 hover:text-red-800" data-id="${id}" title="Delete">
+                  <i class="fas fa-trash text-lg"></i>
+                </button>
+              </div>
+            `;
           }
         }
+      ],
+      pageLength: 10,
+      ordering: true,
+      searching: true,
+      info: true,
+      scrollX: true,
+      scrollCollapse: true,
+      responsive: false,
+      autoWidth: false,
+      columnDefs: [
+        { width: '60px', targets: 0 },  // PC Number
+        { width: '80px', targets: 1 },  // Brand
+        { width: '80px', targets: 2 },  // Model
+        { width: '120px', targets: 3 }, // Serial
+        { width: '100px', targets: 4 }, // Property Tag
+        { width: '100px', targets: 5 }, // OS Version
+        { width: '120px', targets: 6 }, // Processor
+        { width: '60px', targets: 7 },  // RAM
+        { width: '100px', targets: 8 }, // OS License
+        { width: '120px', targets: 9 }, // User
+        { width: '150px', targets: 10 }, // Department
+        { width: '110px', targets: 11 }, // Date of Purchase
+        { width: '110px', targets: 12 }, // Date of Entry
+        { width: '180px', targets: 13 }, // Office License
+        { width: '100px', targets: 14 }, // PC Status
+        { width: '100px', targets: 15 }, // PC Location
+        { width: '100px', targets: 16, className: 'text-center' }  // Actions
+      ],
+      language: {
+        search: 'Search:',
+        lengthMenu: 'Show _MENU_ entries',
+        info: 'Showing _START_ to _END_ of _TOTAL_ entries',
+        infoEmpty: 'Showing 0 to 0 of 0 entries',
+        infoFiltered: '(filtered from _MAX_ total entries)',
+        zeroRecords: 'No matching records found',
+        emptyTable: 'No data available in table',
+        paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
+      }
+    });
+
+    //  delete button with SweetAlert
+    $('#dashboardTable').on('click', '.deleteBtn', function () {
+      const id = $(this).data('id');
+
+      Swal.fire({
+        title: 'Delete?',
+        text: 'Are you sure you want to delete this item?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, delete',
+        cancelButtonText: 'Cancel'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // later: call delete API
+          console.log('delete id:', id);
+        }
       });
+    });
 
       // Ensure widths are correct after first layout/paint.
       setTimeout(function () {
