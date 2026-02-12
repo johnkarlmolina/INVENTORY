@@ -8,13 +8,330 @@
   <script src="https://kit.fontawesome.com/ec23f4a8b0.js" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="icon" type="image/png" href="/Images/ndh-it.png">
 </head>
 <body class="bg-gray-100">
   <div class="flex min-h-screen">
     <%- include('partials/sidebar', { page: 'maintenance' }) %>
     
     <main class="ml-72 flex-1 p-8">
-      <h1 style="color: #0F828C;" class="text-3xl font-semibold">Preventive Maintenance Page</h1>
+      <!-- Page Header -->
+      <div class="mb-6">
+        <h1  style="color: #0F828C;" class="text-3xl font-bold mb-2">Preventive Maintenance</h1>
+        <p class="text-gray-600">Fill out PM activity and track hardware/software status</p>
+      </div>
+
+      <!-- PM Form -->
+      <div class="bg-white rounded-lg shadow-md p-8">
+        <form>
+          <!-- Top Section - Basic Info -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div>
+              <label class="block text-gray-700 text-sm font-medium mb-2">PM Activity No</label>
+              <input 
+                type="text" 
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              >
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm font-medium mb-2">Department</label>
+              <input 
+                type="text" 
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              >
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm font-medium mb-2">Username</label>
+              <input 
+                type="text" 
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              >
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div>
+              <label class="block text-gray-700 text-sm font-medium mb-2">Property Tag</label>
+              <input 
+                type="text" 
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              >
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm font-medium mb-2">Start Time</label>
+              <input 
+                type="time" 
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              >
+            </div>
+            <div>
+              <label class="block text-gray-700 text-sm font-medium mb-2">End Time</label>
+              <input 
+                type="time" 
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              >
+            </div>
+          </div>
+
+          <!-- Hardware Activity Section -->
+          <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Hardware Activity</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full border-collapse">
+                <thead>
+                  <tr class="bg-gray-50">
+                    <th class="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-700">Activity Description</th>
+                    <th class="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                    <th class="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-700">Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Checking of system unit</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option>Select</option>
+                        <option>Good</option>
+                        <option>For Repair</option>
+                        <option>For Replacement</option>
+                        <option>For Condemned</option>
+                      </select>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Checking of storage</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                       <option>Select</option>
+                        <option>Good</option>
+                        <option>For Repair</option>
+                        <option>For Replacement</option>
+                        <option>For Condemned</option>
+                      </select>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Checking of monitor</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option>Select</option>
+                        <option>Good</option>
+                        <option>For Repair</option>
+                        <option>For Replacement</option>
+                        <option>For Condemned</option>
+                      </select>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Checking of keyboard</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option>Select</option>
+                        <option>Good</option>
+                        <option>For Repair</option>
+                        <option>For Replacement</option>
+                        <option>For Condemned</option>
+                      </select>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Checking of mouse</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option>Select</option>
+                        <option>Good</option>
+                        <option>For Repair</option>
+                        <option>For Replacement</option>
+                        <option>For Condemned</option>
+                      </select>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Checking of power cables</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                       <option>Select</option>
+                        <option>Good</option>
+                        <option>For Repair</option>
+                        <option>For Replacement</option>
+                        <option>For Condemned</option>
+                      </select>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Checking of display</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        <option>Select</option>
+                        <option>Good</option>
+                        <option>For Repair</option>
+                        <option>For Replacement</option>
+                        <option>For Condemned</option>
+                      </select>
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Software Activity Section -->
+          <div class="mb-8">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Software Activity</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full border-collapse">
+                <thead>
+                  <tr class="bg-gray-50">
+                    <th class="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-700">Activity Description</th>
+                    <th class="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-700">Start</th>
+                    <th class="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-700">Finish</th>
+                    <th class="border border-gray-300 px-4 py-3 text-left text-sm font-semibold text-gray-700">Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Check Windows patch update</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Antivirus update and scanning</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Microsoft Office update</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Application updates</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Disk defragmentation</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Clearing temporary files</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Clearing recycle bin</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="border border-gray-300 px-4 py-3 text-gray-700">Clearing web history</td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="time" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                    <td class="border border-gray-300 px-4 py-3">
+                      <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Comments Section -->
+          <div class="mb-8">
+            <label class="block text-gray-700 text-sm font-medium mb-2">Comments</label>
+            <textarea 
+              rows="4"
+              placeholder="Additional notes"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
+            ></textarea>
+          </div>
+
+          <!-- Submit Button -->
+          <div>
+            <button 
+              type="submit"
+              class="bg-teal-600 hover:bg-teal-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200"
+            >
+              Submit PM Record
+            </button>
+          </div>
+        </form>
+      </div>
     </main>
   </div>
 </body>
