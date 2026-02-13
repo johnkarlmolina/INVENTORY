@@ -27,7 +27,7 @@
 
         <!-- Button Container -->
         <div class="flex justify-end mb-4">
-          <button id="#"
+          <button id="openPeripheralModal"
             class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
             <i class="fas fa-plus text-lg"></i>
             <span class="font-semibold">Add Peripheral</span>
@@ -88,10 +88,171 @@
       </main>
   </div>
 
+  <div id="peripheralModal" class="fixed inset-0 z-50 hidden">
+    <div id="peripheralModalBackdrop" class="absolute inset-0 bg-black/40"></div>
+
+    <div class="relative z-10 flex min-h-screen items-center justify-center p-4 md:p-6">
+      <div class="w-full max-w-6xl max-h-[92vh] overflow-y-auto rounded-xl bg-white shadow-2xl border border-gray-200">
+        <div class="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white rounded-t-xl">
+          <h2 class="text-2xl font-bold" style="color: #0F828C;">Peripherals Inventory Form</h2>
+          <button id="closePeripheralModal" type="button"
+            class="h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0F828C]"
+            aria-label="Close modal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <form id="peripheralForm" class="px-6 py-6">
+          <section class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label for="brand" class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+                <input id="brand" name="brand" type="text"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
+              <div>
+                <label for="model" class="block text-sm font-medium text-gray-700 mb-2">Model</label>
+                <input id="model" name="model" type="text"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
+              <div>
+                <label for="kind_of_peripheral" class="block text-sm font-medium text-gray-700 mb-2">Peripheral Type</label>
+                <select id="kind_of_peripheral" name="kind_of_peripheral"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+                  <option value="">Select type...</option>
+                  <option value="Keyboard">Keyboard</option>
+                  <option value="Mouse">Mouse</option>
+                  <option value="Monitor">Monitor</option>
+                  <option value="Printer">Printer</option>
+                  <option value="Webcam">Webcam</option>
+                  <option value="Headset">Headset</option>
+                  <option value="Speaker">Speaker</option>
+                  <option value="Scanner">Scanner</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <section class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label for="peripheral_no" class="block text-sm font-medium text-gray-700 mb-2">Peripheral Number</label>
+                <input id="peripheral_no" name="peripheral_no" type="text" 
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
+              <div>
+                <label for="property_tag" class="block text-sm font-medium text-gray-700 mb-2">Property Tag</label>
+                <input id="property_tag" name="property_tag" type="text" 
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
+              <div>
+                <label for="serial_no" class="block text-sm font-medium text-gray-700 mb-2">Serial Number</label>
+                <input id="serial_no" name="serial_no" type="text"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
+            </div>
+          </section>
+
+          <section class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label for="computer_id" class="block text-sm font-medium text-gray-700 mb-2">Computer ID</label>
+                <input id="computer_id" name="computer_id" type="text" 
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
+              <div>
+                <label for="peripheral_user" class="block text-sm font-medium text-gray-700 mb-2">User</label>
+                <input id="peripheral_user" name="peripheral_user" type="text" 
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
+              <div>
+                <label for="user_dept" class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                <select id="user_dept" name="user_dept"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+                  <option value="">Select department...</option>
+                  <option value="IT Department">IT Department</option>
+                  <option value="Accounting">Accounting</option>
+                  <option value="HR">HR</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Operations">Operations</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <section class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="peripheral_status" class="block text-sm font-medium text-gray-700 mb-2">Peripheral Status</label>
+                <select id="peripheral_status" name="peripheral_status"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+                  <option value="Active" selected>Active</option>
+                  <option value="Inactive">Inactive</option>
+                  <option value="In Repair">In Repair</option>
+                  <option value="Disposed">Disposed</option>
+                </select>
+              </div>
+               <div>
+                <label for="peripheral_status" class="block text-sm font-medium text-gray-700 mb-2">Peripheral Location</label>
+                <select id="peripheral_location" name="peripheral_location"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+                  <option value="Floor" selected>Floor</option>
+                  <option value="1st Floor">1st Floor</option>
+                  <option value="2nd Floor">2nd Floor</option>
+                  <option value="3rd Floor">3rd Floor</option>
+                  <option value="4th Floor">4th Floor</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <section class="mb-8">
+            <div class="grid grid-cols-1 gap-4">
+              <div>
+                <label for="date_of_purchase" class="block text-sm font-medium text-gray-700 mb-2">Date of Purchase</label>
+                <input id="date_of_purchase" name="date_of_purchase" type="date"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
+            </div>
+          </section>
+
+          <div class="flex items-center gap-4">
+            <button type="submit"
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
+              <i class="fas fa-plus text-lg"></i>
+              <span class="font-semibold">Add Peripheral</span>
+            </button>
+
+            <button id="clearPeripheralForm" type="button"
+              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              Clear Form
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
 
   <script>
 
     $(function () {
+      const $peripheralModal = $('#peripheralModal');
+      const $peripheralForm = $('#peripheralForm');
+
+      function openPeripheralModal() {
+        $peripheralModal.removeClass('hidden');
+        $('body').addClass('overflow-hidden');
+      }
+
+      function closePeripheralModal() {
+        $peripheralModal.addClass('hidden');
+        $('body').removeClass('overflow-hidden');
+      }
+
       const peripheralsDt = new DataTable('#peripheralsTable', {
         ajax: { url: '/api/peripherals', dataSrc: '' },
         columns: [
@@ -161,6 +322,30 @@
           emptyTable: 'No data available in table',
           paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
         }
+      });
+
+      $('#openPeripheralModal').on('click', openPeripheralModal);
+      $('#closePeripheralModal, #peripheralModalBackdrop').on('click', closePeripheralModal);
+
+      $(document).on('keydown', function (event) {
+        if (event.key === 'Escape' && !$peripheralModal.hasClass('hidden')) {
+          closePeripheralModal();
+        }
+      });
+
+      $('#clearPeripheralForm').on('click', function () {
+        $peripheralForm.trigger('reset');
+        $('#peripheral_status').val('Active');
+      });
+
+      $peripheralForm.on('submit', function (event) {
+        event.preventDefault();
+        Swal.fire({
+          icon: 'success',
+          title: 'Ready',
+          text: 'Peripheral form is now shown in a modal.',
+          confirmButtonColor: '#0F828C'
+        });
       });
 
       // SweetAlert delete 
