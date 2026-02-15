@@ -36,6 +36,7 @@
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Classification</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Current Stock</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Stock No</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Date of Entry</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Date of Purchase</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Brand</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Model</th>
@@ -59,7 +60,9 @@
                 <tr>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Item</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Item Status</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Transaction Issued Qty</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Transaction Date</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Issued Quantity</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap"></th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Item Classification</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Stock No</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Remove</th>
@@ -99,12 +102,13 @@
           { width: '140px', targets: 1 },  // Classification
           { width: '100px', targets: 2 },  // Current Stock
           { width: '100px', targets: 3 },  // Stock No
-          { width: '130px', targets: 4 },  // Date of Purchase
-          { width: '100px', targets: 5 },  // Brand
-          { width: '120px', targets: 6 },  // Model
-          { width: '100px', targets: 7, className: 'text-center' }  // Actions
+          { width: '130px', targets: 4 },  // Date of Entry
+          { width: '130px', targets: 5 },  // Date of Purchase
+          { width: '100px', targets: 6 },  // Brand
+          { width: '120px', targets: 7 },  // Model
+          { width: '100px', targets: 8, className: 'text-center' }  // Actions
         ],
-        language: {
+        language: { 
           search: 'Search:',
           lengthMenu: 'Show _MENU_ entries',
           info: 'Showing _START_ to _END_ of _TOTAL_ entries',
@@ -129,10 +133,12 @@
         columnDefs: [
           { width: '180px', targets: 0 },  // Item
           { width: '120px', targets: 1 },  // Item Status
-          { width: '150px', targets: 2 },  // Transaction Issued Qty
-          { width: '140px', targets: 3 },  // Item Classification
-          { width: '100px', targets: 4 },  // Stock No
-          { width: '80px', targets: 5, className: 'text-center' }  // Remove
+          { width: '150px', targets: 2 },  // Transaction Date
+          { width: '150px', targets: 3 },  // Transaction Quantity
+          { width: '140px', targets: 4 },  // blank
+          { width: '140px', targets: 5 },  // Item Classification
+          { width: '100px', targets: 6 },  // Stock No
+          { width: '80px', targets: 7, className: 'text-center' }  // Remove
         ],
         language: {
           search: 'Search:',
