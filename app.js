@@ -28,6 +28,10 @@ app.use(session(sessionConfig));
 const computerRoutes = require("./route/computerRoutes");
 const authRoutes = require("./route/authRoutes");
 const peripheralRoute = require("./route/peripheralRoute");
+const servicesRoute = require("./route/servicesRoute");
+const maintenanceRoute = require("./route/maintenanceRoute");
+const consumableRoute = require("./route/consumableRoute");
+const reportsRoute = require("./route/reportsRoute");
 
 
 
@@ -53,5 +57,9 @@ app.set("view engine", "ejs");
 app.use("/", authRoutes);
 app.use("/computers", computerRoutes);
 app.use("/peripherals", peripheralRoute);
+app.use("/services", servicesRoute);
+app.use("/maintenance", maintenanceRoute);
+app.use("/consumable", consumableRoute);
+app.use("/reports", reportsRoute);
 
 module.exports = { app, server };
