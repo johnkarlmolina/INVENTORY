@@ -1,13 +1,16 @@
-const mysql = require("mysql2/promise");
+const mysql = require("mysql");
+const util = require("util");
 
 const pool = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "",            // XAMPP default blank
-  database: "inventory_system", //  (database name sa phpMyAdmin)
-  port: 3306,
-  waitForConnections: true,
   connectionLimit: 10,
+  host: process.env.DB_HOST || "localhost",
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASS || "",
+  database: process.env.DB_NAME || "inventory_system",
+  charset: "utf8mb4",
+  port: process.env.DB_PORT || 3306,
 });
 
-module.exports = pool;    
+const query = util.promisify(pool.query).bind(pool);
+
+module.exports = { pool, query };
