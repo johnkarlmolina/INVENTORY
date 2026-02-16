@@ -10,7 +10,7 @@
   
   <ul class="py-5">
     <li class="mb-1 <%= page === 'dashboard' ? 'bg-white/20' : '' %>">
-      <a href="/dashboard" class="sidebar-link flex items-center px-8 py-4 text-white/90 hover:bg-white/15 hover:text-white transition-all">
+      <a href="#" id="dashboard" class="sidebar-link flex items-center px-8 py-4 text-white/90 hover:bg-white/15 hover:text-white transition-all">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="sidebar-icon w-6 h-6 mr-4 flex-shrink-0">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
         </svg>
@@ -19,7 +19,7 @@
     </li>
     
     <li class="mb-1 <%= page === 'inventory' ? 'bg-white/20' : '' %>">
-      <a href="/inventory" class="sidebar-link flex items-center px-8 py-4 text-white/90 hover:bg-white/15 hover:text-white transition-all">
+      <a href="#" id="inventory" class="sidebar-link flex items-center px-8 py-4 text-white/90 hover:bg-white/15 hover:text-white transition-all">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="sidebar-icon w-6 h-6 mr-4 flex-shrink-0">
           <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
         </svg>
@@ -75,6 +75,10 @@
 </nav>
 
 <script>
+
+    $(document).ready(function() {
+
+      const apiUrl = "<%= baseUrl %>";
   const $sidebar = $('#sidebar');
   const $header = $('#sidebarHeader');
   const $toggleBtn = $('#toggleSidebar');
@@ -184,4 +188,26 @@
       applyCollapsedUI(savedCollapsed, { noAnimation: true, skipDtAdjust: false, dtDelayMs: 0 });
     });
   }
+
+  $(document).on('click', "#inventory", function(e) {
+    e.preventDefault();
+    //window.location.href = '/dashboard';  
+    e.stopPropagation();
+
+    $.ajax({
+      url: apiUrl+'/',
+      method: 'GET',
+      success: function() {
+        window.location.href = '/';
+      },
+      error: function() {
+        alert('Failed to load dashboard. Please try again.');
+      }
+    });
+
+
+
+  });
+
+   });
 </script>
