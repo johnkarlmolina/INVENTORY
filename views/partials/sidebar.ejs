@@ -28,7 +28,7 @@
     </li>
     
     <li class="mb-1 <%= page === 'peripherals' ? 'bg-white/20' : '' %>">
-      <a href="/peripherals" class="sidebar-link flex items-center px-8 py-4 text-white/90 hover:bg-white/15 hover:text-white transition-all">
+      <a href="/peripherals" id="peripherals" class="sidebar-link flex items-center px-8 py-4 text-white/90 hover:bg-white/15 hover:text-white transition-all">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="sidebar-icon w-6 h-6 mr-4 flex-shrink-0">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
         </svg>
@@ -208,6 +208,25 @@
 
 
   });
+
+  $(document).on('click', "#peripherals", function(e) {
+    e.preventDefault();
+    //window.location.href = '/dashboard';  
+    e.stopPropagation();
+
+    $.ajax({
+      url: apiUrl+'/peripherals/peripheralPageRender',
+      method: 'GET',
+      success: function() {
+        window.location.href = '/peripherals/peripheralPageRender';
+      },
+      error: function() {
+        alert('Failed to load dashboard. Please try again.');
+      }
+    });
+
+    });
+
 
    });
 </script>
