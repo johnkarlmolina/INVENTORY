@@ -27,6 +27,7 @@ app.use(session(sessionConfig));
 
 const computerRoutes = require("./route/computerRoutes");
 const authRoutes = require("./route/authRoutes");
+const peripheralRoute = require("./route/peripheralRoute");
 
 
 
@@ -51,5 +52,6 @@ app.set("view engine", "ejs");
 
 app.use("/", authRoutes);
 app.use("/computers", computerRoutes);
+app.use("/peripherals", peripheralRoute);
 
 module.exports = { app, server };

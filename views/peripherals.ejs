@@ -237,7 +237,16 @@
   </div>
 
 
+</body>
+
+</html>
+
+
+
   <script>
+
+  $(document).ready(function () {
+      const apiUrl = "<%= baseUrl %>";
 
     $(function () {
       const $peripheralModal = $('#peripheralModal');
@@ -254,7 +263,9 @@
       }
 
       const peripheralsDt = new DataTable('#peripheralsTable', {
-        ajax: { url: '/api/peripherals', dataSrc: '' },
+        processing: true,
+       serverSide: true,
+        ajax: { url: apiUrl+'/peripherals/peripheralDataTable', type:"post", dataType:"json" },
         columns: [
           { data: 'brand' },
           { data: 'model' },
@@ -384,7 +395,6 @@
         }
       }, 350);
     });
-  </script>
-</body>
 
-</html>
+    });
+  </script>
