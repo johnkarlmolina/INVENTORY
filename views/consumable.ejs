@@ -28,7 +28,7 @@
         </div>
         <!-- Button Container -->
         <div class="flex justify-end mb-4">
-          <button id="openComputerModal"
+          <button id="AddItemBtn"
             class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
             <i class="fas fa-plus text-lg"></i>
             <span class="font-semibold">Add Item</span>
@@ -129,8 +129,148 @@
       </main>
   </div>
 
+  <!-- Add Item Modal -->
+  <div id="addItemModal" class="fixed inset-0 z-50 hidden">
+    <div id="addItemModalBackdrop" class="absolute inset-0 bg-black/40"></div>
+
+    <div class="relative z-10 flex min-h-screen items-center justify-center p-4 md:p-6">
+      <div class="w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-xl bg-white shadow-2xl border border-gray-200">
+        <div class="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white rounded-t-xl">
+          <h2 class="text-2xl font-bold" style="color: #0F828C;">Add Consumable Item</h2>
+          <button id="closeAddItemModal" type="button"
+            class="h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0F828C]"
+            aria-label="Close modal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <form id="addItemForm" class="px-6 py-6">
+          <section class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="item" class="block text-sm font-medium text-gray-700 mb-2">Item</label>
+                <input id="item" name="item" type="text"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
+              <div>
+                <label for="item_classification" class="block text-sm font-medium text-gray-700 mb-2">Item Classification</label>
+                <select id="item_classification" name="item_classification"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+                  <option value="">Select classification...</option>
+                  <option value="Ink">Ink</option>
+                  <option value="IT Consumables">IT Consumables</option>
+                  <option value="Office Supplies">Office Supplies</option>
+                  <option value="Cleaning Supplies">Cleaning Supplies</option>
+                  <option value="Pantry Items">Pantry Items</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <section class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="stock" class="block text-sm font-medium text-gray-700 mb-2">Stock</label>
+                <select id="stock" name="stock"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+                  <option value="">Select stock...</option>
+                  <option value="In Stock">In Stock</option>
+                  <option value="Low Stock">Low Stock</option>
+                  <option value="Out of Stock">Out of Stock</option>
+                </select>
+              </div>
+              <div>
+                <label for="date_of_purchase" class="block text-sm font-medium text-gray-700 mb-2">Date of Purchase</label>
+                <input id="date_of_purchase" name="date_of_purchase" type="date"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
+            </div>
+          </section>
+
+          <section class="mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="brand" class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+                <input id="brand" name="brand" type="text"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
+              <div>
+                <label for="model" class="block text-sm font-medium text-gray-700 mb-2">Model</label>
+                <input id="model" name="model" type="text"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
+            </div>
+          </section>
+
+          <div class="flex items-center gap-4">
+            <button type="submit"
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
+              <i class="fas fa-plus text-lg"></i>
+              <span class="font-semibold">Add Item</span>
+            </button>
+
+            <button id="clearAddItemForm" type="button"
+              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              Clear Form
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script>
     $(function () {
+      // Modal functionality
+      const addItemModal = $('#addItemModal');
+      const addItemBtn = $('#AddItemBtn');
+      const closeModalBtn = $('#closeAddItemModal');
+      const modalBackdrop = $('#addItemModalBackdrop');
+      const clearFormBtn = $('#clearAddItemForm');
+
+      // Open modal
+      addItemBtn.on('click', function () {
+        addItemModal.removeClass('hidden');
+        $('body').css('overflow', 'hidden');
+      });
+
+      // Close modal
+      function closeModal() {
+        addItemModal.addClass('hidden');
+        $('body').css('overflow', '');
+      }
+
+      closeModalBtn.on('click', closeModal);
+      modalBackdrop.on('click', closeModal);
+
+      // Clear form
+      clearFormBtn.on('click', function () {
+        $('#addItemForm')[0].reset();
+      });
+
+      // Handle form submission
+      $('#addItemForm').on('submit', function (e) {
+        e.preventDefault();
+        
+        // Get form data
+        const formData = {
+          item: $('#item').val(),
+          item_classification: $('#item_classification').val(),
+          stock: $('#stock').val(),
+          date_of_purchase: $('#date_of_purchase').val(),
+          brand: $('#brand').val(),
+          model: $('#model').val()
+        };
+
+        // TODO: Add your API endpoint here
+        console.log('Form data:', formData);
+        
+        // Clear form and close modal
+        $('#addItemForm')[0].reset();
+        closeModal();
+      });
+
       // Consumables Inventory DataTable 
       const consumablesTable = new DataTable('#consumablesTable', {
         pageLength: 10,
