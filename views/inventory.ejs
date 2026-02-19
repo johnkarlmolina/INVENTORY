@@ -1,7 +1,3 @@
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -248,7 +244,7 @@
           </section>
 
           <div class="flex items-center gap-4">
-            <button type="submit"
+            <button type="submit" id="submitComputerForm"
               class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
               <i class="fas fa-plus text-lg"></i>
               <span class="font-semibold">Add Computer</span>
@@ -275,7 +271,7 @@
 
  $(document).ready(function() {
     const apiUrl = "<%= baseUrl %>";
-     $(function () {
+
     const $computerModal = $('#computerModal');
     const $computerForm = $('#computerForm');
 
@@ -390,15 +386,6 @@
       $('#pc_status').val('Active');
     });
 
-    $computerForm.on('submit', function (event) {
-      event.preventDefault();
-      Swal.fire({
-        icon: 'success',
-        title: 'Ready',
-        text: 'Computer form is now shown in a modal.',
-        confirmButtonColor: '#0F828C'
-      });
-    });
 
     //  delete button with SweetAlert
     $('#dashboardTable').on('click', '.deleteBtn', function () {
@@ -434,7 +421,76 @@
           // ignore
         }
       }, 350);
+
+
+$(document).on('submit', '#computerForm', function (e) {
+    e.preventDefault();
+
+    const fileInput = document.getElementById('computer_file');
+    const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : null;
+
+    // Convert form to object
+    const formDataArray = $(this).serializeArray();
+    let data = {};
+    formDataArray.forEach(item => {
+        data[item.name] = item.value.trim() === '' ? null : item.value.trim();
     });
+
+    // Add filename manually
+    data.picture_of_pc = fileName;
+
+    // Show SweetAlert confirmation first
+    Swal.fire({
+        title: 'Add Computer?',
+        text: "Are you sure you want to add this computer?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#0F828C',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, add it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Send AJAX only after confirmation
+            $.ajax({
+                url: apiUrl + '/computers/addComputer',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Computer Added',
+                            text: response.message,
+                            confirmButtonColor: '#0F828C'
+                        });
+
+                        $('#computerModal').addClass('hidden');
+                        table.ajax.reload();
+                        $('#computerForm')[0].reset();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Insert Failed',
+                            text: response.message,
+                        });
+                    }
+                },
+                error: function (xhr) {
+                    console.error('AJAX error:', xhr.responseText);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong.'
+                    });
+                }
+            });
+        }
+    });
+});
+
+
 
     });
   </script>
