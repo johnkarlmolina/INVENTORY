@@ -350,14 +350,70 @@
       });
 
       $peripheralForm.on('submit', function (event) {
-        event.preventDefault();
-        Swal.fire({
-          icon: 'success',
-          title: 'Ready',
-          text: 'Peripheral form is now shown in a modal.',
-          confirmButtonColor: '#0F828C'
-        });
-      });
+    event.preventDefault();
+
+    // Convert form to object
+    const formArray = $(this).serializeArray();
+    let data = {};
+    formArray.forEach(item => {
+        data[item.name] = item.value || 'test'; // default to 'test' if empty
+    });
+
+    // Optional: sample Peripheral No if empty
+    if (!data.peripheral_no) data.peripheral_no = 'PER-1001';
+
+    // SweetAlert confirmation
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to add this peripheral?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, add it!',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#0F828C',
+        cancelButtonColor: '#d33'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // AJAX POST request
+            $.ajax({
+                url: apiUrl + '/peripherals/addPeripheral',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Peripheral Added',
+                            text: response.message,
+                            confirmButtonColor: '#0F828C'
+                        });
+                        $peripheralForm[0].reset();
+                        $('#peripheral_status').val('Active');
+                        peripheralsDt.ajax.reload(null, false); // reload DataTable
+                        $peripheralModal.addClass('hidden');
+                        $('body').removeClass('overflow-hidden');
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Failed',
+                            text: response.message || 'Something went wrong.'
+                        });
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while submitting the form.'
+                    });
+                    console.error(error);
+                }
+            });
+        }
+    });
+});
+
 
       // SweetAlert delete 
       $('#peripheralsTable').on('click', '.deletePeripheralBtn', function () {
