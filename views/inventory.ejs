@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - IT Inventory</title>
+  <title>Inventory - IT Inventory</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://kit.fontawesome.com/ec23f4a8b0.js" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -17,12 +17,12 @@
 
 <body class="bg-gray-100 overflow-x-hidden">
   <div class="flex min-h-screen">
-    <%- include('partials/sidebar', { page: 'dashboard' }) %>
+    <%- include('partials/sidebar', { page: 'inventory', baseUrl: baseUrl }) %>
 
       <main class="ml-72 flex-1 p-8 transition-all duration-300 overflow-x-hidden"
         style="min-width: 0; max-width: 100%;">
         <div class="mb-6">
-          <h1 style="color: #0F828C;" class="text-4xl font-bold">Dashboard</h1>
+          <h1 style="color: #0F828C;" class="text-4xl font-bold">Computer Inventory</h1>
           <p style="color: #777777;" class="text-2x1">Computer inventory overview</p>
         </div>
 
