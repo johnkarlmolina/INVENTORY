@@ -84,10 +84,10 @@
       e.preventDefault();
       e.stopPropagation();
       $.ajax({
-        url: apiUrl+'/',
+        url: apiUrl+'/dashboard',
         method: 'GET',
         success: function() {
-          window.location.href = '/';
+          window.location.href = '/dashboard';
         },
         error: function() {
           alert('Failed to load dashboard. Please try again.');
@@ -99,13 +99,13 @@
     e.preventDefault();
     e.stopPropagation();
     $.ajax({
-      url: apiUrl+'/',
+      url: apiUrl+'/inventory',
       method: 'GET',
       success: function() {
-        window.location.href = '/';
+        window.location.href = '/inventory';
       },
       error: function() {
-        alert('Failed to load dashboard. Please try again.');
+        alert('Failed to load inventory. Please try again.');
       }
     });
   });

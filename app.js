@@ -27,6 +27,8 @@ app.use(session(sessionConfig));
 
 const computerRoutes = require("./route/computerRoutes");
 const authRoutes = require("./route/authRoutes");
+const dashboardRoute = require("./route/dashboardRoute");
+const inventoryRoute = require("./route/inventoryRoute");
 const peripheralRoute = require("./route/peripheralRoute");
 const servicesRoute = require("./route/servicesRoute");
 const maintenanceRoute = require("./route/maintenanceRoute");
@@ -55,6 +57,8 @@ app.set("trust proxy", 1);
 app.set("view engine", "ejs");
 
 app.use("/", authRoutes);
+app.use("/dashboard", dashboardRoute);
+app.use("/inventory", inventoryRoute);
 app.use("/computers", computerRoutes);
 app.use("/peripherals", peripheralRoute);
 app.use("/services", servicesRoute);
