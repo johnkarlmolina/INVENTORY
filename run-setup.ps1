@@ -56,3 +56,6 @@ CREATE TABLE login (
     password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+# account insert into sql
+INSERT INTO login (username, password) VALUES ('admin', 'admin123');
