@@ -49,7 +49,7 @@ https://tailwindcss.com/ sa design ng frontend
 
 
 
-#sql command for login
+#sql command for login table
 CREATE TABLE login (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(100) NOT NULL UNIQUE,
@@ -57,5 +57,5 @@ CREATE TABLE login (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-# account insert into sql
+# sql command for account insert into login table
 INSERT INTO login (username, password) VALUES ('admin', 'admin123');
