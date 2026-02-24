@@ -43,5 +43,19 @@ https://tailwindcss.com/ sa design ng frontend
 ├── nodemon@3.1.11
 ├── postcss@8.5.6
 ├── selfsigned@5.5.0
+├── sweetalert2@11.26.20
 ├── tailwindcss@4.1.18
 └── util@0.12.5
+
+
+
+#sql command for login
+CREATE TABLE login (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+# account insert into sql
+INSERT INTO login (username, password) VALUES ('admin', 'admin123');
