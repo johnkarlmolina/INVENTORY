@@ -1,3 +1,6 @@
+<!-- Load SweetAlert2 for logout confirmation -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
   /* Only keeping main margin override since it's global */
   main {
@@ -73,6 +76,16 @@
         <span class="sidebar-text text-base whitespace-nowrap opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto transition-all duration-200">Report Generation</span>
       </a>
     </li>
+    
+    <!-- Logout Button -->
+    <li class="mt-auto border-t border-white/10 pt-2">
+      <a href="/login/logout" id="logout" class="sidebar-link flex items-center py-4 px-0 justify-center group-hover:px-8 group-hover:justify-start text-white/90 hover:bg-red-500/20 hover:text-white transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="sidebar-icon w-6 h-6 flex-shrink-0 mr-0 group-hover:mr-4 transition-all">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+        </svg>
+        <span class="sidebar-text text-base whitespace-nowrap opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto transition-all duration-200">Logout</span>
+      </a>
+    </li>
   </ul>
 </nav>
 
@@ -121,6 +134,38 @@
       },
       error: function() {
         alert('Failed to load dashboard. Please try again.');
+      }
+    });
+  });
+
+  // Logout with SweetAlert2 confirmation
+  $(document).on('click', "#logout", function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    Swal.fire({
+      title: 'Logout Confirmation',
+      text: 'Are you sure you want to logout?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#0F828C',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, Logout',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Show success message
+        Swal.fire({
+          icon: 'success',
+          title: 'Logged Out Successfully!',
+          text: 'You have been logged out.',
+          confirmButtonColor: '#0F828C',
+          timer: 1500,
+          showConfirmButton: false
+        }).then(() => {
+          window.location.href = '/login/logout';
+        });
       }
     });
   });

@@ -10,6 +10,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tsparticles@2.10.1/tsparticles.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <link rel="shortcut icon" href="favicon.icon" type="image/x-icon">
 
@@ -184,10 +185,67 @@
         detectRetina: true
       });
 
-      // UI-only: prevent actual submit action
+      // Handle login form submission
       $('#loginForm').on('submit', function (e) {
         e.preventDefault();
-        // No backend logic here. Pure UI.
+        
+        const username = $('#username').val().trim();
+        const password = $('#password').val();
+        const submitButton = $(this).find('button[type="submit"]');
+        
+        // Validate inputs
+        if (!username || !password) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Incomplete Fields',
+            text: 'Please enter username and password',
+            confirmButtonColor: '#0F828C'
+          });
+          return;
+        }
+        
+        // Disable submit button
+        submitButton.prop('disabled', true).html('<span>Logging in...</span>');
+        
+        // Send login request
+        $.ajax({
+          url: '/login/submit',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ username, password }),
+          success: function(response) {
+            if (response.success) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Login Successful!',
+                text: response.message,
+                confirmButtonColor: '#0F828C',
+                timer: 1500,
+                showConfirmButton: false
+              }).then(() => {
+                window.location.href = response.redirect || '/dashboard';
+              });
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: response.message,
+                confirmButtonColor: '#0F828C'
+              });
+              submitButton.prop('disabled', false).html('<span class="flex items-center justify-center space-x-2"><span>LOGIN</span><svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>');
+            }
+          },
+          error: function(xhr) {
+            const response = xhr.responseJSON || {};
+            Swal.fire({
+              icon: 'error',
+              title: 'Login Failed',
+              text: response.message || 'Login failed. Please try again.',
+              confirmButtonColor: '#0F828C'
+            });
+            submitButton.prop('disabled', false).html('<span class="flex items-center justify-center space-x-2"><span>LOGIN</span><svg class="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg></span>');
+          }
+        });
       });
 
       // Password visibility toggle (UI-only)

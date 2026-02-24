@@ -35,6 +35,7 @@ const maintenanceRoute = require("./route/maintenanceRoute");
 const consumableRoute = require("./route/consumableRoute");
 const reportsRoute = require("./route/reportsRoute");
 const loginRoute = require("./route/loginRoute");
+const { isAuthenticated } = require("./middleware/authMiddleware");
 
 
 
@@ -58,14 +59,14 @@ app.set("trust proxy", 1);
 app.set("view engine", "ejs");
 
 app.use("/", authRoutes);
-app.use("/dashboard", dashboardRoute);
-app.use("/inventory", inventoryRoute);
-app.use("/computers", computerRoutes);
-app.use("/peripherals", peripheralRoute);
-app.use("/services", servicesRoute);
-app.use("/maintenance", maintenanceRoute);
-app.use("/consumable", consumableRoute);
-app.use("/reports", reportsRoute);
 app.use("/login", loginRoute);
+app.use("/dashboard", isAuthenticated, dashboardRoute);
+app.use("/inventory", isAuthenticated, inventoryRoute);
+app.use("/computers", isAuthenticated, computerRoutes);
+app.use("/peripherals", isAuthenticated, peripheralRoute);
+app.use("/services", isAuthenticated, servicesRoute);
+app.use("/maintenance", isAuthenticated, maintenanceRoute);
+app.use("/consumable", isAuthenticated, consumableRoute);
+app.use("/reports", isAuthenticated, reportsRoute);
 
 module.exports = { app, server };
