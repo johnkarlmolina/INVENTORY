@@ -11,9 +11,9 @@ exports.peripheralDataTable = async (req, res) => {
     }
 }
 
-exports.addPeripheral = async (brand, model, date_of_purchase, date_of_entry, peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location) => { 
-    //const { brand, model, date_of_purchase, date_of_entry, peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location } = peripheralData;
-    const sql = `INSERT INTO peripherals (brand, model, date_of_purchase, date_of_entry, peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;  
-    const values = [brand, model, date_of_purchase, date_of_entry, peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location];
+exports.addPeripheral = async (brand, model, date_of_purchase,  peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location, computer_id) => { 
+    //const { brand, model, date_of_purchase,  peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location } = peripheralData;
+    const sql = `INSERT INTO peripherals (brand, model, date_of_purchase, peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location, computer_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;  
+    const values = [brand, model, date_of_purchase,  peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location, computer_id];
     return query(sql, values);
 }   

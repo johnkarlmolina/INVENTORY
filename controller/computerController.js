@@ -93,3 +93,14 @@ exports.addComputer = async (req, res) => {
         });
     }
 };
+
+exports.getComputerIds = async (req, res) => {
+    try {
+        const data = await computerModel.getComputerIds();  
+        
+        res.json({ computerIds: data });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Database error" });
+    }
+};

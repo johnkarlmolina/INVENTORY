@@ -14,3 +14,7 @@ exports.addComputer = async (computerData) => {
     const values = [brand, model, serial_number, property_tag, os_version, procie, ram, os_license, pc_user, user_dept, date_of_purchase, office_license, picture_of_pc || null , pc_no || null , pc_status || null, pc_location || null];
     return query(sql, values);
 }
+
+exports.getComputerIds = async()=>{
+    return query("select computer_id, brand, model, serial_number from main_inventory")
+}

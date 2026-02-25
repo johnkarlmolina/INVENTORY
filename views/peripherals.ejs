@@ -12,6 +12,11 @@
   <!-- DataTables (Default) -->
   <link href="https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.min.css" rel="stylesheet">
   <script src="https://cdn.datatables.net/2.1.2/js/dataTables.min.js"></script>
+  <!-- Tom Select CSS -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+
+<!-- Tom Select JS -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 </head>
 
 <body class="bg-gray-100 overflow-x-hidden">
@@ -158,8 +163,16 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label for="computer_id" class="block text-sm font-medium text-gray-700 mb-2">Computer ID</label>
-                <input id="computer_id" name="computer_id" type="text" 
-                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+                <!--<input id="computer_id" name="computer_id" type="text" 
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">-->
+                  <select id="computer_id" name="computer_id"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+                    <option value="">Select Computer ID...</option>
+                    <option value="COM-001">COM-001</option>
+                    <option value="COM-002">COM-002</option>
+                    <option value="COM-003">COM-003</option>
+                    <option value="COM-004">COM-004</option>
+                  </select>
               </div>
               <div>
                 <label for="peripheral_user" class="block text-sm font-medium text-gray-700 mb-2">User</label>
@@ -450,6 +463,65 @@
           // ignore
         }
       }, 350);
+    });
+
+
+    //tom select
+    // Initialize Tom Select
+    const kindSelect = new TomSelect("#kind_of_peripheral", {
+        create: true,
+        sortField: {
+            field: "text",
+            direction: "asc"
+        },
+        placeholder: "Select or type peripheral type..."
+    });
+
+    const computerSelect = new TomSelect("#computer_id", {
+        create: false,
+        sortField: {
+            field: "text",
+            direction: "asc"
+        },
+        placeholder: "Select Computer ID..."
+    });
+
+    const deptSelect = new TomSelect("#user_dept", {
+        create: true,
+        sortField: {
+            field: "text",
+            direction: "asc"
+        },
+        placeholder: "Select or type department..."
+    });
+
+    const statusSelect = new TomSelect("#peripheral_status", {
+        create: false
+    });
+
+    const locationSelect = new TomSelect("#peripheral_location", {
+        create: false
+    });
+
+    //ajax request for data of my computer_id
+    $.ajax({
+      url:apiUrl + '/computers/getComputerIds',
+      method: 'GET',
+      dataType: 'json',
+      success: function(response) {
+        if (response.computerIds) {
+          const computerIds = response.computerIds; // assuming this is an array of computer IDs
+          computerIds.forEach(id => {
+            computerSelect.addOption({ value: id.computer_id, text: id.brand+" "+id.model+" "+id.serial_number });
+          });
+        } else {
+          console.error('Failed to fetch computer IDs:', response.computerIds);
+        }
+      },
+      error: function(xhr, status, error) {
+        console.error('Error fetching computer IDs:', error);
+      } 
+
     });
 
     });

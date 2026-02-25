@@ -102,8 +102,18 @@ exports.peripheralDataTable = async (req, res) => {
 
 exports.addPeripheral = async (req, res) => {
     try {
-        const { brand, model, date_of_purchase, peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location } = req.body;    
-        const result = await peripheralModel.addPeripheral(brand, model, date_of_purchase, peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location);
+        const { brand, 
+                model, 
+                date_of_purchase, 
+                peripheral_user, 
+                user_dept, 
+                kind_of_peripheral, 
+                serial_no, 
+                property_tag, 
+                peripheral_no, 
+                peripheral_status, 
+                peripheral_location, computer_id} = req.body;    
+        const result = await peripheralModel.addPeripheral(brand, model, date_of_purchase, peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location, computer_id);
         res.json({ success: true, message: "Peripheral added successfully" });
     }
     catch (error) {
