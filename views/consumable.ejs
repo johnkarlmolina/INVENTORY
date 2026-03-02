@@ -104,7 +104,17 @@
                     <th
                       class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
                       Item Classification</th>
+
+                      <th
+                      class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
+                      Brand</th>
+
+                      <th
+                      class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
+                      Model</th>
+
                     <th
+                    
                       class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
                       Stock No</th>
                     <th
@@ -278,7 +288,7 @@
         });*/
 
         // Consumables Inventory DataTable 
-        const consumablesTable = new DataTable('#consumablesTable', {
+       /* const consumablesTable = new DataTable('#consumablesTable', {
           pageLength: 10,
           ordering: true,
           searching: true,
@@ -308,7 +318,7 @@
             emptyTable: 'No data available in table',
             paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
           }
-        });
+        });*/
 
         // Request Inventory DataTable 
         const requestsTable = new DataTable('#requestsTable', {
@@ -404,6 +414,111 @@ $('#addItemForm').on('submit', function (e) {
   });
 });
 
+$('#consumablesTable').DataTable({
+          serverSide: true,
+          processing: true,
+          ajax: {
+            url: apiUrl + '/consumable/showConsumables',
+            type: 'POST',
+            dataType: 'json'
+          },
+          columns: [
+            { data: 'item' },
+            { data: 'item_classification' },
+            { data: 'current_stock' },
+            { data: 'stock_no' },
+            { data: 'date_of_entry' },
+            { data: 'date_of_purchase' },
+            { data: 'brand' },
+            { data: 'model' },
+            {
+              data: 'stock_no',
+              render: function (data, type, row) {
+                return `
+                  <button class="add-request bg-yellow-500 text-white px-3 py-1 rounded" data-id="${row.id}">ADD</button>
+                  <button class="edit-btn bg-blue-500 text-white px-3 py-1 rounded" data-id="${row.id}">EDIT</button>
+                  <button class="delete-btn bg-red-500 text-white px-3 py-1 rounded" data-id="${row.id}">DELETE</button>
+                `;
+              }
+            }
+          ]
+        });
 
+        $('#consumablesTable tbody').on('click', '.add-request', function () {
+
+          const rowData = $('#consumablesTable').DataTable().row($(this).parents('tr')).data();
+
+          requestsTable.row.add([
+            rowData.item,
+            "Pending",
+            new Date().toLocaleDateString(),
+            `<input type="number" class="issued-qty border rounded px-2 py-1 w-20" value="1" min="1">`,
+            "",
+            rowData.item_classification,
+            rowData.brand,
+            rowData.model,
+            rowData.stock_no,
+            `<button class="remove-btn bg-red-500 text-white px-3 py-1 rounded">Remove</button>`
+          ]).draw();
+
+        });
+
+        $('#recordRequestBtn').click(function () {
+
+          let requestItems = [];
+
+          $('#requestsTable tbody tr').each(function () {
+
+            let item = $(this).find('td:eq(0)').text();
+            let status = $(this).find('td:eq(1)').text();
+            let transaction_date = $(this).find('td:eq(2)').text();
+            let quantity = $(this).find('.issued-qty').val();
+            let classification = $(this).find('td:eq(5)').text();
+            let stock_no = $(this).find('td:eq(6)').text();
+
+            requestItems.push({
+              item: item,
+              status: status,
+              transaction_date: transaction_date,
+              issued_quantity: quantity,
+              item_classification: classification,
+              stock_no: stock_no
+            });
+
+          });
+
+          console.log(requestItems);
+
+          $.ajax({
+            url: apiUrl + '/consumable/recordRequest',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ items: requestItems }),
+
+            success: function (response) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Request Recorded',
+                text: 'The request has been saved successfully.'
+              });
+
+              requestsTable.clear().draw();
+            },
+
+            error: function () {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to record request.'
+              });
+            }
+
+          });
+
+        });
+
+        $('#requestsTable tbody').on('click', '.remove-btn', function () {
+            requestsTable.row($(this).parents('tr')).remove().draw();
+          });
      });
   </script>
