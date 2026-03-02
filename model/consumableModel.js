@@ -5,3 +5,8 @@ exports.insertConsumables = async (item, item_classification, starting_stock, br
     const values = [item, item_classification, starting_stock, brand, model];
     return query(sql, values);
 }
+
+exports.showConsumables = async () => {
+    const sql = `SELECT * FROM main_consumables`;
+    return query(sql);
+}
