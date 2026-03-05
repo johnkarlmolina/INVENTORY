@@ -274,8 +274,45 @@
 
     const $computerModal = $('#computerModal');
     const $computerForm = $('#computerForm');
+    let isEditMode = false;
+    let editComputerId = null;
 
-    function openComputerModal() {
+    // Function to format date to YYYY-MM-DD for HTML date input
+    function formatDateForInput(dateString) {
+      if (!dateString) return '';
+      
+      // If already in YYYY-MM-DD format, return as is
+      if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        return dateString;
+      }
+      
+      // Try to parse and format the date
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return ''; // Invalid date
+      
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}`;
+    }
+
+    function openComputerModal(editMode = false) {
+      isEditMode = editMode;
+      if (editMode) {
+        $('#computerModal h2').text('Edit Computer');
+        $('#computerForm button[type="submit"] span').text('Update Computer');
+        $('#computerForm button[type="submit"] i').removeClass('fa-plus').addClass('fa-save');
+      } else {
+        $('#computerModal h2').text('Computer Inventory Form');
+        $('#computerForm button[type="submit"] span').text('Add Computer');
+        $('#computerForm button[type="submit"] i').removeClass('fa-save').addClass('fa-plus');
+        editComputerId = null;
+        
+        // Clear all form fields when opening in Add mode
+        $computerForm[0].reset();
+        $('#pc_status').val('Active');
+      }
       $computerModal.removeClass('hidden');
       $('body').addClass('overflow-hidden');
     }
@@ -283,6 +320,12 @@
     function closeComputerModal() {
       $computerModal.addClass('hidden');
       $('body').removeClass('overflow-hidden');
+      isEditMode = false;
+      editComputerId = null;
+      
+      // Clear form when closing to prevent data leakage to next open
+      $computerForm[0].reset();
+      $('#pc_status').val('Active');
     }
 
     const table = new DataTable('#dashboardTable', {
@@ -318,15 +361,15 @@
           searchable: false,
           render: function (id) {
             return `
-              <div class="flex gap-1">
-                <button class="editBtn p-1.5 text-blue-600 hover:text-blue-800" data-id="${id}" title="Update">
-                  <i class="fas fa-edit text-lg"></i>
+              <div class="flex gap-2">
+                <button class="editBtn bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Edit">
+                  <i class="fas fa-edit"></i> Edit
                 </button>
-                <button class="fileBtn p-1.5 text-green-600 hover:text-green-800" data-id="${id}" title="Update File">
-                  <i class="fas fa-file-upload text-lg"></i>
+                <button class="fileBtn bg-white border-2 border-green-500 text-green-500 hover:bg-green-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Upload File">
+                  <i class="fas fa-file-upload"></i> File
                 </button>
-                <button class="deleteBtn p-1.5 text-red-600 hover:text-red-800" data-id="${id}" title="Delete">
-                  <i class="fas fa-trash text-lg"></i>
+                <button class="deleteBtn bg-red-500 border-2 border-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Delete">
+                  <i class="fas fa-trash"></i> Delete
                 </button>
               </div>
             `;
@@ -372,7 +415,19 @@
       }
     });
 
-    $('#openComputerModal').on('click', openComputerModal);
+    $('#openComputerModal').on('click', function() {
+      // Force clear form before opening in Add mode
+      $computerForm[0].reset();
+      $('#pc_status').val('Active');
+      $('#pc_location').val('');
+      $('#user_dept').val('');
+      editComputerId = null;
+      isEditMode = false;
+      
+      // Then open modal
+      openComputerModal(false);
+    });
+    
     $('#closeComputerModal, #computerModalBackdrop').on('click', closeComputerModal);
 
     $(document).on('keydown', function (event) {
@@ -384,6 +439,53 @@
     $('#clearComputerForm').on('click', function () {
       $computerForm.trigger('reset');
       $('#pc_status').val('Active');
+    });
+
+    // Edit button handler
+    $('#dashboardTable').on('click', '.editBtn', function () {
+      const id = $(this).data('id');
+      editComputerId = id;
+      
+      // Get row data from DataTable
+      const rowData = table.row($(this).parents('tr')).data();
+      
+      console.log('Row data for edit:', rowData); // Debug log
+      
+      // Populate form fields
+      $('#brand').val(rowData.brand || '');
+      $('#model').val(rowData.model || '');
+      $('#procie').val(rowData.procie || '');
+      $('#ram').val(rowData.ram || '');
+      $('#videocard').val(rowData.videocard || '');
+      $('#storage').val(rowData.storage || '');
+      $('#pc_no').val(rowData.pc_no || '');
+      $('#property_no').val(rowData.property_no || '');
+      $('#property_tag').val(rowData.property_tag || '');
+      $('#serial_number').val(rowData.serial_number || '');
+      $('#pc_status').val(rowData.pc_status || 'Active');
+      
+      // Handle pc_location - add option if not exists
+      if (rowData.pc_location && $('#pc_location option[value="' + rowData.pc_location + '"]').length === 0) {
+        $('#pc_location').append(new Option(rowData.pc_location, rowData.pc_location));
+      }
+      $('#pc_location').val(rowData.pc_location || '');
+      
+      $('#pc_user').val(rowData.pc_user || '');
+      
+      // Handle user_dept - add option if not exists
+      if (rowData.user_dept && $('#user_dept option[value="' + rowData.user_dept + '"]').length === 0) {
+        $('#user_dept').append(new Option(rowData.user_dept, rowData.user_dept));
+      }
+      $('#user_dept').val(rowData.user_dept || '');
+      $('#os_version').val(rowData.os_version || '');
+      $('#os_license').val(rowData.os_license || '');
+      $('#date_of_purchase').val(formatDateForInput(rowData.date_of_purchase));
+      $('#year_acquired').val(rowData.year_acquired || '');
+      $('#date_of_entry').val(formatDateForInput(rowData.date_of_entry));
+      $('#office_license').val(rowData.office_license || '');
+      
+      // Open modal in edit mode
+      openComputerModal(true);
     });
 
 
@@ -438,22 +540,35 @@ $(document).on('submit', '#computerForm', function (e) {
 
     // Add filename manually
     data.picture_of_pc = fileName;
+    
+    // Determine if edit mode
+    const isUpdate = isEditMode && editComputerId;
+    const title = isUpdate ? 'Update Computer?' : 'Add Computer?';
+    const text = isUpdate ? 'Are you sure you want to update this computer?' : 'Are you sure you want to add this computer?';
+    const confirmText = isUpdate ? 'Yes, update it!' : 'Yes, add it!';
+    const successTitle = isUpdate ? 'Computer Updated' : 'Computer Added';
+    const apiEndpoint = isUpdate ? apiUrl + '/computers/updateComputer' : apiUrl + '/computers/addComputer';
+    
+    // Add ID if editing
+    if (isUpdate) {
+        data.computer_id = editComputerId;
+    }
 
     // Show SweetAlert confirmation first
     Swal.fire({
-        title: 'Add Computer?',
-        text: "Are you sure you want to add this computer?",
+        title: title,
+        text: text,
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#0F828C',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, add it!',
+        confirmButtonText: confirmText,
         cancelButtonText: 'Cancel'
     }).then((result) => {
         if (result.isConfirmed) {
             // Send AJAX only after confirmation
             $.ajax({
-                url: apiUrl + '/computers/addComputer',
+                url: apiEndpoint,
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
@@ -461,18 +576,18 @@ $(document).on('submit', '#computerForm', function (e) {
                     if (response.success) {
                         Swal.fire({
                             icon: 'success',
-                            title: 'Computer Added',
+                            title: successTitle,
                             text: response.message,
                             confirmButtonColor: '#0F828C'
                         });
 
-                        $('#computerModal').addClass('hidden');
+                        closeComputerModal();
                         table.ajax.reload();
                         $('#computerForm')[0].reset();
                     } else {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Insert Failed',
+                            title: isUpdate ? 'Update Failed' : 'Insert Failed',
                             text: response.message,
                         });
                     }

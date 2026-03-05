@@ -12,11 +12,6 @@
   <!-- DataTables (Default) -->
   <link href="https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.min.css" rel="stylesheet">
   <script src="https://cdn.datatables.net/2.1.2/js/dataTables.min.js"></script>
-  <!-- Tom Select CSS -->
-<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
-
-<!-- Tom Select JS -->
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 </head>
 
 <body class="bg-gray-100 overflow-x-hidden">
@@ -261,11 +256,76 @@
   $(document).ready(function () {
       const apiUrl = "<%= baseUrl %>";
 
-    $(function () {
       const $peripheralModal = $('#peripheralModal');
       const $peripheralForm = $('#peripheralForm');
+      let isEditMode = false;
+      let editPeripheralId = null;
 
-      function openPeripheralModal() {
+      // Function to format date to YYYY-MM-DD for HTML date input
+      function formatDateForInput(dateString) {
+        if (!dateString) return '';
+        
+        // If already in YYYY-MM-DD format, return as is
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+          return dateString;
+        }
+        
+        // Try to parse and format the date
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return ''; // Invalid date
+        
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}`;
+      }
+
+      // Load computer IDs into dropdown
+      $.ajax({
+        url:apiUrl + '/computers/getComputerIds',
+        method: 'GET',
+        dataType: 'json',
+        success: function(response) {
+          if (response.computerIds) {
+            const computerIds = response.computerIds;
+            const $computerSelect = $('#computer_id');
+            // Clear existing options except the first (placeholder)
+            $computerSelect.find('option:not(:first)').remove();
+            // Add new options
+            computerIds.forEach(id => {
+              $computerSelect.append(new Option(id.brand+" "+id.model+" "+id.serial_number, id.computer_id));
+            });
+          } else {
+            console.error('Failed to fetch computer IDs:', response.computerIds);
+          }
+        },
+        error: function(xhr, status, error) {
+          console.error('Error fetching computer IDs:', error);
+        } 
+      });
+
+      function openPeripheralModal(editMode = false) {
+        isEditMode = editMode;
+        if (editMode) {
+          $('#peripheralModal h2').text('Edit Peripheral');
+          $('#peripheralForm button[type="submit"] span').text('Update Peripheral');
+          $('#peripheralForm button[type="submit"] i').removeClass('fa-plus').addClass('fa-save');
+        } else {
+          // Clear form when opening in Add mode
+          $('#peripheralModal h2').text('Peripherals Inventory Form');
+          $('#peripheralForm button[type="submit"] span').text('Add Peripheral');
+          $('#peripheralForm button[type="submit"] i').removeClass('fa-save').addClass('fa-plus');
+          editPeripheralId = null;
+          
+          // Clear all form fields
+          $peripheralForm[0].reset();
+          $('#kind_of_peripheral').val('');
+          $('#computer_id').val('');
+          $('#user_dept').val('');
+          $('#peripheral_status').val('Active');
+          $('#peripheral_location').val('');
+        }
         $peripheralModal.removeClass('hidden');
         $('body').addClass('overflow-hidden');
       }
@@ -273,6 +333,16 @@
       function closePeripheralModal() {
         $peripheralModal.addClass('hidden');
         $('body').removeClass('overflow-hidden');
+        isEditMode = false;
+        editPeripheralId = null;
+        
+        // Clear form when closing to prevent data leakage to next open
+        $peripheralForm[0].reset();
+        $('#kind_of_peripheral').val('');
+        $('#computer_id').val('');
+        $('#user_dept').val('');
+        $('#peripheral_status').val('Active');
+        $('#peripheral_location').val('');
       }
 
       const peripheralsDt = new DataTable('#peripheralsTable', {
@@ -296,17 +366,17 @@
             data: 'peripheral_id',
             orderable: false,
             searchable: false,
-            render: function (id) {
+            render: function (id, type, row) {
               return `
-        <div class="flex gap-1">
-          <button class="editPeripheralBtn p-1.5 text-blue-600 hover:text-blue-800" data-id="${id}">
-            <i class="fas fa-edit text-lg"></i>
+        <div class="flex gap-2">
+          <button class="editPeripheralBtn bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Edit">
+            <i class="fas fa-edit"></i> Edit
           </button>
-          <button class="filePeripheralBtn p-1.5 text-green-600 hover:text-green-800" data-id="${id}">
-            <i class="fas fa-file-upload text-lg"></i>
+          <button class="filePeripheralBtn bg-white border-2 border-green-500 text-green-500 hover:bg-green-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Upload File">
+            <i class="fas fa-file-upload"></i> File
           </button>
-          <button class="deletePeripheralBtn p-1.5 text-red-600 hover:text-red-800" data-id="${id}">
-            <i class="fas fa-trash text-lg"></i>
+          <button class="deletePeripheralBtn bg-red-500 border-2 border-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Delete">
+            <i class="fas fa-trash"></i> Delete
           </button>
         </div>
       `;
@@ -348,7 +418,21 @@
         }
       });
 
-      $('#openPeripheralModal').on('click', openPeripheralModal);
+      $('#openPeripheralModal').on('click', function() {
+        // Force clear form before opening in Add mode
+        $peripheralForm[0].reset();
+        $('#kind_of_peripheral').val('');
+        $('#computer_id').val('');
+        $('#user_dept').val('');
+        $('#peripheral_status').val('Active');
+        $('#peripheral_location').val('');
+        editPeripheralId = null;
+        isEditMode = false;
+        
+        // Then open modal
+        openPeripheralModal(false);
+      });
+      
       $('#closePeripheralModal, #peripheralModalBackdrop').on('click', closePeripheralModal);
 
       $(document).on('keydown', function (event) {
@@ -359,7 +443,69 @@
 
       $('#clearPeripheralForm').on('click', function () {
         $peripheralForm.trigger('reset');
+        $('#kind_of_peripheral').val('');
+        $('#computer_id').val('');
+        $('#user_dept').val('');
         $('#peripheral_status').val('Active');
+        $('#peripheral_location').val('');
+      });
+
+      // Edit button handler
+      $('#peripheralsTable').on('click', '.editPeripheralBtn', function () {
+        const id = $(this).data('id');
+        editPeripheralId = id;
+        
+        // Get row data from DataTable
+        const rowData = peripheralsDt.row($(this).parents('tr')).data();
+        
+        console.log('Row data for edit:', rowData); // Debug log
+        
+        // Populate form fields
+        $('#brand').val(rowData.brand || '');
+        $('#model').val(rowData.model || '');
+        $('#peripheral_no').val(rowData.peripheral_no || '');
+        $('#property_tag').val(rowData.property_tag || '');
+        $('#serial_no').val(rowData.serial_no || '');
+        $('#peripheral_user').val(rowData.peripheral_user || '');
+        $('#date_of_purchase').val(formatDateForInput(rowData.date_of_purchase));
+        
+        // Set dropdown values - add option first if not exists
+        if (rowData.kind_of_peripheral) {
+          const $kindSelect = $('#kind_of_peripheral');
+          if ($kindSelect.find('option[value="' + rowData.kind_of_peripheral + '"]').length === 0) {
+            $kindSelect.append(new Option(rowData.kind_of_peripheral, rowData.kind_of_peripheral));
+          }
+          $kindSelect.val(rowData.kind_of_peripheral);
+        }
+        
+        if (rowData.computer_id) {
+          const $computerSelect = $('#computer_id');
+          if ($computerSelect.find('option[value="' + rowData.computer_id + '"]').length === 0) {
+            $computerSelect.append(new Option(rowData.computer_id, rowData.computer_id));
+          }
+          $computerSelect.val(rowData.computer_id);
+        }
+        
+        if (rowData.user_dept) {
+          const $deptSelect = $('#user_dept');
+          if ($deptSelect.find('option[value="' + rowData.user_dept + '"]').length === 0) {
+            $deptSelect.append(new Option(rowData.user_dept, rowData.user_dept));
+          }
+          $deptSelect.val(rowData.user_dept);
+        }
+        
+        $('#peripheral_status').val(rowData.peripheral_status || 'Active');
+        
+        if (rowData.peripheral_location) {
+          const $locationSelect = $('#peripheral_location');
+          if ($locationSelect.find('option[value="' + rowData.peripheral_location + '"]').length === 0) {
+            $locationSelect.append(new Option(rowData.peripheral_location, rowData.peripheral_location));
+          }
+          $locationSelect.val(rowData.peripheral_location);
+        }
+        
+        // Open modal in edit mode
+        openPeripheralModal(true);
       });
 
       $peripheralForm.on('submit', function (event) {
@@ -375,13 +521,26 @@
     // Optional: sample Peripheral No if empty
     if (!data.peripheral_no) data.peripheral_no = 'PER-1001';
 
+    // Determine if edit mode
+    const isUpdate = isEditMode && editPeripheralId;
+    const title = isUpdate ? 'Update Peripheral?' : 'Are you sure?';
+    const text = isUpdate ? 'Do you want to update this peripheral?' : 'Do you want to add this peripheral?';
+    const confirmText = isUpdate ? 'Yes, update it!' : 'Yes, add it!';
+    const successTitle = isUpdate ? 'Peripheral Updated' : 'Peripheral Added';
+    const apiEndpoint = isUpdate ? apiUrl + '/peripherals/updatePeripheral' : apiUrl + '/peripherals/addPeripheral';
+    
+    // Add ID if editing
+    if (isUpdate) {
+        data.peripheral_id = editPeripheralId;
+    }
+
     // SweetAlert confirmation
     Swal.fire({
-        title: 'Are you sure?',
-        text: 'Do you want to add this peripheral?',
+        title: title,
+        text: text,
         icon: 'question',
         showCancelButton: true,
-        confirmButtonText: 'Yes, add it!',
+        confirmButtonText: confirmText,
         cancelButtonText: 'Cancel',
         confirmButtonColor: '#0F828C',
         cancelButtonColor: '#d33'
@@ -389,7 +548,7 @@
         if (result.isConfirmed) {
             // AJAX POST request
             $.ajax({
-                url: apiUrl + '/peripherals/addPeripheral',
+                url: apiEndpoint,
                 method: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(data),
@@ -397,15 +556,18 @@
                     if (response.success) {
                         Swal.fire({
                             icon: 'success',
-                            title: 'Peripheral Added',
+                            title: successTitle,
                             text: response.message,
                             confirmButtonColor: '#0F828C'
                         });
                         $peripheralForm[0].reset();
+                        $('#kind_of_peripheral').val('');
+                        $('#computer_id').val('');
+                        $('#user_dept').val('');
                         $('#peripheral_status').val('Active');
+                        $('#peripheral_location').val('');
                         peripheralsDt.ajax.reload(null, false); // reload DataTable
-                        $peripheralModal.addClass('hidden');
-                        $('body').removeClass('overflow-hidden');
+                        closePeripheralModal();
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -463,66 +625,6 @@
           // ignore
         }
       }, 350);
-    });
-
-
-    //tom select
-    // Initialize Tom Select
-    const kindSelect = new TomSelect("#kind_of_peripheral", {
-        create: true,
-        sortField: {
-            field: "text",
-            direction: "asc"
-        },
-        placeholder: "Select or type peripheral type..."
-    });
-
-    const computerSelect = new TomSelect("#computer_id", {
-        create: false,
-        sortField: {
-            field: "text",
-            direction: "asc"
-        },
-        placeholder: "Select Computer ID..."
-    });
-
-    const deptSelect = new TomSelect("#user_dept", {
-        create: true,
-        sortField: {
-            field: "text",
-            direction: "asc"
-        },
-        placeholder: "Select or type department..."
-    });
-
-    const statusSelect = new TomSelect("#peripheral_status", {
-        create: false
-    });
-
-    const locationSelect = new TomSelect("#peripheral_location", {
-        create: false
-    });
-
-    //ajax request for data of my computer_id
-    $.ajax({
-      url:apiUrl + '/computers/getComputerIds',
-      method: 'GET',
-      dataType: 'json',
-      success: function(response) {
-        if (response.computerIds) {
-          const computerIds = response.computerIds; // assuming this is an array of computer IDs
-          computerIds.forEach(id => {
-            computerSelect.addOption({ value: id.computer_id, text: id.brand+" "+id.model+" "+id.serial_number });
-          });
-        } else {
-          console.error('Failed to fetch computer IDs:', response.computerIds);
-        }
-      },
-      error: function(xhr, status, error) {
-        console.error('Error fetching computer IDs:', error);
-      } 
-
-    });
 
     });
   </script>
