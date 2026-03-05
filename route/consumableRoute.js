@@ -6,5 +6,6 @@ const consumableController = require("../controller/consumableController");
 router.get("/", consumableController.consumablePageRender);
 router.post("/insertConsumables", consumableController.insertConsumables);
 router.post("/showConsumables", consumableController.showConsumables);
+router.post("/recordRequest", consumableController.recordRequest);
 
 module.exports = router;

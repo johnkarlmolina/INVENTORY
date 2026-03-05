@@ -12,10 +12,10 @@ exports.consumablePageRender = async (req, res) => {
 }
 exports.insertConsumables = async (req, res) => {
     try {
-        const { item, item_classification, starting_stock, brand, model} = req.body; 
+        const { item, item_classification, starting_stock, brand, model, batch_number} = req.body; 
         // Here you would typically insert the data into your database
-        console.log("Received consumable data:", { item, item_classification, starting_stock, brand, model});
-            await consumableModel.insertConsumables(item, item_classification, starting_stock, brand, model);
+        console.log("Received consumable data:", { item, item_classification, starting_stock, brand, model, batch_number});
+            await consumableModel.insertConsumables(item, item_classification, starting_stock, brand, model, batch_number);
         // Simulate successful insertion
         res.status(200).json({ message: "Consumable item inserted successfully" });
     }   
@@ -47,7 +47,8 @@ exports.showConsumables = async (req, res) => {
       date_of_entry: item.date_of_entry ,
       date_of_purchase:item.date_of_purchase,
       brand: item.brand || "",
-      model: item.model || ""
+      model: item.model || "",
+      batch_number: item.batch_number || ""
     }));
 
     // Total records BEFORE filtering
@@ -75,7 +76,8 @@ exports.showConsumables = async (req, res) => {
       "date_of_entry",
       "date_of_purchase",
       "brand",
-      "model"
+      "model",
+      "batch_number"
     ];
 
     const columnIndex = order[0]?.column ?? 0;
@@ -112,5 +114,37 @@ exports.showConsumables = async (req, res) => {
     res.status(500).json({
       message: "An error occurred while fetching the consumable items."
     });
+  }
+};
+
+exports.recordRequest = async (req, res) => {
+  try {
+    const { items } = req.body; // get the array
+    console.log("Received request items:", items);
+
+    // loop through each item and save
+    for (const request of items) {
+      const {
+        item,
+        status,
+        transaction_date,
+        issued_quantity,
+        item_classification,
+        brand,
+        model,
+        stock_no,
+        batch_number,
+        issued_to
+      } = request;
+
+      console.log("Saving request:", request);
+
+      // await consumableModel.recordRequest(item, status, transaction_date, issued_quantity, item_classification, brand, model, stock_no, batch_number, issued_to);
+    }
+
+    res.status(200).json({ message: "Consumable request recorded successfully" });
+  } catch (error) {
+    console.error("Error recording consumable request:", error);
+    res.status(500).json({ message: "An error occurred while recording the consumable request." });
   }
 };
