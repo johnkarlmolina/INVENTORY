@@ -101,9 +101,7 @@
                     <th
                       class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
                       Issued Quantity</th>
-                    <th
-                      class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
-                    </th>
+               
                     <th
                       class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
                       Item Classification</th>
@@ -125,7 +123,10 @@
                       Batch Number</th>
                     <th
                       class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
-                      Remove</th>
+                      Issued To:</th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
+                      Action</th>
                   </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -480,12 +481,13 @@ $('#consumablesTable').DataTable({
             "Pending",
             new Date().toLocaleDateString(),
             `<input type="number" class="issued-qty border rounded px-2 py-1 w-20" value="1" min="1">`,
-            "",
+          
             rowData.item_classification,
             rowData.brand,
             rowData.model,
             rowData.stock_no,
             rowData.batch_number || '',
+            '<input type="text" class="issued-to border rounded px-2 py-1 w-32" placeholder="Enter section/office">',
             `<button class="remove-btn bg-red-500 border-2 border-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200" title="Remove">
               <i class="fas fa-times"></i> Remove
             </button>`
@@ -503,11 +505,12 @@ $('#consumablesTable').DataTable({
             let status = $(this).find('td:eq(1)').text();
             let transaction_date = $(this).find('td:eq(2)').text();
             let quantity = $(this).find('.issued-qty').val();
-            let classification = $(this).find('td:eq(5)').text();
-            let brand = $(this).find('td:eq(6)').text();
-            let model = $(this).find('td:eq(7)').text();
-            let stock_no = $(this).find('td:eq(8)').text();
-            let batch_number = $(this).find('td:eq(9)').text();
+            let classification = $(this).find('td:eq(4)').text();
+            let brand = $(this).find('td:eq(5)').text();
+            let model = $(this).find('td:eq(6)').text();
+            let stock_no = $(this).find('td:eq(7)').text();
+            let batch_number = $(this).find('td:eq(8)').text();
+            let issued_to = $(this).find('.issued-to').val();
 
             requestItems.push({
               item: item,
@@ -518,14 +521,15 @@ $('#consumablesTable').DataTable({
               brand: brand,
               model: model,
               stock_no: stock_no,
-              batch_number: batch_number
+              batch_number: batch_number,
+              issued_to: issued_to
             });
 
           });
 
           console.log(requestItems);
 
-          $.ajax({
+         $.ajax({
             url: apiUrl + '/consumable/recordRequest',
             type: 'POST',
             contentType: 'application/json',
