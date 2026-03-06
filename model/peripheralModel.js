@@ -16,4 +16,9 @@ exports.addPeripheral = async (brand, model, date_of_purchase,  peripheral_user,
     const sql = `INSERT INTO peripherals (brand, model, date_of_purchase, peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location, computer_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;  
     const values = [brand, model, date_of_purchase,  peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location, computer_id];
     return query(sql, values);
-}   
+}
+
+exports.deletePeripheral = async (peripheral_id) => {
+    const sql = `DELETE FROM peripherals WHERE peripheral_id = ?`;
+    return query(sql, [peripheral_id]);
+}

@@ -7,5 +7,6 @@ const computerController = require("../controller/computerController");
 router.post("/computerDataTable", computerController.computerDataTable); 
 router.post("/addComputer", computerController.addComputer);
 router.get("/getComputerIds", computerController.getComputerIds);
+router.post("/deleteComputer", computerController.deleteComputer);
 
 module.exports = router;

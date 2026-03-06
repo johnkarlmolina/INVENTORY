@@ -6,5 +6,6 @@ const peripheralController = require("../controller/peripheralController");
 router.get("/peripheralPageRender", peripheralController.peripheralPageRender);
 router.post("/peripheralDataTable", peripheralController.peripheralDataTable);
 router.post("/addPeripheral", peripheralController.addPeripheral);
+router.post("/deletePeripheral", peripheralController.deletePeripheral);
 
 module.exports = router;
