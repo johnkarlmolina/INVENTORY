@@ -104,3 +104,14 @@ exports.getComputerIds = async (req, res) => {
         res.status(500).json({ error: "Database error" });
     }
 };
+
+exports.deleteComputer = async (req, res) => {
+    try {
+        const { computer_id } = req.body;
+        await computerModel.deleteComputer(computer_id);
+        res.json({ success: true, message: "Computer deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting computer:", error);
+        res.status(500).json({ success: false, message: "An error occurred while deleting the computer." });
+    }
+};

@@ -499,11 +499,41 @@
         icon: 'warning',
         showCancelButton: true,
         confirmButtonText: 'Yes, delete',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
         cancelButtonText: 'Cancel'
       }).then((result) => {
         if (result.isConfirmed) {
-          // later: call delete API
-          console.log('delete id:', id);
+          $.ajax({
+            url: apiUrl + '/computers/deleteComputer',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ computer_id: id }),
+            success: function(response) {
+              if (response.success) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Deleted!',
+                  text: 'Computer has been deleted.',
+                  confirmButtonColor: '#0F828C'
+                });
+                table.ajax.reload(null, false);
+              } else {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Failed',
+                  text: response.message || 'Failed to delete computer.'
+                });
+              }
+            },
+            error: function() {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while deleting the computer.'
+              });
+            }
+          });
         }
       });
     });

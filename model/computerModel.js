@@ -18,3 +18,7 @@ exports.addComputer = async (computerData) => {
 exports.getComputerIds = async()=>{
     return query("select computer_id, brand, model, serial_number from main_inventory")
 }
+
+exports.deleteComputer = async (computer_id) => {
+    return query(`DELETE FROM main_inventory WHERE computer_id = ?`, [computer_id]);
+}

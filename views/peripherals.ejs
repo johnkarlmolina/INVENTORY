@@ -607,11 +607,40 @@
           icon: 'warning',
           showCancelButton: true,
           confirmButtonText: 'Yes, delete',
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#6c757d'
         }).then((r) => {
           if (r.isConfirmed) {
-            console.log('delete id', id);
-            // later: call delete endpoint then:
-            // peripheralsDt.ajax.reload(null, false);
+            $.ajax({
+              url: apiUrl + '/peripherals/deletePeripheral',
+              method: 'POST',
+              contentType: 'application/json',
+              data: JSON.stringify({ peripheral_id: id }),
+              success: function(response) {
+                if (response.success) {
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Deleted!',
+                    text: 'Peripheral has been deleted.',
+                    confirmButtonColor: '#0F828C'
+                  });
+                  peripheralsDt.ajax.reload(null, false);
+                } else {
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Failed',
+                    text: response.message || 'Failed to delete peripheral.'
+                  });
+                }
+              },
+              error: function() {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'An error occurred while deleting the peripheral.'
+                });
+              }
+            });
           }
         });
       });

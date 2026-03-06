@@ -121,3 +121,14 @@ exports.addPeripheral = async (req, res) => {
         res.status(500).json({ error: "An error occurred while adding the peripheral." });
     }   
 }
+
+exports.deletePeripheral = async (req, res) => {
+    try {
+        const { peripheral_id } = req.body;
+        await peripheralModel.deletePeripheral(peripheral_id);
+        res.json({ success: true, message: "Peripheral deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting peripheral:", error);
+        res.status(500).json({ success: false, message: "An error occurred while deleting the peripheral." });
+    }
+}
