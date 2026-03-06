@@ -119,32 +119,38 @@ exports.showConsumables = async (req, res) => {
 
 exports.recordRequest = async (req, res) => {
   try {
-    const { items } = req.body; // get the array
+    const { items } = req.body;
     console.log("Received request items:", items);
 
-    // loop through each item and save
     for (const request of items) {
-      const {
-        item,
-        status,
-        transaction_date,
-        issued_quantity,
-        item_classification,
-        brand,
-        model,
-        stock_no,
-        batch_number,
-        issued_to
-      } = request;
 
       console.log("Saving request:", request);
 
-      // await consumableModel.recordRequest(item, status, transaction_date, issued_quantity, item_classification, brand, model, stock_no, batch_number, issued_to);
+      await consumableModel.recordRequest(
+        request.item,
+        request.transaction_date,
+        request.issued_quantity,
+        request.item_classification,
+        request.stock_no,
+        request.batch_number,
+        request.issued_to
+      );
+
+      const currentStock = await consumableModel.getStockByItem(request.stock_no);
+
+      const newStock = currentStock - request.issued_quantity;
+
+      await consumableModel.updateMainConsumableStock(request.stock_no, newStock);
+
+
     }
 
     res.status(200).json({ message: "Consumable request recorded successfully" });
+
   } catch (error) {
     console.error("Error recording consumable request:", error);
-    res.status(500).json({ message: "An error occurred while recording the consumable request." });
+    res.status(500).json({
+      message: "An error occurred while recording the consumable request."
+    });
   }
 };
