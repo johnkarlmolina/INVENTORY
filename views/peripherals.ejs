@@ -12,6 +12,9 @@
   <!-- DataTables (Default) -->
   <link href="https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.min.css" rel="stylesheet">
   <script src="https://cdn.datatables.net/2.1.2/js/dataTables.min.js"></script>
+  <!-- Tom Select -->
+  <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 </head>
 
 <body class="bg-gray-100 overflow-x-hidden">
@@ -261,6 +264,13 @@
       let isEditMode = false;
       let editPeripheralId = null;
 
+      // Tom Select instances
+      const tsKind = new TomSelect('#kind_of_peripheral', { create: false });
+      const tsDept = new TomSelect('#user_dept', { create: false });
+      const tsStatus = new TomSelect('#peripheral_status', { create: false });
+      const tsLocation = new TomSelect('#peripheral_location', { create: false });
+      let tsComputerId;
+
       // Function to format date to YYYY-MM-DD for HTML date input
       function formatDateForInput(dateString) {
         if (!dateString) return '';
@@ -299,6 +309,8 @@
           } else {
             console.error('Failed to fetch computer IDs:', response.computerIds);
           }
+          // Initialize Tom Select for computer_id after options are loaded
+          tsComputerId = new TomSelect('#computer_id', { create: false });
         },
         error: function(xhr, status, error) {
           console.error('Error fetching computer IDs:', error);
@@ -320,11 +332,11 @@
           
           // Clear all form fields
           $peripheralForm[0].reset();
-          $('#kind_of_peripheral').val('');
-          $('#computer_id').val('');
-          $('#user_dept').val('');
-          $('#peripheral_status').val('Active');
-          $('#peripheral_location').val('');
+          tsKind.clear(); tsKind.setValue('');
+          if (tsComputerId) { tsComputerId.clear(); tsComputerId.setValue(''); }
+          tsDept.clear(); tsDept.setValue('');
+          tsStatus.setValue('Active');
+          tsLocation.setValue('Floor');
         }
         $peripheralModal.removeClass('hidden');
         $('body').addClass('overflow-hidden');
@@ -338,11 +350,11 @@
         
         // Clear form when closing to prevent data leakage to next open
         $peripheralForm[0].reset();
-        $('#kind_of_peripheral').val('');
-        $('#computer_id').val('');
-        $('#user_dept').val('');
-        $('#peripheral_status').val('Active');
-        $('#peripheral_location').val('');
+        tsKind.clear(); tsKind.setValue('');
+        if (tsComputerId) { tsComputerId.clear(); tsComputerId.setValue(''); }
+        tsDept.clear(); tsDept.setValue('');
+        tsStatus.setValue('Active');
+        tsLocation.setValue('Floor');
       }
 
       const peripheralsDt = new DataTable('#peripheralsTable', {
@@ -471,37 +483,33 @@
         
         // Set dropdown values - add option first if not exists
         if (rowData.kind_of_peripheral) {
-          const $kindSelect = $('#kind_of_peripheral');
-          if ($kindSelect.find('option[value="' + rowData.kind_of_peripheral + '"]').length === 0) {
-            $kindSelect.append(new Option(rowData.kind_of_peripheral, rowData.kind_of_peripheral));
+          if (!tsKind.getOption(rowData.kind_of_peripheral)) {
+            tsKind.addOption({ value: rowData.kind_of_peripheral, text: rowData.kind_of_peripheral });
           }
-          $kindSelect.val(rowData.kind_of_peripheral);
+          tsKind.setValue(rowData.kind_of_peripheral);
         }
         
-        if (rowData.computer_id) {
-          const $computerSelect = $('#computer_id');
-          if ($computerSelect.find('option[value="' + rowData.computer_id + '"]').length === 0) {
-            $computerSelect.append(new Option(rowData.computer_id, rowData.computer_id));
+        if (rowData.computer_id && tsComputerId) {
+          if (!tsComputerId.getOption(rowData.computer_id)) {
+            tsComputerId.addOption({ value: rowData.computer_id, text: rowData.computer_id });
           }
-          $computerSelect.val(rowData.computer_id);
+          tsComputerId.setValue(rowData.computer_id);
         }
         
         if (rowData.user_dept) {
-          const $deptSelect = $('#user_dept');
-          if ($deptSelect.find('option[value="' + rowData.user_dept + '"]').length === 0) {
-            $deptSelect.append(new Option(rowData.user_dept, rowData.user_dept));
+          if (!tsDept.getOption(rowData.user_dept)) {
+            tsDept.addOption({ value: rowData.user_dept, text: rowData.user_dept });
           }
-          $deptSelect.val(rowData.user_dept);
+          tsDept.setValue(rowData.user_dept);
         }
         
-        $('#peripheral_status').val(rowData.peripheral_status || 'Active');
+        tsStatus.setValue(rowData.peripheral_status || 'Active');
         
         if (rowData.peripheral_location) {
-          const $locationSelect = $('#peripheral_location');
-          if ($locationSelect.find('option[value="' + rowData.peripheral_location + '"]').length === 0) {
-            $locationSelect.append(new Option(rowData.peripheral_location, rowData.peripheral_location));
+          if (!tsLocation.getOption(rowData.peripheral_location)) {
+            tsLocation.addOption({ value: rowData.peripheral_location, text: rowData.peripheral_location });
           }
-          $locationSelect.val(rowData.peripheral_location);
+          tsLocation.setValue(rowData.peripheral_location);
         }
         
         // Open modal in edit mode
