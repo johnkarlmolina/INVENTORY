@@ -15,4 +15,5 @@ exports.recordRequest = async (item, status, transaction_date, issued_quantity, 
     const sql = `INSERT INTO consumable_requests (item, status, transaction_date, issued_quantity, item_classification, brand, model, stock_no, batch_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     const values = [item, status, transaction_date, issued_quantity, item_classification, brand, model, stock_no, batch_number];
     return query(sql, values);
-}   
+}
+   

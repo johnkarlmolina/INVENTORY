@@ -261,17 +261,37 @@
         const closeModalBtn = $('#closeAddItemModal');
         const modalBackdrop = $('#addItemModalBackdrop');
         const clearFormBtn = $('#clearAddItemForm');
+        let isEditMode = false;
+        let editItemId = null;
 
-        // Open modal
+        <!-- Open modal -->
         addItemBtn.on('click', function () {
+          openAddItemModal(false);
+        });
+
+        function openAddItemModal(editMode = false) {
+          isEditMode = editMode;
+          if (editMode) {
+            $('#addItemModal h2').text('Edit Consumable Item');
+            $('#addItemForm button[type="submit"] span').text('Update Item');
+            $('#addItemForm button[type="submit"] i').removeClass('fa-plus').addClass('fa-save');
+          } else {
+            $('#addItemModal h2').text('Add Consumable Item');
+            $('#addItemForm button[type="submit"] span').text('Add Item');
+            $('#addItemForm button[type="submit"] i').removeClass('fa-save').addClass('fa-plus');
+            editItemId = null;
+            $('#addItemForm')[0].reset();
+          }
           addItemModal.removeClass('hidden');
           $('body').css('overflow', 'hidden');
-        });
+        }
 
         // Close modal
         function closeModal() {
           addItemModal.addClass('hidden');
           $('body').css('overflow', '');
+          isEditMode = false;
+          editItemId = null;
         }
 
         closeModalBtn.on('click', closeModal);
@@ -281,6 +301,17 @@
         clearFormBtn.on('click', function () {
           $('#addItemForm')[0].reset();
         });
+
+        function formatDateForInput(dateString) {
+          if (!dateString) return '';
+          if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
+          const date = new Date(dateString);
+          if (isNaN(date.getTime())) return '';
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        }
 
         // Handle form submission
         /*$('#addItemForm').on('submit', function (e) {
@@ -418,7 +449,7 @@ $('#addItemForm').on('submit', function (e) {
           closeModal();
 
           // Reload DataTable if needed
-          consumablesTable.ajax?.reload?.();
+          $('#consumablesTable').DataTable().ajax.reload();
         },
         error: function () {
           Swal.fire({
@@ -470,6 +501,22 @@ $('#consumablesTable').DataTable({
               }
             }
           ]
+        });
+
+        $('#consumablesTable').on('click', '.edit-btn', function () {
+          const id = $(this).data('id');
+          editItemId = id;
+          const rowData = $('#consumablesTable').DataTable().row($(this).parents('tr')).data();
+          
+          $('#item').val(rowData.item || '');
+          $('#item_classification').val(rowData.item_classification || '');
+          $('#starting_stock').val(rowData.current_stock || '');
+          $('#date_of_purchase').val(formatDateForInput(rowData.date_of_purchase));
+          $('#brand').val(rowData.brand || '');
+          $('#model').val(rowData.model || '');
+          $('#batch_number').val(rowData.batch_number || '');
+          
+          openAddItemModal(true);
         });
 
         $('#consumablesTable tbody').on('click', '.add-request', function () {
