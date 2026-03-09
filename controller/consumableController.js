@@ -154,3 +154,91 @@ exports.recordRequest = async (req, res) => {
     });
   }
 };
+
+exports.getConsumableLogs = async (req, res) => {
+  try {
+    const {
+      draw = 1,
+      start = 0,
+      length = 10,
+      search = { value: "" },
+      order = [{ column: 0, dir: "desc" }]
+    } = req.body;
+
+    // Fetch logs from database
+    const logs = await consumableModel.getConsumableLogs();
+
+    // Map DB results
+    const logsList = logs.map(log => ({
+      item: log.item || "",
+      transact_date: log.transact_date || "",
+      issued_quantity: log.issued_quantity || 0,
+      item_class: log.item_class || "",
+      stock_no: log.stock_no || "",
+      batch_number: log.batch_number || "",
+      issued_to: log.issued_to || ""
+    }));
+
+    // Total records BEFORE filtering
+    const recordsTotal = logsList.length;
+
+    // SEARCH FILTER
+    const searchValue = (search.value || "").toLowerCase();
+
+    let filteredLogs = logsList.filter(log =>
+      log.item.toLowerCase().includes(searchValue) ||
+      log.item_class.toLowerCase().includes(searchValue) ||
+      log.issued_to.toLowerCase().includes(searchValue) ||
+      log.stock_no.toString().includes(searchValue)
+    );
+
+    // Total records AFTER filtering
+    const recordsFiltered = filteredLogs.length;
+
+    // ORDERING
+    const columns = [
+      "item",
+      "transact_date",
+      "issued_quantity",
+      "item_class",
+      "stock_no",
+      "batch_number",
+      "issued_to"
+    ];
+
+    const columnIndex = order[0]?.column ?? 0;
+    const columnName = columns[columnIndex];
+    const dir = order[0]?.dir === "desc" ? "desc" : "asc";
+
+    if (columnName) {
+      filteredLogs.sort((a, b) => {
+        const aValue = a[columnName];
+        const bValue = b[columnName];
+
+        if (aValue < bValue) return dir === "asc" ? -1 : 1;
+        if (aValue > bValue) return dir === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    // PAGINATION
+    const startNum = parseInt(start);
+    const lengthNum = parseInt(length);
+
+    const data = filteredLogs.slice(startNum, startNum + lengthNum);
+
+    // RESPONSE (DataTables format)
+    res.json({
+      draw: parseInt(draw),
+      recordsTotal,
+      recordsFiltered,
+      data
+    });
+
+  } catch (error) {
+    console.error("Error fetching consumable logs:", error);
+    res.status(500).json({
+      message: "An error occurred while fetching the consumable logs."
+    });
+  }
+};
