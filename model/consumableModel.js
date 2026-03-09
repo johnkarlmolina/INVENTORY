@@ -29,4 +29,9 @@ exports.updateMainConsumableStock = async (item, newStock) => {
     const values = [newStock, item];
     return query(sql, values);
 }
+
+exports.getConsumableLogs = async () => {
+    const sql = `SELECT * FROM consumable_logs`;
+    return query(sql);
+}
    
