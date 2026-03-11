@@ -176,7 +176,8 @@ exports.getConsumableLogs = async (req, res) => {
       item_class: log.item_class || "",
       stock_no: log.stock_no || "",
       batch_number: log.batch_number || "",
-      issued_to: log.issued_to || ""
+      issued_to: log.issued_to || "",
+      consumable_no: log.consumable_no || 0
     }));
 
     // Total records BEFORE filtering
@@ -189,7 +190,10 @@ exports.getConsumableLogs = async (req, res) => {
       log.item.toLowerCase().includes(searchValue) ||
       log.item_class.toLowerCase().includes(searchValue) ||
       log.issued_to.toLowerCase().includes(searchValue) ||
-      log.stock_no.toString().includes(searchValue)
+      log.stock_no.toString().includes(searchValue)||
+      log.batch_number.toLowerCase().includes(searchValue)||
+      log.transact_date.toString().toLowerCase().includes(searchValue)||
+      log.consumable_no.toString().includes(searchValue)
     );
 
     // Total records AFTER filtering
@@ -203,7 +207,8 @@ exports.getConsumableLogs = async (req, res) => {
       "item_class",
       "stock_no",
       "batch_number",
-      "issued_to"
+      "issued_to",
+      "consumable_no"
     ];
 
     const columnIndex = order[0]?.column ?? 0;
@@ -242,3 +247,38 @@ exports.getConsumableLogs = async (req, res) => {
     });
   }
 };
+
+exports.undoTransaction = async (req, res) => {
+  try {
+    const { id } = req.body; 
+    console.log("Received log ID for undo:", id);
+    const item_stats = "UNDO"
+
+    const consumableLogs = await consumableModel.getConsumableLogsById(id);
+
+    if (consumableLogs.length === 0) {
+      return res.status(404).json({ message: "Transaction log not found." });
+    }
+    const log = consumableLogs[0];
+    await consumableModel.updateMainConsumableStock(log.stock_no, log.issued_quantity);
+
+    await consumableModel.insertIntoUndoLogs(
+          log.item,
+          log.issued_quantity,
+          log.item_class,
+          log.stock_no,
+          log.batch_number,
+          log.issued_to,
+          log.consumable_no,
+          item_stats
+          
+        );
+
+    await consumableModel.deleteConsumableLog(id);
+
+    res.status(200).json({ message: "Transaction undone successfully." });
+  } catch (error) {
+    console.error("Error undoing transaction:", error);
+    res.status(500).json({ message: "An error occurred while undoing the transaction." });
+  }   
+}
