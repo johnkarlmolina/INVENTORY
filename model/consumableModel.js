@@ -85,3 +85,14 @@ exports.deleteConsumableLog = async (consumable_no) => {
   const values = [consumable_no];
   return query(sql, values);
 }
+
+exports.updateConsumable = async (stock_no, item, item_classification, current_stock, date_of_purchase, brand, model, batch_number) => {
+  const sql = `UPDATE main_consumables SET item = ?, item_classification = ?, current_stock = ?, date_of_purchase = ?, brand = ?, model = ?, batch_number = ? WHERE stock_no = ?`;
+  const values = [item, item_classification, current_stock, date_of_purchase, brand, model, batch_number, stock_no];
+  return query(sql, values);
+}
+
+exports.deleteConsumable = async (stock_no) => {
+  const sql = `DELETE FROM main_consumables WHERE stock_no = ?`;
+  return query(sql, [stock_no]);
+}

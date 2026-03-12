@@ -282,3 +282,25 @@ exports.undoTransaction = async (req, res) => {
     res.status(500).json({ message: "An error occurred while undoing the transaction." });
   }   
 }
+
+exports.updateConsumable = async (req, res) => {
+  try {
+    const { stock_no, item, item_classification, current_stock, date_of_purchase, brand, model, batch_number } = req.body;
+    await consumableModel.updateConsumable(stock_no, item, item_classification, current_stock, date_of_purchase, brand, model, batch_number);
+    res.status(200).json({ success: true, message: "Consumable item updated successfully" });
+  } catch (error) {
+    console.error("Error updating consumable item:", error);
+    res.status(500).json({ success: false, message: "An error occurred while updating the consumable item." });
+  }
+};
+
+exports.deleteConsumable = async (req, res) => {
+  try {
+    const { consumable_id } = req.body;
+    await consumableModel.deleteConsumable(consumable_id);
+    res.json({ success: true, message: "Consumable item deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting consumable:", error);
+    res.status(500).json({ success: false, message: "An error occurred while deleting the consumable item." });
+  }
+}
