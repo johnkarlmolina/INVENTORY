@@ -287,6 +287,7 @@ exports.updateConsumable = async (req, res) => {
   try {
     const { stock_no, item, item_classification, current_stock, date_of_purchase, brand, model, batch_number } = req.body;
     await consumableModel.updateConsumable(stock_no, item, item_classification, current_stock, date_of_purchase, brand, model, batch_number);
+    await consumableModel.insertIntoConsumableStatuses(stock_no, item, item_classification, current_stock, date_of_purchase, brand, model, batch_number);
     res.status(200).json({ success: true, message: "Consumable item updated successfully" });
   } catch (error) {
     console.error("Error updating consumable item:", error);

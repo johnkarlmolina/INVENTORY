@@ -80,6 +80,13 @@ exports.insertIntoUndoLogs = async (
   return query(sql, values);
 };
 
+exports.insertIntoConsumableStatuses = async (stock_no, item, item_classification, current_stock, date_of_purchase, brand, model, batch_number)=>{
+  const sql = `INSERT INTO main_consumables_changes (stock_no, item, item_classification, current_stock, date_of_purchase, brand, model, batch_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+  const values = [stock_no, item, item_classification, current_stock, date_of_purchase, brand, model, batch_number];
+  return query(sql, values);  
+
+}
+
 exports.deleteConsumableLog = async (consumable_no) => {
   const sql = `DELETE FROM consumable_logs WHERE consumable_no = ?`;
   const values = [consumable_no];
