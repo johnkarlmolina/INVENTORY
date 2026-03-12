@@ -459,29 +459,54 @@ $('#addItemForm').on('submit', function (e) {
   e.stopPropagation();
 
   var form = this;
-  var formData = $(form).serialize();
+  var formData = $(form).serializeArray();
+  var dataObject = {};
+  
+  // Convert form data array to object
+  $.each(formData, function() {
+    dataObject[this.name] = this.value;
+  });
+
+  // Determine if we're in edit mode
+  var url, confirmText, successTitle, successText, loadingText;
+  
+  if (isEditMode) {
+    url = apiUrl + '/consumable/updateConsumable';
+    confirmText = 'Do you want to update this consumable item?';
+    successTitle = 'Item Updated';
+    successText = 'The consumable item has been updated successfully.';
+    loadingText = 'Please wait while we update the item.';
+    dataObject.stock_no = editItemId;  // Add stock_no for update
+    dataObject.current_stock = dataObject.starting_stock;  // Use starting_stock as current_stock for update
+  } else {
+    url = apiUrl + '/consumable/insertConsumables';
+    confirmText = 'Do you want to add this consumable item?';
+    successTitle = 'Item Added';
+    successText = 'The consumable item has been added successfully.';
+    loadingText = 'Please wait while we add the item.';
+  }
 
   Swal.fire({
     title: 'Are you sure?',
-    text: 'Do you want to add this consumable item?',
+    text: confirmText,
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#0F828C',
     cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes, add it!',
+    confirmButtonText: isEditMode ? 'Yes, update it!' : 'Yes, add it!',
     cancelButtonText: 'Cancel'
   }).then((result) => {
 
     if (result.isConfirmed) {
 
       $.ajax({
-        url: apiUrl + '/consumable/insertConsumables',
+        url: url,
         method: 'POST',
-        data: formData,
+        data: dataObject,
         beforeSend: function () {
           Swal.fire({
             title: 'Saving...',
-            text: 'Please wait while we add the item.',
+            text: loadingText,
             allowOutsideClick: false,
             didOpen: () => {
               Swal.showLoading();
@@ -491,22 +516,22 @@ $('#addItemForm').on('submit', function (e) {
         success: function (response) {
           Swal.fire({
             icon: 'success',
-            title: 'Item Added',
-            text: 'The consumable item has been added successfully.',
+            title: successTitle,
+            text: successText,
             confirmButtonColor: '#0F828C'
           });
 
           form.reset();
           closeModal();
 
-          // Reload DataTable if needed
+          // Reload DataTable
           $('#consumablesTable').DataTable().ajax.reload();
         },
         error: function () {
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'An error occurred while adding the item. Please try again.',
+            text: 'An error occurred while saving the item. Please try again.',
             confirmButtonColor: '#0F828C'
           });
         }
@@ -539,13 +564,13 @@ $('#consumablesTable').DataTable({
               data: 'stock_no',
               render: function (data, type, row) {
                 return `
-                  <button class="add-request bg-white border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${row.id}" title="Add">
+                  <button class="add-request bg-white border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${row.stock_no}" title="Add">
                     <i class="fas fa-plus"></i> Add
                   </button>
-                  <button class="edit-btn bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${row.id}" title="Edit">
+                  <button class="edit-btn bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${row.stock_no}" title="Edit">
                     <i class="fas fa-edit"></i> Edit
                   </button>
-                  <button class="delete-btn bg-red-500 border-2 border-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200" data-id="${row.id}" title="Delete">
+                  <button class="delete-btn bg-red-500 border-2 border-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200" data-id="${row.stock_no}" title="Delete">
                     <i class="fas fa-trash"></i> Delete
                   </button>
                 `;
@@ -768,6 +793,55 @@ $('#consumablesTable').DataTable({
             }
           });
 
+        });
+
+        // Delete consumable item
+        $('#consumablesTable').on('click', '.delete-btn', function () {
+          const id = $(this).data('id');
+
+          Swal.fire({
+            title: 'Delete?',
+            text: 'Are you sure you want to delete this consumable item?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            cancelButtonText: 'Cancel'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              $.ajax({
+                url: apiUrl + '/consumable/deleteConsumable',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ consumable_id: id }),
+                success: function(response) {
+                  if (response.success) {
+                    Swal.fire({
+                      icon: 'success',
+                      title: 'Deleted!',
+                      text: 'Consumable item has been deleted.',
+                      confirmButtonColor: '#0F828C'
+                    });
+                    $('#consumablesTable').DataTable().ajax.reload(null, false);
+                  } else {
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Failed',
+                      text: response.message || 'Failed to delete consumable item.'
+                    });
+                  }
+                },
+                error: function() {
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred while deleting the consumable item.'
+                  });
+                }
+              });
+            }
+          });
         });
      });
   </script>
