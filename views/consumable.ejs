@@ -572,12 +572,15 @@ $('#consumablesTable').DataTable({
 
         $('#consumablesTable tbody').on('click', '.add-request', function () {
 
+          const now = new Date();
+          const formatted = now.toLocaleString('sv-SE').slice(0,16);
+
           const rowData = $('#consumablesTable').DataTable().row($(this).parents('tr')).data();
 
           requestsTable.row.add([
             rowData.item,
             "Pending",
-            new Date().toLocaleDateString(),
+            `<input type="datetime-local" class="transaction-date border rounded px-2 py-1 w-48" value="${formatted}">`,
             `<input type="number" class="issued-qty border rounded px-2 py-1 w-20" value="1" min="1">`,
           
             rowData.item_classification,
@@ -601,7 +604,7 @@ $('#consumablesTable').DataTable({
 
             let item = $(this).find('td:eq(0)').text();
             let status = $(this).find('td:eq(1)').text();
-            let transaction_date = $(this).find('td:eq(2)').text();
+            let transaction_date = $(this).find('.transaction-date').val();
             let quantity = $(this).find('.issued-qty').val();
             let classification = $(this).find('td:eq(4)').text();
             let brand = $(this).find('td:eq(5)').text();
@@ -707,11 +710,11 @@ $('#consumablesTable').DataTable({
               { data: 'batch_number' },
               { data: 'issued_to' },
               {
-                data: null,
+                data: 'consumable_no',
                 render: function (data, type, row) {
                   return `
-                    <button class="bg-orange-500 border-2 border-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-lg transition-all duration-200" 
-                      title="Undo this transaction">
+                    <button class="bg-orange-500 border-2 border-orange-500 text-white hover:bg-orange-600 px-4 py-2 rounded-lg transition-all duration-200 undo_transaction" 
+                      title="Undo this transaction" data-id='${row.consumable_no}'>
                       <i class="fas fa-undo"></i> Undo
                     </button>
                   `;
@@ -723,5 +726,48 @@ $('#consumablesTable').DataTable({
             scrollX: true
           });
         }
+
+
+        $("#logsTable").on('click', '.undo_transaction', function () {
+         
+          const transactionId = $(this).data('id');
+          console.log('Attempting to undo transaction with ID:', transactionId);
+
+          Swal.fire({
+            title: 'Are you sure?',
+            text: 'Do you want to undo this transaction?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#0F828C',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, undo it!',
+            cancelButtonText: 'Cancel'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              $.ajax({
+                url: apiUrl + '/consumable/undoTransaction',
+                type: 'POST',
+                data: { id: transactionId },
+                success: function (response) {
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Transaction Undone',
+                    text: 'The transaction has been undone successfully.'
+                  });
+                  logsTable.ajax.reload();
+                  $('#consumablesTable').DataTable().ajax.reload();
+                },
+                error: function () {
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to undo the transaction. Please try again.'
+                  });
+                }
+              });
+            }
+          });
+
+        });
      });
   </script>
