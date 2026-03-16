@@ -357,17 +357,17 @@
 
           <section class="mb-8">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+             <!-- <div>
                 <label for="return_quantity" class="block text-sm font-medium text-gray-700 mb-2">Return Quantity</label>
                 <input id="return_quantity" name="return_quantity" type="number" min="1"
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20"
                   placeholder="Enter return quantity">
-              </div>
+              </div>-->
               <div>
-                <label for="return_stock" class="block text-sm font-medium text-gray-700 mb-2">Return Stock</label>
-                <input id="return_stock" name="return_stock" type="number" min="0"
+                <label for="return_quantity" class="block text-sm font-medium text-gray-700 mb-2">Return Quantity</label>
+                <input id="return_quantity" name="return_quantity" type="number" min="0"
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20"
-                  placeholder="Enter return stock">
+                  placeholder="Enter return quantity">
               </div>
             </div>
           </section>
@@ -849,13 +849,63 @@ $('#consumablesTable').DataTable({
         returnModalBackdrop.on('click', closeReturnFormModal);
         cancelReturnFormBtn.on('click', closeReturnFormModal);
 
-        submitReturnFormBtn.on('click', function () {
-          Swal.fire({
-            icon: 'info',
-            title: 'UI Only',
-            text: 'Return form UI is ready. No backend function yet.'
+        $(document).on('change', '#return_quantity', function () {
+          const max = Number($('#return_issued_quantity').val()) || 0;
+          let value = Number($(this).val()) || 0;
+
+          if (value < 0) value = 0;
+          else if (value > max) {
+
+              swal.fire({
+                icon: 'warning',
+                title: 'Invalid Quantity',
+                text: `Return quantity cannot exceed issued quantity (${max}).`
+              }).then(() => {
+                value = max; 
+
+              $(this).val(value);
+              }); 
+
+          }
+          
+   
+        }); 
+          submitReturnFormBtn.on('click', function () {
+            /*Swal.fire({
+              icon: 'info',
+              title: 'UI Only',
+              text: 'Return form UI is ready. No backend function yet.'
+            });*/
+
+            $.ajax({
+              url: apiUrl + '/consumable/returnItem',
+              type: 'POST',
+              contentType: 'application/json',
+              data: JSON.stringify({
+                transaction_id: $('#return_transaction_id').val(),
+                return_quantity: $('#return_quantity').val()
+              }),
+              success: function (response) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Return Processed',
+                  text: 'The return has been processed successfully.'
+                });
+
+                closeReturnFormModal();
+                logsTable.ajax.reload();
+                $('#consumablesTable').DataTable().ajax.reload();
+              },
+              error: function () {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'Failed to process the return. Please try again.'
+                });
+              }
+            });
+
           });
-        });
 
         // Initialize logs DataTable
         function initializeLogsTable() {

@@ -24,9 +24,9 @@ exports.getStockByItem = async (item) => {
     return result.length > 0 ? result[0].current_stock : null;
 }
 
-exports.updateMainConsumableStock = async (item, newStock) => {
-    const sql = `UPDATE main_consumables SET current_stock = ? WHERE stock_no = ?`;
-    const values = [newStock, item];
+exports.updateMainConsumableStock = async (item, requested_qty) => {
+    const sql = `UPDATE main_consumables SET current_stock = current_stock - ? WHERE stock_no = ?`;
+    const values = [requested_qty, item];
     return query(sql, values);
 }
 
@@ -44,7 +44,7 @@ exports.getConsumableLogsById = async (consumable_no) => {
 }  
 
 exports.updateMainConsumableStock = async (stock_no, newStock) => {
-    const sql = `UPDATE main_consumables SET current_stock = current_stock + ? WHERE stock_no = ?`;
+    const sql = `UPDATE main_consumables SET current_stock = current_stock - ? WHERE stock_no = ?`;
     const values = [newStock, stock_no];
     return query(sql, values);
 }
@@ -102,4 +102,17 @@ exports.updateConsumable = async (stock_no, item, item_classification, current_s
 exports.deleteConsumable = async (stock_no) => {
   const sql = `DELETE FROM main_consumables WHERE stock_no = ?`;
   return query(sql, [stock_no]);
+}
+
+
+exports.updateConsumableLogs = async (consumable_no, return_quantity) => {
+
+   const sql = `
+   update consumable_logs set issued_quantity = issued_quantity - ? WHERE consumable_no = ?
+  `;
+
+  const values = [return_quantity, consumable_no];
+  return query(sql, values);
+  
+
 }

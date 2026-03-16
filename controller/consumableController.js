@@ -140,7 +140,7 @@ exports.recordRequest = async (req, res) => {
 
       const newStock = currentStock - request.issued_quantity;
 
-      await consumableModel.updateMainConsumableStock(request.stock_no, newStock);
+      await consumableModel.updateMainConsumableStock(request.stock_no, request.issued_quantity);
 
 
     }
@@ -304,4 +304,36 @@ exports.deleteConsumable = async (req, res) => {
     console.error("Error deleting consumable:", error);
     res.status(500).json({ success: false, message: "An error occurred while deleting the consumable item." });
   }
+}
+
+exports.returnItem = async (req, res) => {  
+  try {
+    const { transaction_id, return_quantity } = req.body;
+    const item_stats = "RETURNED"
+    const consumableLogs = await consumableModel.getConsumableLogsById(transaction_id);
+    if (consumableLogs.length === 0) {
+      return res.status(404).json({ message: "Transaction log not found." });
+    }
+    const log = consumableLogs[0];
+    await consumableModel.updateMainConsumableStock(log.stock_no, return_quantity);
+    await consumableModel.insertIntoUndoLogs(
+      log.item,
+      return_quantity,
+      log.item_class,
+      log.stock_no,
+      log.batch_number,
+      log.issued_to,
+      log.consumable_no,
+      item_stats
+    );
+
+    const updateConsumableLogs = await consumableModel.updateConsumableLogs(transaction_id, return_quantity);
+
+    
+    res.status(200).json({ message: "Item returned successfully" });
+  } 
+  catch (error) {
+    console.error("Error returning item:", error);
+    res.status(500).json({ message: "An error occurred while returning the item." });
+  } 
 }

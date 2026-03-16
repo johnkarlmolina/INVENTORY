@@ -11,5 +11,6 @@ router.post("/getConsumableLogs", consumableController.getConsumableLogs);
 router.post("/undoTransaction", consumableController.undoTransaction);
 router.post("/updateConsumable", consumableController.updateConsumable);
 router.post("/deleteConsumable", consumableController.deleteConsumable);
+router.post("/returnItem", consumableController.returnItem);
 
 module.exports = router;
