@@ -34,6 +34,7 @@ const servicesRoute = require("./route/servicesRoute");
 const maintenanceRoute = require("./route/maintenanceRoute");
 const consumableRoute = require("./route/consumableRoute");
 const reportsRoute = require("./route/reportsRoute");
+const userManagementRoute = require("./route/userManagementRoute");
 const loginRoute = require("./route/loginRoute");
 const { isAuthenticated } = require("./middleware/authMiddleware");
 
@@ -68,5 +69,6 @@ app.use("/services", isAuthenticated, servicesRoute);
 app.use("/maintenance", isAuthenticated, maintenanceRoute);
 app.use("/consumable", isAuthenticated, consumableRoute);
 app.use("/reports", isAuthenticated, reportsRoute);
+app.use("/user-management", isAuthenticated, userManagementRoute);
 
 module.exports = { app, server };
