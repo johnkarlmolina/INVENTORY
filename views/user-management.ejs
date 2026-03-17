@@ -83,17 +83,24 @@
 
           <section class="mb-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <!--<div>
                 <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department</label>
                 <input id="department" name="department" type="text"
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20"
                   placeholder="Enter department">
-              </div>
+              </div>-->
               <div>
                 <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
                 <input id="username" name="username" type="text"
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20"
                   placeholder="Enter username">
+              </div>
+
+               <div>
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                <input id="password" name="password" type="password"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20"
+                  placeholder="Enter password">
               </div>
             </div>
           </section>
@@ -109,6 +116,12 @@
                   <option value="Staff">Staff</option>
                   <option value="Viewer">Viewer</option>
                 </select>
+              </div>
+              <div>
+                <label for="department" class="block text-sm font-medium text-gray-700 mb-2">Department</label>
+                <input id="department" name="department" type="text"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20"
+                  placeholder="Enter department">
               </div>
             </div>
           </section>
@@ -132,6 +145,7 @@
 
   <script>
     $(document).ready(function () {
+      const apiUrl = "<%= baseUrl %>";
       const actionButtons = `
         <div class="flex items-center gap-2">
           <button class="edit-user-btn bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-200" type="button" title="Edit">
@@ -200,17 +214,50 @@
       addUserModalBackdrop.on('click', closeAddUserModal);
       cancelAddUserBtn.on('click', closeAddUserModal);
 
-      $('#addUserForm').on('submit', function (e) {
-        e.preventDefault();
+  $('#addUserForm').on('submit', function (e) {
+  e.preventDefault();
 
-        Swal.fire({
-          icon: 'info',
-          title: 'UI Only',
-          text: 'Add New User form is ready. No backend function yet.'
-        });
+  var form = $(this);
 
-        closeAddUserModal();
+  Swal.fire({
+    title: 'Are you sure?',
+    text: 'Do you want to add this user?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, add user!',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+
+      $.ajax({
+        url: apiUrl + '/user-management/addUser',
+        method: 'POST',
+        data: form.serialize(),
+
+        success: function (response) {
+          Swal.fire({
+            icon: 'success',
+            title: 'User Added',
+            text: 'The new user has been added successfully.'
+          });
+
+          console.log(form.serialize());
+          closeAddUserModal();
+        },
+
+        error: function (xhr, status, error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred while adding the user. Please try again.'
+          });
+        }
+
       });
+
+    }
+  });
+});
 
       $(document).on('click', '.edit-user-btn', function () {
         Swal.fire({
