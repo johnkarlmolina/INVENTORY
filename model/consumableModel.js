@@ -1,14 +1,14 @@
 const { query } = require("../config/db");
 
-exports.insertConsumables = async (item, item_classification, starting_stock, brand, model, batch_number) => {
-    const sql = `INSERT INTO main_consumables (item, item_classification, starting_stock, brand, model, batch_number, current_stock) VALUES (?, ?, ?, ?, ?, ?, ?)`;  
-    const values = [item, item_classification, starting_stock, brand, model, batch_number, starting_stock];
+exports.insertConsumables = async (item, item_classification, starting_stock, brand, model, batch_number, date_of_purchase, date_of_delivery) => {
+    const sql = `INSERT INTO main_consumables (item, item_classification, starting_stock, brand, model, batch_number, current_stock, date_of_purchase, delivery_date, item_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;  
+    const values = [item, item_classification, starting_stock, brand, model, batch_number, starting_stock, date_of_purchase, date_of_delivery, 'active'];
     return query(sql, values);
 }
 
 exports.showConsumables = async () => {
-    const sql = `SELECT * FROM main_consumables`;
-    return query(sql);
+    const sql = `SELECT * FROM main_consumables where item_status = ?`;
+    return query(sql, ['active']);
 }
 
 exports.recordRequest = async (item, transaction_date, issued_quantity, item_classification, stock_no, batch_number, issued_to) => {
@@ -61,8 +61,8 @@ exports.insertIntoUndoLogs = async (
 ) => {
   const sql = `
     INSERT INTO consumable_logs_statuses 
-    (item, issued_quantity, item_classification, stock_no, batch_number, issued_to, consumable_no, item_status) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    (item, issued_quantity, item_classification, stock_no, batch_number, issued_to, consumable_no, item_status, return_qty) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const values = [
@@ -73,7 +73,8 @@ exports.insertIntoUndoLogs = async (
     batch_number,
     issued_to,
     consumable_no,
-    item_status
+    item_status,
+    issued_quantity
   ];
   
 
@@ -100,8 +101,8 @@ exports.updateConsumable = async (stock_no, item, item_classification, current_s
 }
 
 exports.deleteConsumable = async (stock_no) => {
-  const sql = `DELETE FROM main_consumables WHERE stock_no = ?`;
-  return query(sql, [stock_no]);
+  const sql = `update main_consumables set item_status = ? WHERE stock_no = ?`;
+  return query(sql, ['inactive', stock_no]);
 }
 
 
