@@ -12,10 +12,10 @@ exports.consumablePageRender = async (req, res) => {
 }
 exports.insertConsumables = async (req, res) => {
     try {
-        const { item, item_classification, starting_stock, brand, model, batch_number} = req.body; 
+        const { item, item_classification, starting_stock, brand, model, batch_number, date_of_purchase, date_of_delivery} = req.body; 
         // Here you would typically insert the data into your database
-        console.log("Received consumable data:", { item, item_classification, starting_stock, brand, model, batch_number});
-            await consumableModel.insertConsumables(item, item_classification, starting_stock, brand, model, batch_number);
+        console.log("Received consumable data:", { item, item_classification, starting_stock, brand, model, batch_number, date_of_purchase, date_of_delivery});
+            await consumableModel.insertConsumables(item, item_classification, starting_stock, brand, model, batch_number, date_of_purchase, date_of_delivery);
         // Simulate successful insertion
         res.status(200).json({ message: "Consumable item inserted successfully" });
     }   
