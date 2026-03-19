@@ -14,90 +14,114 @@ exports.peripheralPageRender = async (req, res) => {
 }
 
 exports.peripheralDataTable = async (req, res) => {
-    try {
-        const {
-            draw = 1,
-            start = 0,
-            length = 10,
-            search = {},
-            order = [{ column: 0, dir: "asc" }]
-        } = req.body;
+  try {
+    const {
+      draw = 1,
+      start = 0,
+      length = 10,
+      search = { value: "" },
+      order = [{ column: 0, dir: "asc" }]
+    } = req.body;
 
-        // Fetch all peripherals from model
-        const peripheralsData = await peripheralModel.peripheralDataTable();
+    // Fetch data
+    const peripherals = await peripheralModel.peripheralDataTable();
 
-        // Convert database rows to consistent object format
-        const peripheralsList = peripheralsData.map(item => ({
-            peripheral_id: item.peripheral_id,
-            brand: item.brand || "",
-            model: item.model || "",
-            date_of_purchase: item.date_of_purchase ? new Date(item.date_of_purchase) : null,
-            date_of_entry: item.date_of_entry ? new Date(item.date_of_entry) : null,
-            peripheral_user: item.peripheral_user || "",
-            user_dept: item.user_dept || "",
-            kind_of_peripheral: item.kind_of_peripheral || "",
-            serial_no: item.serial_no || "",
-            property_tag: item.property_tag || "",
-            peripheral_no: item.peripheral_no || "",
-            peripheral_status: item.peripheral_status || "",
-            peripheral_location: item.peripheral_location || ""
-        }));
+    // Map data safely (NO Date objects ❗)
+    const peripheralList = peripherals.map(item => ({
+      peripheral_id: item.peripheral_id,
+      brand: item.brand || "",
+      model: item.model || "",
+      date_of_purchase: item.date_of_purchase || "",
+      date_of_entry: item.date_of_entry || "",
+      peripheral_user: item.peripheral_user || "",
+      user_dept: item.user_dept || "",
+      kind_of_peripheral: item.kind_of_peripheral || "",
+      serial_no: item.serial_no || "",
+      property_tag: item.property_tag || "",
+      peripheral_no: item.peripheral_no || "",
+      peripheral_status: item.peripheral_status || "",
+      peripheral_location: item.peripheral_location || ""
+    }));
 
-        const searchValue = (search.value || "").toLowerCase();
+    // TOTAL BEFORE FILTER
+    const recordsTotal = peripheralList.length;
 
-        // Filter: convert all values to string for search, including dates
-        const filteredData = peripheralsList.filter(item => {
-            return Object.values(item).some(value => {
-                if (value === null || value === undefined) return false;
-                // Convert dates to ISO string
-                if (value instanceof Date) {
-                    return value.toISOString().toLowerCase().includes(searchValue);
-                }
-                return value.toString().toLowerCase().includes(searchValue);
-            });
-        });
+    // 🔍 SEARCH
+    const searchValue = (search.value || "").toLowerCase();
 
-        // Sorting
-        const columnIndex = order[0].column;
-        const dir = order[0].dir === "asc" ? 1 : -1;
+    let filteredData = peripheralList.filter(item =>
+      item.brand.toLowerCase().includes(searchValue) ||
+      item.model.toLowerCase().includes(searchValue) ||
+      item.peripheral_user.toLowerCase().includes(searchValue) ||
+      item.user_dept.toLowerCase().includes(searchValue) ||
+      item.kind_of_peripheral.toLowerCase().includes(searchValue) ||
+      item.serial_no.toLowerCase().includes(searchValue) ||
+      item.property_tag.toLowerCase().includes(searchValue) ||
+      item.peripheral_no.toLowerCase().includes(searchValue) ||
+      item.peripheral_status.toLowerCase().includes(searchValue) ||
+      item.peripheral_location.toLowerCase().includes(searchValue) ||
+      item.date_of_purchase.toString().toLowerCase().includes(searchValue) ||
+      item.date_of_entry.toString().toLowerCase().includes(searchValue)
+    );
 
-        const sortedData = filteredData.sort((a, b) => {
-            const aValue = Object.values(a)[columnIndex];
-            const bValue = Object.values(b)[columnIndex];
+    const recordsFiltered = filteredData.length;
 
-            // Handle nulls
-            if (aValue === null) return 1;
-            if (bValue === null) return -1;
+    // 🔄 SORT
+    const columns = [
+      "brand",
+      "model",
+      "date_of_purchase",
+      "date_of_entry",
+      "peripheral_user",
+      "user_dept",
+      "kind_of_peripheral",
+      "serial_no",
+      "property_tag",
+      "peripheral_no",
+      "peripheral_status",
+      "peripheral_location"
+    ];
 
-            // Dates
-            if (aValue instanceof Date && bValue instanceof Date) {
-                return (aValue - bValue) * dir;
-            }
+    const columnIndex = order[0]?.column ?? 0;
+    const columnName = columns[columnIndex];
+    const dir = order[0]?.dir === "desc" ? "desc" : "asc";
 
-            // Numbers
-            if (!isNaN(aValue) && !isNaN(bValue)) {
-                return (aValue - bValue) * dir;
-            }
+    if (columnName) {
+      filteredData.sort((a, b) => {
+        const aValue = a[columnName];
+        const bValue = b[columnName];
 
-            // Strings
-            return aValue.toString().localeCompare(bValue.toString()) * dir;
-        });
-
-        // Pagination
-        const paginatedData = sortedData.slice(start, start + length);
-
-        // Respond in DataTables format
-        res.json({
-            draw,
-            recordsTotal: peripheralsList.length,
-            recordsFiltered: filteredData.length,
-            data: paginatedData
-        });
-
-    } catch (error) {
-        console.error("Error fetching peripherals data:", error);
-        res.status(500).json({ error: "An error occurred while fetching peripherals data." });
+        if (aValue < bValue) return dir === "asc" ? -1 : 1;
+        if (aValue > bValue) return dir === "asc" ? 1 : -1;
+        return 0;
+      });
     }
+
+    // 📄 PAGINATION
+    const startNum = parseInt(start);
+    const lengthNum = parseInt(length);
+
+    const data = filteredData.slice(startNum, startNum + lengthNum);
+
+    // ✅ RESPONSE
+    res.json({
+      draw: parseInt(draw),
+      recordsTotal,
+      recordsFiltered,
+      data
+    });
+
+  } catch (error) {
+    console.error("Error fetching peripherals:", error);
+
+    res.status(500).json({
+      draw: 0,
+      recordsTotal: 0,
+      recordsFiltered: 0,
+      data: [],
+      error: error.message
+    });
+  }
 };
 
 exports.addPeripheral = async (req, res) => {

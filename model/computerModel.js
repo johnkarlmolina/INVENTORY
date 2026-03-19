@@ -1,7 +1,7 @@
 const { query } = require("../config/db");
 
 exports.computerDataTable = async (req, res) => {
-    return query(`select * from main_inventory`)
+    return query(`select * from main_inventory where pc_status != ?`, ['inactive']);
     
 }
 
@@ -20,5 +20,5 @@ exports.getComputerIds = async()=>{
 }
 
 exports.deleteComputer = async (computer_id) => {
-    return query(`DELETE FROM main_inventory WHERE computer_id = ?`, [computer_id]);
+    return query(`update main_inventory set pc_status = ? WHERE computer_id = ?`, ['inactive',computer_id]);
 }
