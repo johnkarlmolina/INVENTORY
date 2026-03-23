@@ -33,6 +33,7 @@ exports.peripheralDataTable = async (req, res) => {
       model: item.model || "",
       date_of_purchase: item.date_of_purchase || "",
       date_of_entry: item.date_of_entry || "",
+      computer_id: item.computer_id || "",
       peripheral_user: item.peripheral_user || "",
       user_dept: item.user_dept || "",
       kind_of_peripheral: item.kind_of_peripheral || "",
@@ -124,6 +125,78 @@ exports.peripheralDataTable = async (req, res) => {
   }
 };
 
+exports.inactivePeripheralDataTable = async (req, res) => {
+  try {
+    const {
+      draw = 1,
+      start = 0,
+      length = 10,
+      search = { value: "" },
+      order = [{ column: 0, dir: "asc" }]
+    } = req.body;
+
+    const peripherals = await peripheralModel.inactivePeripheralDataTable();
+
+    const peripheralList = peripherals.map(item => ({
+      peripheral_id: item.peripheral_id,
+      brand: item.brand || "",
+      model: item.model || "",
+      peripheral_user: item.peripheral_user || "",
+      peripheral_no: item.peripheral_no || ""
+    }));
+
+    const recordsTotal = peripheralList.length;
+    const searchValue = (search.value || "").toLowerCase();
+
+    let filteredData = peripheralList.filter(item =>
+      item.brand.toLowerCase().includes(searchValue) ||
+      item.model.toLowerCase().includes(searchValue) ||
+      item.peripheral_user.toLowerCase().includes(searchValue) ||
+      item.peripheral_no.toLowerCase().includes(searchValue)
+    );
+
+    const recordsFiltered = filteredData.length;
+
+    const columns = ["brand", "model", "peripheral_user", "peripheral_no"];
+    const columnIndex = order[0]?.column ?? 0;
+    const columnName = columns[columnIndex];
+    const dir = order[0]?.dir === "desc" ? "desc" : "asc";
+
+    if (columnName) {
+      filteredData.sort((a, b) => {
+        const aValue = a[columnName];
+        const bValue = b[columnName];
+
+        if (aValue < bValue) return dir === "asc" ? -1 : 1;
+        if (aValue > bValue) return dir === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    const startNum = parseInt(start);
+    const lengthNum = parseInt(length);
+    const data = filteredData.slice(startNum, startNum + lengthNum);
+
+    res.json({
+      draw: parseInt(draw),
+      recordsTotal,
+      recordsFiltered,
+      data
+    });
+
+  } catch (error) {
+    console.error("Error fetching inactive peripherals:", error);
+
+    res.status(500).json({
+      draw: 0,
+      recordsTotal: 0,
+      recordsFiltered: 0,
+      data: [],
+      error: error.message
+    });
+  }
+};
+
 exports.addPeripheral = async (req, res) => {
     try {
         const { brand, 
@@ -146,6 +219,28 @@ exports.addPeripheral = async (req, res) => {
     }   
 }
 
+exports.updatePeripheral = async (req, res) => {
+  try {
+    const result = await peripheralModel.updatePeripheral(req.body);
+
+    if (result && result.affectedRows === 1) {
+      res.json({
+        success: true,
+        message: "Peripheral updated successfully"
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: "Update failed"
+      });
+    }
+  }
+  catch (error) {
+    console.error("Error updating peripheral:", error);
+    res.status(500).json({ success: false, message: "An error occurred while updating the peripheral." });
+  }
+}
+
 exports.deletePeripheral = async (req, res) => {
     try {
         const { peripheral_id } = req.body;
@@ -156,3 +251,14 @@ exports.deletePeripheral = async (req, res) => {
         res.status(500).json({ success: false, message: "An error occurred while deleting the peripheral." });
     }
 }
+
+    exports.activatePeripheral = async (req, res) => {
+      try {
+        const { peripheral_id } = req.body;
+        await peripheralModel.activatePeripheral(peripheral_id);
+        res.json({ success: true, message: "Peripheral activated successfully" });
+      } catch (error) {
+        console.error("Error activating peripheral:", error);
+        res.status(500).json({ success: false, message: "An error occurred while activating the peripheral." });
+      }
+    }
