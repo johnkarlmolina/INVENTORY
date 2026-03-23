@@ -117,6 +117,74 @@ exports.showConsumables = async (req, res) => {
   }
 };
 
+exports.inactiveConsumablesDataTable = async (req, res) => {
+  try {
+    const {
+      draw = 1,
+      start = 0,
+      length = 10,
+      search = { value: "" },
+      order = [{ column: 0, dir: "asc" }]
+    } = req.body;
+
+    const consumables = await consumableModel.inactiveConsumables();
+
+    const consumableList = consumables.map(item => ({
+      stock_no: item.stock_no || 0,
+      item_classification: item.item_classification || "",
+      brand: item.brand || "",
+      model: item.model || ""
+    }));
+
+    const recordsTotal = consumableList.length;
+    const searchValue = (search.value || "").toLowerCase();
+
+    let filteredConsumables = consumableList.filter(item =>
+      item.item_classification.toLowerCase().includes(searchValue) ||
+      item.brand.toLowerCase().includes(searchValue) ||
+      item.model.toLowerCase().includes(searchValue)
+    );
+
+    const recordsFiltered = filteredConsumables.length;
+
+    const columns = ["item_classification", "brand", "model"];
+    const columnIndex = order[0]?.column ?? 0;
+    const columnName = columns[columnIndex];
+    const dir = order[0]?.dir === "desc" ? "desc" : "asc";
+
+    if (columnName) {
+      filteredConsumables.sort((a, b) => {
+        const aValue = a[columnName];
+        const bValue = b[columnName];
+
+        if (aValue < bValue) return dir === "asc" ? -1 : 1;
+        if (aValue > bValue) return dir === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    const startNum = parseInt(start);
+    const lengthNum = parseInt(length);
+    const data = filteredConsumables.slice(startNum, startNum + lengthNum);
+
+    res.json({
+      draw: parseInt(draw),
+      recordsTotal,
+      recordsFiltered,
+      data
+    });
+  } catch (error) {
+    console.error("Error fetching inactive consumables:", error);
+    res.status(500).json({
+      draw: 0,
+      recordsTotal: 0,
+      recordsFiltered: 0,
+      data: [],
+      message: "An error occurred while fetching inactive consumables."
+    });
+  }
+};
+
 exports.recordRequest = async (req, res) => {
   try {
     const { items } = req.body;
@@ -303,6 +371,17 @@ exports.deleteConsumable = async (req, res) => {
   } catch (error) {
     console.error("Error deleting consumable:", error);
     res.status(500).json({ success: false, message: "An error occurred while deleting the consumable item." });
+  }
+}
+
+exports.activateConsumable = async (req, res) => {
+  try {
+    const { consumable_id } = req.body;
+    await consumableModel.activateConsumable(consumable_id);
+    res.json({ success: true, message: "Consumable item activated successfully" });
+  } catch (error) {
+    console.error("Error activating consumable:", error);
+    res.status(500).json({ success: false, message: "An error occurred while activating the consumable item." });
   }
 }
 

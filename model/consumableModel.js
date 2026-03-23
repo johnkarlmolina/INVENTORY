@@ -11,6 +11,11 @@ exports.showConsumables = async () => {
     return query(sql, ['active']);
 }
 
+exports.inactiveConsumables = async () => {
+  const sql = `SELECT * FROM main_consumables WHERE item_status = ?`;
+  return query(sql, ['inactive']);
+}
+
 exports.recordRequest = async (item, transaction_date, issued_quantity, item_classification, stock_no, batch_number, issued_to) => {
     const sql = `INSERT INTO consumable_logs (item, date_input, issued_quantity, item_class, stock_no, batch_number, issued_to) VALUES (?, ?, ?, ?, ?, ?, ?)`;
     const values = [item, transaction_date, issued_quantity, item_classification, stock_no, batch_number, issued_to];
@@ -103,6 +108,11 @@ exports.updateConsumable = async (stock_no, item, item_classification, current_s
 exports.deleteConsumable = async (stock_no) => {
   const sql = `update main_consumables set item_status = ? WHERE stock_no = ?`;
   return query(sql, ['inactive', stock_no]);
+}
+
+exports.activateConsumable = async (stock_no) => {
+  const sql = `update main_consumables set item_status = ? WHERE stock_no = ?`;
+  return query(sql, ['active', stock_no]);
 }
 
 

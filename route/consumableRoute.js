@@ -6,11 +6,13 @@ const consumableController = require("../controller/consumableController");
 router.get("/", consumableController.consumablePageRender);
 router.post("/insertConsumables", consumableController.insertConsumables);
 router.post("/showConsumables", consumableController.showConsumables);
+router.post("/inactiveConsumablesDataTable", consumableController.inactiveConsumablesDataTable);
 router.post("/recordRequest", consumableController.recordRequest);
 router.post("/getConsumableLogs", consumableController.getConsumableLogs);
 router.post("/undoTransaction", consumableController.undoTransaction);
 router.post("/updateConsumable", consumableController.updateConsumable);
 router.post("/deleteConsumable", consumableController.deleteConsumable);
+router.post("/activateConsumable", consumableController.activateConsumable);
 router.post("/returnItem", consumableController.returnItem);
 
 module.exports = router;
