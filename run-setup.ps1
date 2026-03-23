@@ -19,15 +19,21 @@ npm install sweetalert2
 #Refferece
 https://tailwindcss.com/ sa design ng frontend
 
+# For excel export
+npm install exceljs
 
+# For chart design
+npm install chart.js
 
 #npm list
 ├── @fortawesome/fontawesome-free@7.1.0
 ├── autoprefixer@10.4.24
+├── chart.js@4.5.1
 ├── compression@1.8.1
 ├── cors@2.8.6
 ├── dotenv@17.3.1
 ├── ejs@4.0.1
+├── exceljs@4.4.0
 ├── express-router@0.0.1
 ├── express-session@1.19.0
 ├── express@5.2.1
@@ -46,7 +52,6 @@ https://tailwindcss.com/ sa design ng frontend
 ├── sweetalert2@11.26.20
 ├── tailwindcss@4.1.18
 └── util@0.12.5
-
 
 
 #sql command for login table

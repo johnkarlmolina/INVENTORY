@@ -124,6 +124,76 @@ exports.computerDataTable = async (req, res) => {
   }
 };
 
+exports.inactiveComputerDataTable = async (req, res) => {
+  try {
+    const {
+      draw = 1,
+      start = 0,
+      length = 10,
+      search = { value: "" },
+      order = [{ column: 0, dir: "asc" }]
+    } = req.body;
+
+    const computers = await computerModel.inactiveComputerDataTable();
+
+    const computerList = computers.map(item => ({
+      computer_id: item.computer_id,
+      pc_no: item.pc_no || "",
+      brand: item.brand || "",
+      model: item.model || "",
+      pc_user: item.pc_user || ""
+    }));
+
+    const recordsTotal = computerList.length;
+    const searchValue = (search.value || "").toLowerCase();
+
+    let filteredData = computerList.filter(item =>
+      item.pc_no.toLowerCase().includes(searchValue) ||
+      item.brand.toLowerCase().includes(searchValue) ||
+      item.model.toLowerCase().includes(searchValue) ||
+      item.pc_user.toLowerCase().includes(searchValue)
+    );
+
+    const recordsFiltered = filteredData.length;
+
+    const columns = ["pc_no", "brand", "model", "pc_user"];
+    const columnIndex = order[0]?.column ?? 0;
+    const columnName = columns[columnIndex];
+    const dir = order[0]?.dir === "desc" ? "desc" : "asc";
+
+    if (columnName) {
+      filteredData.sort((a, b) => {
+        const aValue = a[columnName];
+        const bValue = b[columnName];
+
+        if (aValue < bValue) return dir === "asc" ? -1 : 1;
+        if (aValue > bValue) return dir === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    const startNum = parseInt(start);
+    const lengthNum = parseInt(length);
+    const data = filteredData.slice(startNum, startNum + lengthNum);
+
+    res.json({
+      draw: parseInt(draw),
+      recordsTotal,
+      recordsFiltered,
+      data
+    });
+  } catch (error) {
+    console.error("Error fetching inactive computers:", error);
+    res.status(500).json({
+      draw: 0,
+      recordsTotal: 0,
+      recordsFiltered: 0,
+      data: [],
+      error: error.message
+    });
+  }
+};
+
 exports.addComputer = async (req, res) => {
     try {
 
@@ -150,6 +220,30 @@ exports.addComputer = async (req, res) => {
     }
 };
 
+exports.updateComputer = async (req, res) => {
+  try {
+    const result = await computerModel.updateComputer(req.body);
+
+    if (result && result.affectedRows === 1) {
+      res.json({
+        success: true,
+        message: "Computer updated successfully"
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: "Update failed"
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Database error"
+    });
+  }
+};
+
 exports.getComputerIds = async (req, res) => {
     try {
         const data = await computerModel.getComputerIds();  
@@ -172,3 +266,14 @@ exports.deleteComputer = async (req, res) => {
         res.status(500).json({ success: false, message: "An error occurred while deleting the computer." });
     }
 };
+
+  exports.activateComputer = async (req, res) => {
+    try {
+      const { computer_id } = req.body;
+      await computerModel.activateComputer(computer_id);
+      res.json({ success: true, message: "Computer activated successfully" });
+    } catch (error) {
+      console.error("Error activating computer:", error);
+      res.status(500).json({ success: false, message: "An error occurred while activating the computer." });
+    }
+  };
