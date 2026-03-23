@@ -22,11 +22,15 @@
         <p class="text-gray-600">Manage system users and access records</p>
       </div>
 
-      <div class="flex justify-end gap-3 mb-4">
+      <div class="flex justify-end mb-4">
         <button id="addNewUserBtn"
           class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
           <i class="fas fa-plus text-lg"></i>
           <span class="font-semibold">Add New User</span>
+        </button>
+        <button id="openInactiveUsersModal" class="ml-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50">
+          <i class="fas fa-ban text-lg"></i>
+          <span class="font-semibold">Inactive</span>
         </button>
       </div>
 
@@ -144,6 +148,38 @@
     </div>
   </div>
 
+  <div id="inactiveUsersModal" class="fixed inset-0 z-50 hidden">
+    <div id="inactiveUsersModalBackdrop" class="absolute inset-0 bg-black/40"></div>
+
+    <div class="relative z-10 flex min-h-screen items-center justify-center p-4 md:p-6">
+      <div class="w-full max-w-5xl rounded-xl bg-white shadow-2xl border border-gray-200">
+        <div class="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white rounded-t-xl">
+          <h2 class="text-2xl font-bold" style="color: #0F828C;">Inactive Users</h2>
+          <button id="closeInactiveUsersModal" type="button"
+            class="h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0F828C]"
+            aria-label="Close modal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="px-6 py-6">
+          <div class="overflow-x-auto">
+            <table id="inactiveUsersTable" class="display nowrap" style="width:100%">
+              <thead style="background-color: #0F828C;">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Name</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Username</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     $(document).ready(function () {
       const apiUrl = "<%= baseUrl %>";
@@ -212,15 +248,67 @@
       });
 
       const addUserModal = $('#addUserModal');
+      const inactiveUsersModal = $('#inactiveUsersModal');
       const addUserForm = $('#addUserForm');
       const addUserModalBackdrop = $('#addUserModalBackdrop');
+      const inactiveUsersModalBackdrop = $('#inactiveUsersModalBackdrop');
       const closeAddUserModalBtn = $('#closeAddUserModal');
+      const closeInactiveUsersModalBtn = $('#closeInactiveUsersModal');
       const cancelAddUserBtn = $('#cancelAddUserBtn');
       const addUserModalTitle = $('#addUserModalTitle');
       const saveUserBtnIcon = $('#saveUserBtnIcon');
       const saveUserBtnText = $('#saveUserBtnText');
       let isEditMode = false;
       let editUserId = null;
+
+      const inactiveUsersTable = new DataTable('#inactiveUsersTable', {
+        processing: true,
+        serverSide: true,
+        ajax: {
+          url: apiUrl + '/user-management/inactiveUserDataTable',
+          type: 'POST',
+          dataType: 'json'
+        },
+        columns: [
+          { data: 'fname' },
+          { data: 'uname' },
+          {
+            data: 'user_no',
+            orderable: false,
+            searchable: false,
+            render: function (id) {
+              return `
+                <button class="activate-user-btn bg-green-500 border-2 border-green-500 text-white hover:bg-green-600 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" type="button" title="Activate">
+                  <i class="fas fa-check"></i> Activate
+                </button>
+              `;
+            }
+          }
+        ],
+        pageLength: 10,
+        ordering: true,
+        searching: true,
+        info: true,
+        scrollX: true,
+        scrollCollapse: true,
+        responsive: false,
+        autoWidth: false,
+        columnDefs: [
+          { width: '220px', targets: 0 },
+          { width: '180px', targets: 1 },
+          { width: '160px', targets: 2, orderable: false, className: 'text-center' }
+        ],
+        language: {
+          search: 'Search:',
+          lengthMenu: 'Show _MENU_ entries',
+          info: 'Showing _START_ to _END_ of _TOTAL_ entries',
+          infoEmpty: 'Showing 0 to 0 of 0 entries',
+          infoFiltered: '(filtered from _MAX_ total entries)',
+          zeroRecords: 'No matching records found',
+          emptyTable: 'No inactive users',
+          paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
+        }
+      });
 
       function resetUserForm() {
         addUserForm[0].reset();
@@ -267,9 +355,23 @@
       $('#addNewUserBtn').on('click', function () {
         openAddUserModal(false);
       });
+
+      $('#openInactiveUsersModal').on('click', function () {
+        inactiveUsersModal.removeClass('hidden');
+        $('body').css('overflow', 'hidden');
+        inactiveUsersTable.ajax.reload(null, false);
+      });
+
+      function closeInactiveUsersModal() {
+        inactiveUsersModal.addClass('hidden');
+        $('body').css('overflow', '');
+      }
+
       closeAddUserModalBtn.on('click', closeAddUserModal);
       addUserModalBackdrop.on('click', closeAddUserModal);
       cancelAddUserBtn.on('click', closeAddUserModal);
+      closeInactiveUsersModalBtn.on('click', closeInactiveUsersModal);
+      inactiveUsersModalBackdrop.on('click', closeInactiveUsersModal);
 
   $('#addUserForm').on('submit', function (e) {
   e.preventDefault();
@@ -364,6 +466,7 @@
                     text: response.message || 'User deleted successfully.'
                   });
                   userTable.ajax.reload(null, false);
+                  inactiveUsersTable.ajax.reload(null, false);
                   return;
                 }
 
@@ -378,6 +481,54 @@
                   icon: 'error',
                   title: 'Error',
                   text: 'An error occurred while deleting the user.'
+                });
+              }
+            });
+          }
+        });
+      });
+
+      $(document).on('click', '.activate-user-btn', function () {
+        const userNo = $(this).data('id');
+
+        Swal.fire({
+          title: 'Activate user?',
+          text: 'Are you sure you want to activate this user?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, activate',
+          confirmButtonColor: '#22c55e',
+          cancelButtonText: 'Cancel'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            $.ajax({
+              url: apiUrl + '/user-management/activateUser',
+              method: 'POST',
+              contentType: 'application/json',
+              data: JSON.stringify({ user_no: userNo }),
+              success: function (response) {
+                if (response.success) {
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Activated!',
+                    text: response.message || 'User activated successfully.'
+                  });
+                  inactiveUsersTable.ajax.reload(null, false);
+                  userTable.ajax.reload(null, false);
+                  return;
+                }
+
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Failed',
+                  text: response.message || 'Failed to activate user.'
+                });
+              },
+              error: function () {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'An error occurred while activating the user.'
                 });
               }
             });

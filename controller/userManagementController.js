@@ -122,3 +122,77 @@ exports.deleteUser = async (req, res) => {
         res.status(500).json({ success: false, message: "An error occurred while deleting the user." });
     }
 };
+
+exports.inactiveUserDataTable = async (req, res) => {
+    try {
+        const {
+            draw = 1,
+            start = 0,
+            length = 10,
+            search = {},
+            order = [{ column: 0, dir: "asc" }]
+        } = req.body;
+
+        const parsedStart = Number(start) || 0;
+        const parsedLength = Number(length) || 10;
+
+        const data = await userModel.inactiveUserDataTable();
+        const userList = data.map((item) => ({
+            user_no: item.user_no,
+            fname: item.fname || "",
+            uname: item.uname || ""
+        }));
+
+        const searchValue = String(search.value || "").toLowerCase();
+        const filteredData = userList.filter((item) =>
+            item.fname.toLowerCase().includes(searchValue) ||
+            item.uname.toLowerCase().includes(searchValue)
+        );
+
+        const sortableColumns = ["fname", "uname"];
+        const orderColumn = Number(order[0]?.column) || 0;
+        const orderDirection = order[0]?.dir === "desc" ? -1 : 1;
+        const sortKey = sortableColumns[orderColumn] || "fname";
+
+        const sortedData = filteredData.sort((a, b) => {
+            const aValue = a[sortKey];
+            const bValue = b[sortKey];
+            if (aValue < bValue) return -1 * orderDirection;
+            if (aValue > bValue) return 1 * orderDirection;
+            return 0;
+        });
+
+        const paginatedData = sortedData.slice(parsedStart, parsedStart + parsedLength);
+
+        res.json({
+            draw: Number(draw) || 1,
+            recordsTotal: userList.length,
+            recordsFiltered: filteredData.length,
+            data: paginatedData
+        });
+    } catch (error) {
+        console.error("Error loading inactive user DataTable:", error);
+        res.status(500).json({ error: "DB error" });
+    }
+};
+
+exports.activateUser = async (req, res) => {
+    try {
+        const { user_no } = req.body;
+
+        if (!user_no) {
+            return res.status(400).json({ success: false, message: "User ID is required." });
+        }
+
+        const result = await userModel.activateUser(user_no);
+
+        if (result && result.affectedRows === 1) {
+            return res.status(200).json({ success: true, message: "User activated successfully" });
+        }
+
+        res.status(404).json({ success: false, message: "User not found." });
+    } catch (error) {
+        console.error("Error activating user:", error);
+        res.status(500).json({ success: false, message: "An error occurred while activating the user." });
+    }
+};
