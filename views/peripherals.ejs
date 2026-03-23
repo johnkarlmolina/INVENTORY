@@ -35,6 +35,11 @@
             <i class="fas fa-plus text-lg"></i>
             <span class="font-semibold">Add Peripheral</span>
           </button>
+
+          <button id="openInactivePeripheralModal" class="ml-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50">
+            <i class="fas fa-ban text-lg"></i>
+            <span class="font-semibold">Inactive</span>
+          </button>
         </div>
 
         <div class="bg-white rounded-lg shadow-lg p-6 w-full overflow-x-auto">
@@ -247,6 +252,40 @@
     </div>
   </div>
 
+  <div id="inactivePeripheralModal" class="fixed inset-0 z-50 hidden">
+    <div id="inactivePeripheralModalBackdrop" class="absolute inset-0 bg-black/40"></div>
+
+    <div class="relative z-10 flex min-h-screen items-center justify-center p-4 md:p-6">
+      <div class="w-full max-w-5xl rounded-xl bg-white shadow-2xl border border-gray-200">
+        <div class="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white rounded-t-xl">
+          <h2 class="text-2xl font-bold" style="color: #0F828C;">Inactive Peripherals</h2>
+          <button id="closeInactivePeripheralModal" type="button"
+            class="h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0F828C]"
+            aria-label="Close modal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="px-6 py-6">
+          <div class="overflow-x-auto">
+            <table id="inactivePeripheralTable" class="display nowrap" style="width:100%">
+              <thead style="background-color: #0F828C;">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Brand</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Model</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">User</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Peripheral No.</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
 </body>
 
@@ -260,6 +299,7 @@
       const apiUrl = "<%= baseUrl %>";
 
       const $peripheralModal = $('#peripheralModal');
+      const $inactivePeripheralModal = $('#inactivePeripheralModal');
       const $peripheralForm = $('#peripheralForm');
       let isEditMode = false;
       let editPeripheralId = null;
@@ -335,7 +375,7 @@
           tsKind.clear(); tsKind.setValue('');
           if (tsComputerId) { tsComputerId.clear(); tsComputerId.setValue(''); }
           tsDept.clear(); tsDept.setValue('');
-          tsStatus.setValue('Active');
+          tsStatus.setValue('active');
           tsLocation.setValue('Floor');
         }
         $peripheralModal.removeClass('hidden');
@@ -353,7 +393,7 @@
         tsKind.clear(); tsKind.setValue('');
         if (tsComputerId) { tsComputerId.clear(); tsComputerId.setValue(''); }
         tsDept.clear(); tsDept.setValue('');
-        tsStatus.setValue('Active');
+        tsStatus.setValue('active');
         tsLocation.setValue('Floor');
       }
 
@@ -430,13 +470,64 @@
         }
       });
 
+      const inactivePeripheralDt = new DataTable('#inactivePeripheralTable', {
+        processing: true,
+        serverSide: true,
+        ajax: { url: apiUrl + '/peripherals/inactivePeripheralDataTable', type: 'POST', dataType: 'json' },
+        columns: [
+          { data: 'brand' },
+          { data: 'model' },
+          { data: 'peripheral_user' },
+          { data: 'peripheral_no' },
+          {
+            data: 'peripheral_id',
+            orderable: false,
+            searchable: false,
+            render: function (id) {
+              return `
+                <div class="flex gap-2">
+                  <button class="activatePeripheralBtn bg-green-500 border-2 border-green-500 text-white hover:bg-green-600 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Activate">
+                    <i class="fas fa-check"></i> Activate
+                  </button>
+                </div>
+              `;
+            }
+          }
+        ],
+        pageLength: 10,
+        ordering: true,
+        searching: true,
+        info: true,
+        scrollX: true,
+        scrollCollapse: true,
+        responsive: false,
+        autoWidth: false,
+        columnDefs: [
+          { width: '100px', targets: 0 },
+          { width: '100px', targets: 1 },
+          { width: '120px', targets: 2 },
+          { width: '100px', targets: 3 },
+          { width: '120px', targets: 4, className: 'text-center' }
+        ],
+        language: {
+          search: 'Search:',
+          lengthMenu: 'Show _MENU_ entries',
+          info: 'Showing _START_ to _END_ of _TOTAL_ entries',
+          infoEmpty: 'Showing 0 to 0 of 0 entries',
+          infoFiltered: '(filtered from _MAX_ total entries)',
+          zeroRecords: 'No matching records found',
+          emptyTable: 'No inactive peripherals',
+          paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
+        }
+      });
+
       $('#openPeripheralModal').on('click', function() {
         // Force clear form before opening in Add mode
         $peripheralForm[0].reset();
         $('#kind_of_peripheral').val('');
         $('#computer_id').val('');
         $('#user_dept').val('');
-        $('#peripheral_status').val('Active');
+        $('#peripheral_status').val('active');
         $('#peripheral_location').val('');
         editPeripheralId = null;
         isEditMode = false;
@@ -447,9 +538,24 @@
       
       $('#closePeripheralModal, #peripheralModalBackdrop').on('click', closePeripheralModal);
 
+      $('#openInactivePeripheralModal').on('click', function() {
+        $inactivePeripheralModal.removeClass('hidden');
+        $('body').addClass('overflow-hidden');
+        inactivePeripheralDt.ajax.reload(null, false);
+      });
+
+      $('#closeInactivePeripheralModal, #inactivePeripheralModalBackdrop').on('click', function() {
+        $inactivePeripheralModal.addClass('hidden');
+        $('body').removeClass('overflow-hidden');
+      });
+
       $(document).on('keydown', function (event) {
         if (event.key === 'Escape' && !$peripheralModal.hasClass('hidden')) {
           closePeripheralModal();
+        }
+        if (event.key === 'Escape' && !$inactivePeripheralModal.hasClass('hidden')) {
+          $inactivePeripheralModal.addClass('hidden');
+          $('body').removeClass('overflow-hidden');
         }
       });
 
@@ -458,7 +564,7 @@
         $('#kind_of_peripheral').val('');
         $('#computer_id').val('');
         $('#user_dept').val('');
-        $('#peripheral_status').val('Active');
+        $('#peripheral_status').val('active');
         $('#peripheral_location').val('');
       });
 
@@ -503,7 +609,7 @@
           tsDept.setValue(rowData.user_dept);
         }
         
-        tsStatus.setValue(rowData.peripheral_status || 'Active');
+        tsStatus.setValue((rowData.peripheral_status || 'active').toLowerCase());
         
         if (rowData.peripheral_location) {
           if (!tsLocation.getOption(rowData.peripheral_location)) {
@@ -572,7 +678,7 @@
                         $('#kind_of_peripheral').val('');
                         $('#computer_id').val('');
                         $('#user_dept').val('');
-                        $('#peripheral_status').val('Active');
+                        $('#peripheral_status').val('active');
                         $('#peripheral_location').val('');
                         peripheralsDt.ajax.reload(null, false); // reload DataTable
                         closePeripheralModal();
@@ -625,6 +731,7 @@
                     confirmButtonColor: '#0F828C'
                   });
                   peripheralsDt.ajax.reload(null, false);
+                  inactivePeripheralDt.ajax.reload(null, false);
                 } else {
                   Swal.fire({
                     icon: 'error',
@@ -638,6 +745,55 @@
                   icon: 'error',
                   title: 'Error',
                   text: 'An error occurred while deleting the peripheral.'
+                });
+              }
+            });
+          }
+        });
+      });
+
+      $('#inactivePeripheralTable').on('click', '.activatePeripheralBtn', function () {
+        const id = $(this).data('id');
+
+        Swal.fire({
+          title: 'Activate?',
+          text: 'Are you sure you want to activate this peripheral?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, activate',
+          confirmButtonColor: '#22c55e',
+          cancelButtonColor: '#6c757d',
+          cancelButtonText: 'Cancel'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            $.ajax({
+              url: apiUrl + '/peripherals/activatePeripheral',
+              method: 'POST',
+              contentType: 'application/json',
+              data: JSON.stringify({ peripheral_id: id }),
+              success: function(response) {
+                if (response.success) {
+                  Swal.fire({
+                    icon: 'success',
+                    title: 'Activated!',
+                    text: 'Peripheral has been activated.',
+                    confirmButtonColor: '#22c55e'
+                  });
+                  inactivePeripheralDt.ajax.reload(null, false);
+                  peripheralsDt.ajax.reload(null, false);
+                } else {
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Failed',
+                    text: response.message || 'Failed to activate peripheral.'
+                  });
+                }
+              },
+              error: function() {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: 'An error occurred while activating the peripheral.'
                 });
               }
             });
