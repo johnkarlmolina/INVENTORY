@@ -8,18 +8,625 @@
   <script src="https://kit.fontawesome.com/ec23f4a8b0.js" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.min.css" rel="stylesheet">
+  <script src="https://cdn.datatables.net/2.1.2/js/dataTables.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exceljs/dist/exceljs.min.js"></script>
   <link rel="icon" type="image/png" href="/Images/ndh-it.png">
 </head>
 <body class="bg-gray-100">
   <div class="flex min-h-screen">
     <%- include('partials/sidebar', { page: 'reports' }) %>
-    
+
     <main class="ml-72 flex-1 p-8">
-      <h1 style="color: #0F828C;" class="text-3xl font-semibold mb-8">Report Generation Page</h1>
-      <div class="flex items-center justify-center" style="min-height: 60vh;">
-        <h2 class="text-5xl font-bold text-gray-500">Coming Soon</h2>
+      <h1 style="color: #0F828C;" class="text-3xl font-semibold mb-6">Report Generation Page</h1>
+
+      <section class="bg-white rounded-xl shadow p-5 mb-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button id="refreshBtn" class="px-4 py-2 rounded-lg text-white font-medium" style="background-color:#0F828C;">
+              <i class="fa-solid fa-rotate-right mr-2"></i>Refresh Data
+            </button>
+            <select id="excelExportType" class="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <option value="all">All Data</option>
+              <option value="inventory">Inventory Only</option>
+              <option value="peripherals">Peripherals Only</option>
+              <option value="consumables">Consumables Only</option>
+            </select>
+            <button id="exportExcelBtn" class="px-4 py-2 rounded-lg text-white font-medium bg-emerald-600 hover:bg-emerald-700 transition">
+              <i class="fa-solid fa-file-excel mr-2"></i>Save as Excel
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+      <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-6">
+        <section class="bg-white rounded-xl shadow p-4 flex flex-col">
+          <h2 class="text-base font-semibold text-gray-700 mb-3">Inventory Status (Computers)</h2>
+          <div class="h-56 mb-3">
+            <canvas id="inventoryChart"></canvas>
+          </div>
+          <div class="overflow-auto max-h-64 border border-gray-200 rounded-lg">
+            <table id="inventoryTable" class="display nowrap min-w-full text-xs text-left text-gray-700" style="width:100%">
+              <thead class="bg-gray-50 text-gray-600 uppercase tracking-wider">
+                <tr>
+                  <th class="px-3 py-2">PC No</th>
+                  <th class="px-3 py-2">Model</th>
+                  <th class="px-3 py-2">User</th>
+                  <th class="px-3 py-2">Status</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+        </section>
+
+        <section class="bg-white rounded-xl shadow p-4 flex flex-col">
+          <h2 class="text-base font-semibold text-gray-700 mb-3">Peripherals by Type</h2>
+          <div class="h-56 mb-3">
+            <canvas id="peripheralsChart"></canvas>
+          </div>
+          <div class="overflow-auto max-h-64 border border-gray-200 rounded-lg">
+            <table id="peripheralsTable" class="display nowrap min-w-full text-xs text-left text-gray-700" style="width:100%">
+              <thead class="bg-gray-50 text-gray-600 uppercase tracking-wider">
+                <tr>
+                  <th class="px-3 py-2">Peripheral No</th>
+                  <th class="px-3 py-2">Type</th>
+                  <th class="px-3 py-2">Model</th>
+                  <th class="px-3 py-2">Status</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+        </section>
+
+        <section class="bg-white rounded-xl shadow p-4 flex flex-col">
+          <h2 class="text-base font-semibold text-gray-700 mb-3">Consumables Stock by Classification</h2>
+          <div class="h-56 mb-3">
+            <canvas id="consumablesChart"></canvas>
+          </div>
+          <div class="overflow-auto max-h-64 border border-gray-200 rounded-lg">
+            <table id="consumablesTable" class="display nowrap min-w-full text-xs text-left text-gray-700" style="width:100%">
+              <thead class="bg-gray-50 text-gray-600 uppercase tracking-wider">
+                <tr>
+                  <th class="px-3 py-2">Stock No</th>
+                  <th class="px-3 py-2">Item</th>
+                  <th class="px-3 py-2">Class</th>
+                  <th class="px-3 py-2">Current Stock</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+        </section>
+      </div>
+
+      <section class="bg-white rounded-xl shadow overflow-hidden">
+        <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-gray-800">Main Consolidated Table</h2>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table id="mainReportTable" class="display nowrap min-w-full text-sm text-left text-gray-700" style="width:100%">
+            <thead class="bg-gray-50 text-gray-600 uppercase text-xs tracking-wider">
+              <tr>
+                <th class="px-4 py-3">Source</th>
+                <th class="px-4 py-3">No/ID</th>
+                <th class="px-4 py-3">Item / Model</th>
+                <th class="px-4 py-3">Brand</th>
+                <th class="px-4 py-3">User</th>
+                <th class="px-4 py-3">Dept / Class</th>
+                <th class="px-4 py-3">Status</th>
+                <th class="px-4 py-3">Location</th>
+                <th class="px-4 py-3">Entry Date</th>
+              </tr>
+            </thead>
+          </table>
+        </div>
+      </section>
+
+      <div id="loadingState" class="hidden fixed inset-0 bg-black/30 z-50 items-center justify-center">
+        <div class="bg-white rounded-xl px-6 py-4 shadow-lg text-gray-700 font-medium">
+          <i class="fa-solid fa-spinner fa-spin mr-2"></i>Loading reports data...
+        </div>
       </div>
     </main>
   </div>
+
+  <script>
+    let inventoryChart;
+    let peripheralsChart;
+    let consumablesChart;
+    let socketRefreshTimer;
+
+    const state = {
+      computers: [],
+      peripherals: [],
+      consumables: [],
+      mainRows: []
+    };
+
+    const tables = {
+      inventory: null,
+      peripherals: null,
+      consumables: null,
+      main: null
+    };
+
+    const dom = {
+      refreshBtn: document.getElementById("refreshBtn"),
+      excelExportType: document.getElementById("excelExportType"),
+      exportExcelBtn: document.getElementById("exportExcelBtn"),
+      loadingState: document.getElementById("loadingState")
+    };
+
+    function setupTables() {
+      tables.inventory = new DataTable("#inventoryTable", {
+        data: [],
+        columns: [
+          { data: "pcNo" },
+          { data: "model" },
+          { data: "user" },
+          { data: "status" }
+        ],
+        pageLength: 5,
+        lengthChange: false,
+        info: false,
+        searching: true,
+        ordering: true,
+        responsive: true
+      });
+
+      tables.peripherals = new DataTable("#peripheralsTable", {
+        data: [],
+        columns: [
+          { data: "peripheralNo" },
+          { data: "type" },
+          { data: "model" },
+          { data: "status" }
+        ],
+        pageLength: 5,
+        lengthChange: false,
+        info: false,
+        searching: true,
+        ordering: true,
+        responsive: true
+      });
+
+      tables.consumables = new DataTable("#consumablesTable", {
+        data: [],
+        columns: [
+          { data: "stockNo" },
+          { data: "item" },
+          { data: "classification" },
+          { data: "currentStock" }
+        ],
+        pageLength: 5,
+        lengthChange: false,
+        info: false,
+        searching: true,
+        ordering: true,
+        responsive: true
+      });
+
+      tables.main = new DataTable("#mainReportTable", {
+        data: [],
+        columns: [
+          { data: "source" },
+          { data: "noOrId" },
+          { data: "itemModel" },
+          { data: "brand" },
+          { data: "user" },
+          { data: "deptOrClass" },
+          { data: "status" },
+          { data: "location" },
+          { data: "entryDate" }
+        ],
+        pageLength: 10,
+        lengthChange: true,
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+        searching: true,
+        ordering: true,
+        responsive: true
+      });
+    }
+
+    function setLoading(isLoading) {
+      dom.loadingState.classList.toggle("hidden", !isLoading);
+      dom.loadingState.classList.toggle("flex", isLoading);
+    }
+
+    function escapeHtml(value) {
+      return (value ?? "")
+        .toString()
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    async function fetchData(url) {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          draw: 1,
+          start: 0,
+          length: 100000,
+          search: { value: "" },
+          order: [{ column: 0, dir: "asc" }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}`);
+      }
+
+      const payload = await response.json();
+      return Array.isArray(payload.data) ? payload.data : [];
+    }
+
+    function countBy(items, keyGetter) {
+      const counts = {};
+      items.forEach((item) => {
+        const key = (keyGetter(item) || "Unknown").toString().trim() || "Unknown";
+        counts[key] = (counts[key] || 0) + 1;
+      });
+      return counts;
+    }
+
+    function sumBy(items, keyGetter, valueGetter) {
+      const sums = {};
+      items.forEach((item) => {
+        const key = (keyGetter(item) || "Unknown").toString().trim() || "Unknown";
+        sums[key] = (sums[key] || 0) + (Number(valueGetter(item)) || 0);
+      });
+      return sums;
+    }
+
+    function buildMainRows() {
+      const computerRows = state.computers.map((item) => ({
+        source: "Inventory",
+        noOrId: item.pc_no || item.computer_id || "",
+        itemModel: `${item.brand || ""} ${item.model || ""}`.trim(),
+        brand: item.brand || "",
+        user: item.pc_user || "",
+        deptOrClass: item.user_dept || "",
+        status: item.pc_status || "",
+        location: item.pc_location || "",
+        entryDate: item.date_of_entry || ""
+      }));
+
+      const peripheralRows = state.peripherals.map((item) => ({
+        source: "Peripherals",
+        noOrId: item.peripheral_no || item.peripheral_id || "",
+        itemModel: `${item.kind_of_peripheral || "Peripheral"} - ${item.model || ""}`,
+        brand: item.brand || "",
+        user: item.peripheral_user || "",
+        deptOrClass: item.user_dept || "",
+        status: item.peripheral_status || "",
+        location: item.peripheral_location || "",
+        entryDate: item.date_of_entry || ""
+      }));
+
+      const consumableRows = state.consumables.map((item) => ({
+        source: "Consumables",
+        noOrId: item.stock_no || "",
+        itemModel: item.item || item.model || "",
+        brand: item.brand || "",
+        user: "",
+        deptOrClass: item.item_classification || "",
+        status: `Stock: ${item.current_stock || 0}`,
+        location: "",
+        entryDate: item.date_of_entry || ""
+      }));
+
+      state.mainRows = [...computerRows, ...peripheralRows, ...consumableRows];
+      refreshMainTable();
+    }
+
+    function drawChart(existingChart, canvasId, type, labels, values, colorSet, datasetLabel) {
+      const chartCanvas = document.getElementById(canvasId);
+      if (!chartCanvas) return existingChart;
+
+      if (existingChart) {
+        existingChart.destroy();
+      }
+
+      return new Chart(chartCanvas, {
+        type,
+        data: {
+          labels,
+          datasets: [{
+            label: datasetLabel,
+            data: values,
+            backgroundColor: colorSet,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: "bottom" }
+          }
+        }
+      });
+    }
+
+    function refreshInventoryTable() {
+      const rows = state.computers.map((item) => ({
+        pcNo: escapeHtml(item.pc_no || item.computer_id || ""),
+        model: escapeHtml(`${item.brand || ""} ${item.model || ""}`.trim()),
+        user: escapeHtml(item.pc_user || ""),
+        status: escapeHtml(item.pc_status || "")
+      }));
+
+      tables.inventory.clear();
+      tables.inventory.rows.add(rows);
+      tables.inventory.draw(false);
+    }
+
+    function refreshPeripheralsTable() {
+      const rows = state.peripherals.map((item) => ({
+        peripheralNo: escapeHtml(item.peripheral_no || item.peripheral_id || ""),
+        type: escapeHtml(item.kind_of_peripheral || ""),
+        model: escapeHtml(item.model || ""),
+        status: escapeHtml(item.peripheral_status || "")
+      }));
+
+      tables.peripherals.clear();
+      tables.peripherals.rows.add(rows);
+      tables.peripherals.draw(false);
+    }
+
+    function refreshConsumablesTable() {
+      const rows = state.consumables.map((item) => ({
+        stockNo: escapeHtml(item.stock_no || ""),
+        item: escapeHtml(item.item || ""),
+        classification: escapeHtml(item.item_classification || ""),
+        currentStock: escapeHtml(item.current_stock || 0)
+      }));
+
+      tables.consumables.clear();
+      tables.consumables.rows.add(rows);
+      tables.consumables.draw(false);
+    }
+
+    function refreshMainTable() {
+      const rows = state.mainRows.map((row) => ({
+        source: escapeHtml(row.source),
+        noOrId: escapeHtml(row.noOrId),
+        itemModel: escapeHtml(row.itemModel),
+        brand: escapeHtml(row.brand),
+        user: escapeHtml(row.user),
+        deptOrClass: escapeHtml(row.deptOrClass),
+        status: escapeHtml(row.status),
+        location: escapeHtml(row.location),
+        entryDate: escapeHtml(row.entryDate)
+      }));
+
+      tables.main.clear();
+      tables.main.rows.add(rows);
+      tables.main.draw(false);
+    }
+
+    function renderAll() {
+      const inventoryStatusCount = countBy(state.computers, (item) => item.pc_status || "Unknown");
+      const peripheralTypeCount = countBy(state.peripherals, (item) => item.kind_of_peripheral || "Unknown");
+      const consumableStockByClass = sumBy(state.consumables, (item) => item.item_classification || "Unknown", (item) => item.current_stock || 0);
+
+      inventoryChart = drawChart(
+        inventoryChart,
+        "inventoryChart",
+        "doughnut",
+        Object.keys(inventoryStatusCount),
+        Object.values(inventoryStatusCount),
+        ["#0F828C", "#22c55e", "#f59e0b", "#ef4444", "#6b7280", "#14b8a6"],
+        "Inventory Status"
+      );
+
+      peripheralsChart = drawChart(
+        peripheralsChart,
+        "peripheralsChart",
+        "bar",
+        Object.keys(peripheralTypeCount),
+        Object.values(peripheralTypeCount),
+        ["#0ea5e9", "#2563eb", "#8b5cf6", "#06b6d4", "#6366f1", "#14b8a6"],
+        "Peripheral Count"
+      );
+
+      consumablesChart = drawChart(
+        consumablesChart,
+        "consumablesChart",
+        "bar",
+        Object.keys(consumableStockByClass),
+        Object.values(consumableStockByClass),
+        ["#10b981", "#84cc16", "#22c55e", "#16a34a", "#65a30d", "#4d7c0f"],
+        "Current Stock"
+      );
+
+      refreshInventoryTable();
+      refreshPeripheralsTable();
+      refreshConsumablesTable();
+      buildMainRows();
+    }
+
+    async function loadReports() {
+      try {
+        setLoading(true);
+
+        const [computers, peripherals, consumables] = await Promise.all([
+          fetchData("/computers/computerDataTable"),
+          fetchData("/peripherals/peripheralDataTable"),
+          fetchData("/consumable/showConsumables")
+        ]);
+
+        state.computers = computers;
+        state.peripherals = peripherals;
+        state.consumables = consumables;
+
+        renderAll();
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          icon: "error",
+          title: "Load failed",
+          text: "Unable to fetch reports data. Please try again."
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    async function saveAsExcel() {
+      try {
+        const workbook = new ExcelJS.Workbook();
+        const exportType = dom.excelExportType.value;
+        const createdSheets = [];
+
+        if (exportType === "all" || exportType === "inventory") {
+          const inventorySheet = workbook.addWorksheet("Inventory");
+          inventorySheet.addRow(["PC No", "Brand", "Model", "User", "Dept", "Status", "Location", "Date of Entry"]);
+          state.computers.forEach((item) => {
+            inventorySheet.addRow([
+              item.pc_no || item.computer_id || "",
+              item.brand || "",
+              item.model || "",
+              item.pc_user || "",
+              item.user_dept || "",
+              item.pc_status || "",
+              item.pc_location || "",
+              item.date_of_entry || ""
+            ]);
+          });
+          createdSheets.push(inventorySheet);
+        }
+
+        if (exportType === "all" || exportType === "peripherals") {
+          const peripheralsSheet = workbook.addWorksheet("Peripherals");
+          peripheralsSheet.addRow(["Peripheral No", "Type", "Brand", "Model", "User", "Dept", "Status", "Location", "Date of Entry"]);
+          state.peripherals.forEach((item) => {
+            peripheralsSheet.addRow([
+              item.peripheral_no || item.peripheral_id || "",
+              item.kind_of_peripheral || "",
+              item.brand || "",
+              item.model || "",
+              item.peripheral_user || "",
+              item.user_dept || "",
+              item.peripheral_status || "",
+              item.peripheral_location || "",
+              item.date_of_entry || ""
+            ]);
+          });
+          createdSheets.push(peripheralsSheet);
+        }
+
+        if (exportType === "all" || exportType === "consumables") {
+          const consumablesSheet = workbook.addWorksheet("Consumables");
+          consumablesSheet.addRow(["Stock No", "Item", "Classification", "Brand", "Model", "Batch Number", "Current Stock", "Date of Entry"]);
+          state.consumables.forEach((item) => {
+            consumablesSheet.addRow([
+              item.stock_no || "",
+              item.item || "",
+              item.item_classification || "",
+              item.brand || "",
+              item.model || "",
+              item.batch_number || "",
+              item.current_stock || 0,
+              item.date_of_entry || ""
+            ]);
+          });
+          createdSheets.push(consumablesSheet);
+        }
+
+        if (exportType === "all") {
+          const mainSheet = workbook.addWorksheet("Main Report");
+          mainSheet.addRow(["Source", "No/ID", "Item/Model", "Brand", "User", "Dept/Class", "Status", "Location", "Entry Date"]);
+          state.mainRows.forEach((row) => {
+            mainSheet.addRow([
+              row.source || "",
+              row.noOrId || "",
+              row.itemModel || "",
+              row.brand || "",
+              row.user || "",
+              row.deptOrClass || "",
+              row.status || "",
+              row.location || "",
+              row.entryDate || ""
+            ]);
+          });
+          createdSheets.push(mainSheet);
+        }
+
+        createdSheets.forEach((sheet) => {
+          sheet.columns.forEach((column) => {
+            column.width = 20;
+          });
+        });
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+        const url = window.URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        const datePart = new Date().toISOString().slice(0, 10);
+        const fileSuffixByType = {
+          all: "all",
+          inventory: "inventory",
+          peripherals: "peripherals",
+          consumables: "consumables"
+        };
+
+        anchor.href = url;
+        anchor.download = `it-inventory-report-${fileSuffixByType[exportType]}-${datePart}.xlsx`;
+        anchor.click();
+        window.URL.revokeObjectURL(url);
+
+        Swal.fire({
+          icon: "success",
+          title: "Excel saved",
+          text: "Report workbook downloaded successfully."
+        });
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          icon: "error",
+          title: "Export failed",
+          text: "Unable to generate Excel file right now."
+        });
+      }
+    }
+
+    function scheduleSocketRefresh() {
+      clearTimeout(socketRefreshTimer);
+      socketRefreshTimer = setTimeout(() => {
+        loadReports();
+      }, 600);
+    }
+
+    function setupSocket() {
+      const socket = io();
+
+      socket.on("connect", () => {
+        console.log("Reports socket connected");
+      });
+
+      socket.on("reports:refresh", () => {
+        scheduleSocketRefresh();
+      });
+
+      socket.on("disconnect", () => {
+        console.log("Reports socket disconnected");
+      });
+    }
+
+    dom.refreshBtn.addEventListener("click", loadReports);
+    dom.exportExcelBtn.addEventListener("click", saveAsExcel);
+
+    setupTables();
+    setupSocket();
+    loadReports();
+  </script>
 </body>
 </html>

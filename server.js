@@ -1,9 +1,27 @@
 const { app, server } = require("./app");
+const { Server } = require("socket.io");
 const ngrok = require("ngrok");
 const path = require("path");
 const fs = require("fs");
 
 const PORT = process.env.PORT || 3000;
+
+const io = new Server(server, {
+  cors: {
+    origin: true,
+    credentials: true
+  }
+});
+
+app.set("io", io);
+
+io.on("connection", (socket) => {
+  console.log(`🔌 Socket connected: ${socket.id}`);
+
+  socket.on("disconnect", () => {
+    console.log(`🔌 Socket disconnected: ${socket.id}`);
+  });
+});
 
 server.listen(PORT, async () => {
   let baseUrl = process.env.LOCAL_URL || `https://localhost:${PORT}`;
