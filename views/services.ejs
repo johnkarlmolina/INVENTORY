@@ -8,83 +8,322 @@
   <script src="https://kit.fontawesome.com/ec23f4a8b0.js" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- DataTables (Default) -->
+  <link href="https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.min.css" rel="stylesheet">
+  <script src="https://cdn.datatables.net/2.1.2/js/dataTables.min.js"></script>
   <link rel="icon" type="image/png" href="/Images/ndh-it.png">
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 overflow-x-hidden">
   <div class="flex min-h-screen">
-    <%- include('partials/sidebar', { page: 'services' }) %>
+    <%- include('partials/sidebar', { page: 'services', baseUrl: baseUrl }) %>
     
-    <main class="ml-72 flex-1 p-8">
-      <!-- Page Header -->
+    <main class="ml-72 flex-1 p-8 transition-all duration-300 overflow-x-hidden" style="min-width: 0; max-width: 100%;">
       <div class="mb-6">
-        <h1 style="color: #0F828C;" class="text-3xl font-bold mb-2">Service History</h1>
-        <p class="text-gray-600">Track computer service requests and repairs</p>
+        <h1 style="color: #0F828C;" class="text-4xl font-bold">Service History</h1>
+        <p style="color: #777777;" class="text-2x1">Track computer service requests and repairs</p>
       </div>
 
-      <!-- New Service Request Form -->
-      <div class="bg-white rounded-lg shadow-md p-8 mb-8">
-        <h2 class="text-xl font-semibold text-gray-800 mb-6">New Service Request</h2>
-        
-        <form>
-          <!-- ID Field -->
-          <div class="mb-6">
-            <label class="block text-gray-700 text-sm font-medium mb-2">ID</label>
-            <input  
-              type="text" 
-              placeholder="Auto increment" 
-              disabled
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
-            >
-          </div>
+      <!-- Button Container -->
+      <div class="flex justify-end mb-4">
+        <button id="openServiceModal"
+          class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
+          <i class="fas fa-plus text-lg"></i>
+          <span class="font-semibold">Add Service</span>
+        </button>
+      </div>
 
-          <!-- Serial Number and Property Tag Row -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label class="block text-gray-700 text-sm font-medium mb-2">Serial Number</label>
-              <input 
-                type="text" 
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              >
+      <div class="bg-white rounded-lg shadow-lg p-6 w-full overflow-x-auto">
+        <div class="w-full overflow-x-auto">
+          <table id="servicesTable" class="display nowrap" style="width:100%">
+            <thead style="background-color: #0F828C;">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Service ID</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Serial Number</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Property Tag</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Problem</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Remarks</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Service Modal (UI only) -->
+  <div id="serviceModal" class="fixed inset-0 z-50 hidden">
+    <div id="serviceModalBackdrop" class="absolute inset-0 bg-black/40"></div>
+
+    <div class="relative z-10 flex min-h-screen items-center justify-center p-4 md:p-6">
+      <div class="w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-xl bg-white shadow-2xl border border-gray-200">
+        <div class="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white rounded-t-xl">
+          <h2 class="text-2xl font-bold" style="color: #0F828C;">New Service Request</h2>
+          <button id="closeServiceModal" type="button"
+            class="h-10 w-10 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0F828C]"
+            aria-label="Close modal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <form id="serviceForm" class="px-6 py-6">
+          <section class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="serial_number" class="block text-sm font-medium text-gray-700 mb-2">Serial Number</label>
+                <input id="serial_number" name="serial_number" type="text"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
+              <div>
+                <label for="property_tag" class="block text-sm font-medium text-gray-700 mb-2">Property Tag</label>
+                <input id="property_tag" name="property_tag" type="text"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
             </div>
+          </section>
+
+          <section class="mb-6">
             <div>
-              <label class="block text-gray-700 text-sm font-medium mb-2">Property Tag</label>
-              <input 
-                type="text" 
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-              >
+              <label for="problem" class="block text-sm font-medium text-gray-700 mb-2">Problem Description</label>
+              <textarea id="problem" name="problem" rows="4"
+                class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20 resize-none"></textarea>
             </div>
-          </div>
+          </section>
 
-          <!-- Problem Description -->
-          <div class="mb-6">
-            <label class="block text-gray-700 text-sm font-medium mb-2">Problem Description</label>
-            <textarea 
-              rows="4"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
-            ></textarea>
-          </div>
+          <section class="mb-8">
+            <div>
+              <label for="remarks" class="block text-sm font-medium text-gray-700 mb-2">Remarks / Solution</label>
+              <textarea id="remarks" name="remarks" rows="4"
+                class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20 resize-none"></textarea>
+            </div>
+          </section>
 
-          <!-- Remarks / Solution -->
-          <div class="mb-6">
-            <label class="block text-gray-700 text-sm font-medium mb-2">Remarks / Solution</label>
-            <textarea 
-              rows="4"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none"
-            ></textarea>
-          </div>
+          <div class="flex items-center gap-4">
+            <button type="submit" id="submitServiceForm"
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
+              <i class="fas fa-plus text-lg"></i>
+              <span class="font-semibold">Submit Service Request</span>
+            </button>
 
-          <!-- Submit Button -->
-          <div>
-            <button 
-              type="submit"
-              class="bg-teal-600 hover:bg-teal-700 text-white font-medium px-6 py-3 rounded-lg transition duration-200"
-            >
-              Submit Service Request
+            <button id="clearServiceForm" type="button"
+              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              Clear Form
             </button>
           </div>
         </form>
       </div>
-    </main>
+    </div>
   </div>
+
+  <script>
+    $(document).ready(function () {
+      const apiUrl = "<%= baseUrl %>";
+
+      const servicesTable = new DataTable('#servicesTable', {
+        processing: true,
+        serverSide: true,
+        ajax: {
+          url: apiUrl + '/services/servicesDataTable',
+          type: 'POST',
+          dataType: 'json'
+        },
+        columns: [
+          { data: 'service_id' },
+          { data: 'serial_number' },
+          { data: 'property_tag' },
+          { data: 'problem' },
+          { data: 'remarks' },
+          {
+            data: 'service_id',
+            orderable: false,
+            searchable: false,
+            render: function (id) {
+              return `
+                <div class="inline-flex gap-2 whitespace-nowrap">
+                  <button class="editServiceBtn bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}">
+                    <i class="fas fa-edit"></i> Edit
+                  </button>
+                  <button class="deleteServiceBtn bg-red-500 border-2 border-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                </div>
+              `;
+            }
+          }
+        ],
+        columnDefs: [
+          { width: '170px', targets: 5, className: 'text-center' }
+        ],
+        pageLength: 10,
+        lengthMenu: [10, 25, 50, 100],
+        ordering: true,
+        searching: true,
+        info: true,
+        scrollX: true,
+        scrollCollapse: true,
+        responsive: false,
+        autoWidth: false,
+        language: {
+          search: 'Search:',
+          lengthMenu: 'Show _MENU_ entries',
+          info: 'Showing _START_ to _END_ of _TOTAL_ entries',
+          infoEmpty: 'Showing 0 to 0 of 0 entries',
+          infoFiltered: '(filtered from _MAX_ total entries)',
+          zeroRecords: 'No matching records found',
+          emptyTable: 'No services',
+          paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
+        }
+      });
+
+      const $serviceModal = $('#serviceModal');
+      const $serviceForm = $('#serviceForm');
+      let isEditMode = false;
+      let editServiceId = null;
+
+      function openServiceModal() {
+        $serviceModal.removeClass('hidden');
+        $('body').addClass('overflow-hidden');
+      }
+
+      function closeServiceModal() {
+        $serviceModal.addClass('hidden');
+        $('body').removeClass('overflow-hidden');
+        $serviceForm[0].reset();
+        isEditMode = false;
+        editServiceId = null;
+        $('#serviceModal h2').text('New Service Request');
+        $('#submitServiceForm span').text('Submit Service Request');
+        $('#submitServiceForm i').removeClass('fa-save').addClass('fa-plus');
+      }
+
+      function setEditMode(service) {
+        isEditMode = true;
+        editServiceId = service.service_id;
+
+        $('#serviceModal h2').text('Edit Service Request');
+        $('#submitServiceForm span').text('Update Service');
+        $('#submitServiceForm i').removeClass('fa-plus').addClass('fa-save');
+
+        $('#serial_number').val(service.serial_number || '');
+        $('#property_tag').val(service.property_tag || '');
+        $('#problem').val(service.problem || '');
+        $('#remarks').val(service.remarks || '');
+      }
+
+      $('#openServiceModal').on('click', function () {
+        // Add mode
+        isEditMode = false;
+        editServiceId = null;
+        $('#serviceModal h2').text('New Service Request');
+        $('#submitServiceForm span').text('Submit Service Request');
+        $('#submitServiceForm i').removeClass('fa-save').addClass('fa-plus');
+        $serviceForm[0].reset();
+        openServiceModal();
+      });
+
+      $('#closeServiceModal, #serviceModalBackdrop').on('click', function () {
+        closeServiceModal();
+      });
+
+      $('#clearServiceForm').on('click', function () {
+        $serviceForm[0].reset();
+      });
+
+      $serviceForm.on('submit', function (e) {
+        e.preventDefault();
+
+        const payload = {
+          serial_number: $('#serial_number').val().trim(),
+          property_tag: $('#property_tag').val().trim(),
+          problem: $('#problem').val().trim(),
+          remarks: $('#remarks').val().trim(),
+        };
+
+        const url = isEditMode && editServiceId
+          ? `${apiUrl}/services/${editServiceId}`
+          : `${apiUrl}/services`;
+        const method = isEditMode ? 'PUT' : 'POST';
+
+        $.ajax({
+          url,
+          method,
+          contentType: 'application/json',
+          data: JSON.stringify(payload),
+          success: function (resp) {
+            if (!resp || resp.success !== true) {
+              Swal.fire({ icon: 'error', title: 'Failed', text: resp?.message || 'Request failed', confirmButtonColor: '#0F828C' });
+              return;
+            }
+            closeServiceModal();
+            servicesTable.ajax.reload(null, false);
+            Swal.fire({ icon: 'success', title: isEditMode ? 'Updated' : 'Added', text: 'Service saved successfully.', confirmButtonColor: '#0F828C' });
+          },
+          error: function (xhr) {
+            const message = xhr?.responseJSON?.message || 'Request failed';
+            Swal.fire({ icon: 'error', title: 'Error', text: message, confirmButtonColor: '#0F828C' });
+          }
+        });
+      });
+
+      // Edit button
+      $('#servicesTable').on('click', '.editServiceBtn', function () {
+        const serviceId = $(this).data('id');
+        if (!serviceId) return;
+
+        $.ajax({
+          url: `${apiUrl}/services/${serviceId}`,
+          method: 'GET',
+          success: function (resp) {
+            if (!resp || resp.success !== true || !resp.service) {
+              Swal.fire({ icon: 'error', title: 'Not found', text: resp?.message || 'Service not found', confirmButtonColor: '#0F828C' });
+              return;
+            }
+            setEditMode(resp.service);
+            openServiceModal();
+          },
+          error: function (xhr) {
+            const message = xhr?.responseJSON?.message || 'Failed to load service';
+            Swal.fire({ icon: 'error', title: 'Error', text: message, confirmButtonColor: '#0F828C' });
+          }
+        });
+      });
+
+      // Delete button
+      $('#servicesTable').on('click', '.deleteServiceBtn', function () {
+        const serviceId = $(this).data('id');
+        if (!serviceId) return;
+
+        Swal.fire({
+          icon: 'warning',
+          title: 'Delete service?',
+          text: 'This action cannot be undone.',
+          showCancelButton: true,
+          confirmButtonText: 'Delete',
+          cancelButtonText: 'Cancel',
+          confirmButtonColor: '#d33',
+        }).then((result) => {
+          if (!result.isConfirmed) return;
+
+          $.ajax({
+            url: `${apiUrl}/services/${serviceId}`,
+            method: 'DELETE',
+            success: function (resp) {
+              if (!resp || resp.success !== true) {
+                Swal.fire({ icon: 'error', title: 'Failed', text: resp?.message || 'Delete failed', confirmButtonColor: '#0F828C' });
+                return;
+              }
+              servicesTable.ajax.reload(null, false);
+              Swal.fire({ icon: 'success', title: 'Deleted', text: 'Service deleted.', confirmButtonColor: '#0F828C' });
+            },
+            error: function (xhr) {
+              const message = xhr?.responseJSON?.message || 'Delete failed';
+              Swal.fire({ icon: 'error', title: 'Error', text: message, confirmButtonColor: '#0F828C' });
+            }
+          });
+        });
+      });
+    });
+  </script>
 </body>
 </html>
