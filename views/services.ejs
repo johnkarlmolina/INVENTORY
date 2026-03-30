@@ -68,6 +68,29 @@
         </div>
 
         <form id="serviceForm" class="px-6 py-6">
+          
+          <section class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="type_of_asset" class="block text-sm font-medium text-gray-700 mb-2">Type of asset</label>
+                <select id="type_of_asset" name="type_of_asset" 
+                    class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+                  <option value="peripheral">Peripheral</option>
+                  <option value="computer">Computer</option>
+                  <!-- Options will be populated dynamically -->
+                </select>
+              </div>
+              <div>
+                <label for="brand_serial" class="block text-sm font-medium text-gray-700 mb-2">Brand/Serial</label>
+                <select id="brand_serial" name="brand_serial" 
+                    class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+                  <option value="">Select brand/serial</option>
+                  <!-- Options will be populated dynamically -->  
+                </select>
+              </div>
+            </div>
+          </section>
+
           <section class="mb-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -323,6 +346,48 @@
           });
         });
       });
+          $(document).on('change', '#type_of_asset', function() {
+            const selectedType = $(this).val();
+            const $brandSerialSelect = $('#brand_serial');
+
+            $brandSerialSelect.empty().append('<option value="">Select brand/serial</option>');
+
+            if (selectedType) {
+              $.ajax({
+                url: apiUrl + `/services/brandSerialOptions`,
+                data: { type_of_asset: selectedType },
+                method: 'GET',
+                success: function(resp) {
+                  if (resp && resp.success === true && Array.isArray(resp.options)) {
+
+                    resp.options.forEach(item => {
+                      let value = '';
+                      let text = '';
+
+                      if (resp.typeAsset === "peripheral") {
+                        value = item.peripheral_id;
+                        text = `${item.brand} ${item.model} ${item.serial_no} ${item.property_tag}`;
+                      } 
+                      else if (resp.typeAsset === "computer") {
+                        value = item.computer_id;
+                        text = `${item.brand} ${item.model} ${item.serial_number} ${item.property_tag}`;
+                      }
+
+                      $brandSerialSelect.append(
+                        `<option value="${value}">${text}</option>`
+                      );
+                    });
+
+                  }
+                },
+                error: function(err) {
+                  console.error("AJAX error:", err);
+                  alert("Failed to load options");
+                }
+              });
+            }
+          });
+
     });
   </script>
 </body>

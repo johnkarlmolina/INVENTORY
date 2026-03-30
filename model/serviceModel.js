@@ -48,3 +48,12 @@ exports.updateComputerService = async (service_id, serviceData) => {
 exports.deleteComputerService = async (service_id) => {
 	return query(`DELETE FROM computer_service WHERE service_id = ?`, [service_id]);
 };
+
+exports.brandSerialOptionsComputer = async() => {
+	return query(`select * from main_inventory`)
+}
+
+
+exports.brandSerialOptionsPeripheral = async() => {
+	return query(`select * from peripherals`)
+}
