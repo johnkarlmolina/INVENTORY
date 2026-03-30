@@ -151,3 +151,22 @@ exports.deleteService = async (req, res) => {
     }
 };
 
+exports.brandSerialOptions = async(req, res) => {
+    try {
+        const { type_of_asset } = req.query;
+        let options;
+        let typeAsset;
+        if (type_of_asset === "computer") {
+            options = await serviceModel.brandSerialOptionsComputer();
+            typeAsset = "computer";
+        } else if (type_of_asset === "peripheral") {
+            options = await serviceModel.brandSerialOptionsPeripheral();
+            typeAsset = "peripheral";
+        }
+        return res.json({ success: true, options:options, typeAsset:typeAsset });
+    } catch (error) {
+        console.error("Error fetching brand/serial options:", error);
+        return res.status(500).json({ success: false, message: "Failed to fetch options" });
+    }   
+};
+
