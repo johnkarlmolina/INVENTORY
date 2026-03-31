@@ -1,10 +1,15 @@
 const userModel = require("../model/userManagement");
+const { getAccessLevel } = require("../middleware/authMiddleware");
 exports.renderUserManagement = async (req, res) => {
     try {
+        const accessLevel = getAccessLevel(req);
         res.render("user-management", {
             page: "user-management",
             title: "User Management",
-            baseUrl: process.env.BASE_URL || ""
+            baseUrl: process.env.BASE_URL || "",
+            accessLevel,
+            isAdmin: accessLevel === "Admin",
+            isTechnician: accessLevel === "IT Technician"
         });
     } catch (error) {
         console.error("Error rendering user management page:", error);

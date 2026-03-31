@@ -1,9 +1,15 @@
 const consumableModel = require("../model/consumableModel");
+const { getAccessLevel } = require("../middleware/authMiddleware");
 exports.consumablePageRender = async (req, res) => {    
     try {
+    const accessLevel = getAccessLevel(req);
         res.render("consumable", {
             page: "consumable",
             title: "Consumable Inventory",
+      baseUrl: process.env.BASE_URL || "",
+      accessLevel,
+      isAdmin: accessLevel === "Admin",
+      isTechnician: accessLevel === "IT Technician"
         });
     } catch (error) {
         console.error("Error rendering consumable page:", error);

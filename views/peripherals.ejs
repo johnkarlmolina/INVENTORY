@@ -19,7 +19,7 @@
 
 <body class="bg-gray-100 overflow-x-hidden">
   <div class="flex min-h-screen">
-    <%- include('partials/sidebar', { page: 'peripherals' }) %>
+    <%- include('partials/sidebar', { page: 'peripherals', baseUrl: baseUrl, accessLevel: accessLevel }) %>
 
       <main class="ml-72 flex-1 p-8 transition-all duration-300 overflow-x-hidden"
         style="min-width: 0; max-width: 100%;">
@@ -30,16 +30,18 @@
 
         <!-- Button Container -->
         <div class="flex justify-end mb-4">
-          <button id="openPeripheralModal"
-            class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
-            <i class="fas fa-plus text-lg"></i>
-            <span class="font-semibold">Add Peripheral</span>
-          </button>
+          <% if (isAdmin) { %>
+            <button id="openPeripheralModal"
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
+              <i class="fas fa-plus text-lg"></i>
+              <span class="font-semibold">Add Peripheral</span>
+            </button>
 
-          <button id="openInactivePeripheralModal" class="ml-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50">
-            <i class="fas fa-ban text-lg"></i>
-            <span class="font-semibold">Inactive</span>
-          </button>
+            <button id="openInactivePeripheralModal" class="ml-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50">
+              <i class="fas fa-ban text-lg"></i>
+              <span class="font-semibold">Inactive</span>
+            </button>
+          <% } %>
         </div>
 
         <div class="bg-white rounded-lg shadow-lg p-6 w-full overflow-x-auto">
@@ -83,9 +85,11 @@
                   <th
                     class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
                     Peripheral Location</th>
-                  <th
-                    class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
-                    Actions</th>
+                  <% if (isAdmin) { %>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
+                      Actions</th>
+                  <% } %>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
@@ -295,8 +299,9 @@
 
   <script>
 
-  $(document).ready(function () {
+    $(document).ready(function () {
       const apiUrl = "<%= baseUrl %>";
+      const isAdminUser = JSON.parse('<%- JSON.stringify(!!isAdmin) %>');
 
       const $peripheralModal = $('#peripheralModal');
       const $inactivePeripheralModal = $('#inactivePeripheralModal');
@@ -397,44 +402,67 @@
         tsLocation.setValue('Floor');
       }
 
+      const peripheralColumns = [
+        { data: 'brand' },
+        { data: 'model' },
+        { data: 'date_of_purchase' },
+        { data: 'date_of_entry' },
+        { data: 'peripheral_user' },
+        { data: 'user_dept' },
+        { data: 'kind_of_peripheral' },
+        { data: 'serial_no' },
+        { data: 'property_tag' },
+        { data: 'peripheral_no' },
+        { data: 'peripheral_status' },
+        { data: 'peripheral_location' }
+      ];
+
+      if (isAdminUser) {
+        peripheralColumns.push({
+          data: 'peripheral_id',
+          orderable: false,
+          searchable: false,
+          render: function (id, type, row) {
+            return `
+      <div class="flex gap-2">
+        <button class="editPeripheralBtn bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Edit">
+          <i class="fas fa-edit"></i> Edit
+        </button>
+        <button class="filePeripheralBtn bg-white border-2 border-green-500 text-green-500 hover:bg-green-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Upload File">
+          <i class="fas fa-file-upload"></i> File
+        </button>
+        <button class="deletePeripheralBtn bg-red-500 border-2 border-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Delete">
+          <i class="fas fa-trash"></i> Delete
+        </button>
+      </div>
+    `;
+          }
+        });
+      }
+
+      const peripheralColumnDefs = [
+        { width: '80px', targets: 0 },   // Brand
+        { width: '100px', targets: 1 },  // Model
+        { width: '110px', targets: 2 },  // Date of Purchase
+        { width: '110px', targets: 3 },  // Date of Entry
+        { width: '120px', targets: 4 },  // User
+        { width: '150px', targets: 5 },  // Department
+        { width: '120px', targets: 6 },  // Type of Peripheral
+        { width: '120px', targets: 7 },  // Serial No.
+        { width: '100px', targets: 8 },  // Property Tag
+        { width: '100px', targets: 9 },  // Peripheral No.
+        { width: '120px', targets: 10 }, // Peripheral Status
+        { width: '120px', targets: 11 }  // Peripheral Location
+      ];
+      if (isAdminUser) {
+        peripheralColumnDefs.push({ width: '100px', targets: 12, className: 'text-center' });
+      }
+
       const peripheralsDt = new DataTable('#peripheralsTable', {
         processing: true,
        serverSide: true,
         ajax: { url: apiUrl+'/peripherals/peripheralDataTable', type:"post", dataType:"json" },
-        columns: [
-          { data: 'brand' },
-          { data: 'model' },
-          { data: 'date_of_purchase' },
-          { data: 'date_of_entry' },
-          { data: 'peripheral_user' },
-          { data: 'user_dept' },
-          { data: 'kind_of_peripheral' },
-          { data: 'serial_no' },
-          { data: 'property_tag' },
-          { data: 'peripheral_no' },
-          { data: 'peripheral_status' },
-          { data: 'peripheral_location' },
-          {
-            data: 'peripheral_id',
-            orderable: false,
-            searchable: false,
-            render: function (id, type, row) {
-              return `
-        <div class="flex gap-2">
-          <button class="editPeripheralBtn bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Edit">
-            <i class="fas fa-edit"></i> Edit
-          </button>
-          <button class="filePeripheralBtn bg-white border-2 border-green-500 text-green-500 hover:bg-green-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Upload File">
-            <i class="fas fa-file-upload"></i> File
-          </button>
-          <button class="deletePeripheralBtn bg-red-500 border-2 border-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Delete">
-            <i class="fas fa-trash"></i> Delete
-          </button>
-        </div>
-      `;
-            }
-          }
-        ],
+        columns: peripheralColumns,
         pageLength: 10,
         ordering: true,
         searching: true,
@@ -443,21 +471,7 @@
         scrollCollapse: true,
         responsive: false,
         autoWidth: false,
-        columnDefs: [
-          { width: '80px', targets: 0 },   // Brand
-          { width: '100px', targets: 1 },  // Model
-          { width: '110px', targets: 2 },  // Date of Purchase
-          { width: '110px', targets: 3 },  // Date of Entry
-          { width: '120px', targets: 4 },  // User
-          { width: '150px', targets: 5 },  // Department
-          { width: '120px', targets: 6 },  // Type of Peripheral
-          { width: '120px', targets: 7 },  // Serial No.
-          { width: '100px', targets: 8 },  // Property Tag
-          { width: '100px', targets: 9 },  // Peripheral No.
-          { width: '120px', targets: 10 }, // Peripheral Status
-          { width: '120px', targets: 11 }, // Peripheral Location
-          { width: '100px', targets: 12, className: 'text-center' }  // Actions
-        ],
+        columnDefs: peripheralColumnDefs,
         language: {
           search: 'Search:',
           lengthMenu: 'Show _MENU_ entries',
@@ -470,7 +484,9 @@
         }
       });
 
-      const inactivePeripheralDt = new DataTable('#inactivePeripheralTable', {
+      let inactivePeripheralDt = null;
+      if (isAdminUser) {
+        inactivePeripheralDt = new DataTable('#inactivePeripheralTable', {
         processing: true,
         serverSide: true,
         ajax: { url: apiUrl + '/peripherals/inactivePeripheralDataTable', type: 'POST', dataType: 'json' },
@@ -519,7 +535,8 @@
           emptyTable: 'No inactive peripherals',
           paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
         }
-      });
+        });
+      }
 
       $('#openPeripheralModal').on('click', function() {
         // Force clear form before opening in Add mode
@@ -539,6 +556,7 @@
       $('#closePeripheralModal, #peripheralModalBackdrop').on('click', closePeripheralModal);
 
       $('#openInactivePeripheralModal').on('click', function() {
+        if (!isAdminUser || !inactivePeripheralDt) return;
         $inactivePeripheralModal.removeClass('hidden');
         $('body').addClass('overflow-hidden');
         inactivePeripheralDt.ajax.reload(null, false);
@@ -706,6 +724,7 @@
 
       // SweetAlert delete 
       $('#peripheralsTable').on('click', '.deletePeripheralBtn', function () {
+        if (!isAdminUser) return;
         const id = $(this).data('id');
         Swal.fire({
           title: 'Delete?',
@@ -731,7 +750,7 @@
                     confirmButtonColor: '#0F828C'
                   });
                   peripheralsDt.ajax.reload(null, false);
-                  inactivePeripheralDt.ajax.reload(null, false);
+                  if (inactivePeripheralDt) inactivePeripheralDt.ajax.reload(null, false);
                 } else {
                   Swal.fire({
                     icon: 'error',
@@ -753,6 +772,7 @@
       });
 
       $('#inactivePeripheralTable').on('click', '.activatePeripheralBtn', function () {
+        if (!isAdminUser) return;
         const id = $(this).data('id');
 
         Swal.fire({
@@ -779,7 +799,7 @@
                     text: 'Peripheral has been activated.',
                     confirmButtonColor: '#22c55e'
                   });
-                  inactivePeripheralDt.ajax.reload(null, false);
+                  if (inactivePeripheralDt) inactivePeripheralDt.ajax.reload(null, false);
                   peripheralsDt.ajax.reload(null, false);
                 } else {
                   Swal.fire({

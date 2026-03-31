@@ -8,7 +8,8 @@ const getUserByUsername = async (username) => {
                 user_no AS id,
                 uname AS username,
                 upassword AS password,
-                user_stats
+                user_stats,
+                access_lvl
             FROM users
             WHERE uname = ? AND user_stats = 'active'
             LIMIT 1
@@ -29,7 +30,8 @@ const getUserById = async (id) => {
                 user_no AS id,
                 uname AS username,
                 upassword AS password,
-                user_stats
+                user_stats,
+                access_lvl
             FROM users
             WHERE user_no = ? AND user_stats = 'active'
             LIMIT 1

@@ -1,4 +1,5 @@
 const loginModel = require("../model/loginModel");
+const { normalizeAccessLevel } = require("../middleware/authMiddleware");
 
 // Render login page
 exports.loginPageRender = (req, res) => {
@@ -48,6 +49,7 @@ exports.loginSubmit = async (req, res) => {
         // Set session
         req.session.userId = user.id;
         req.session.username = user.username;
+        req.session.accessLevel = normalizeAccessLevel(user.access_lvl);
 
         // Send success response
         res.json({ 
