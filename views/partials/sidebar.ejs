@@ -10,7 +10,28 @@
 
 <nav id="sidebar" style="background-color: #0F828C; z-index: 1000;" class="group w-20 hover:w-72 transition-all duration-300 text-white h-screen fixed left-0 top-0 overflow-y-auto overflow-x-hidden shadow-xl">
   <div id="sidebarHeader" class="p-6 border-b border-white/10 flex items-center justify-center group-hover:justify-between transition-all">
-    <h2 id="sidebarTitle" class="text-xl font-semibold tracking-wide whitespace-nowrap opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto transition-opacity duration-200">IT INVENTORY</h2>
+    <% 
+      const roleLabel = ((typeof accessLevel !== 'undefined' ? accessLevel : '') || '').toString().trim();
+      const roleText = roleLabel || 'User';
+      const roleIconClass = roleText === 'Admin'
+        ? 'fa-user-shield'
+        : (roleText === 'IT Technician' ? 'fa-screwdriver-wrench' : 'fa-user');
+    %>
+
+    <div class="flex items-center gap-3">
+      <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/15">
+        <i class="fas <%= roleIconClass %> text-white"></i>
+      </span>
+
+      <div class="flex flex-col">
+        <h2 id="sidebarTitle" class="text-xl font-semibold tracking-wide whitespace-nowrap opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto transition-opacity duration-200">IT INVENTORY</h2>
+        <span class="text-xs text-white/90 whitespace-nowrap opacity-0 w-0 overflow-hidden group-hover:opacity-100 group-hover:w-auto transition-opacity duration-200">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-white/15 border border-white/10">
+            <%= roleText %>
+          </span>
+        </span>
+      </div>
+    </div>
   </div>
   
   <ul class="py-5">

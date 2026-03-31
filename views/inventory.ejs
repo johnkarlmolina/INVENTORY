@@ -17,7 +17,7 @@
 
 <body class="bg-gray-100 overflow-x-hidden">
   <div class="flex min-h-screen">
-    <%- include('partials/sidebar', { page: 'inventory', baseUrl: baseUrl }) %>
+    <%- include('partials/sidebar', { page: 'inventory', baseUrl: baseUrl, accessLevel: accessLevel }) %>
 
       <main class="ml-72 flex-1 p-8 transition-all duration-300 overflow-x-hidden"
         style="min-width: 0; max-width: 100%;">
@@ -28,16 +28,18 @@
 
         <!-- Button Container -->
         <div class="flex justify-end mb-4">
-          <button id="openComputerModal"
-            class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
-            <i class="fas fa-plus text-lg"></i>
-            <span class="font-semibold">Add Computer</span>
-          </button>
+          <% if (isAdmin) { %>
+            <button id="openComputerModal"
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
+              <i class="fas fa-plus text-lg"></i>
+              <span class="font-semibold">Add Computer</span>
+            </button>
 
-          <button id="openInactiveModal" class="ml-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50">
-            <i class="fas fa-ban text-lg"></i>
-            <span class="font-semibold">Inactive</span>
-          </button>
+            <button id="openInactiveModal" class="ml-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50">
+              <i class="fas fa-ban text-lg"></i>
+              <span class="font-semibold">Inactive</span>
+            </button>
+          <% } %>
         </div>
           
         <div class="bg-white rounded-lg shadow-lg p-6 w-full overflow-x-auto">
@@ -61,7 +63,9 @@
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Office License</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">PC Status</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">PC Location</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Actions</th>
+                  <% if (isAdmin) { %>
+                    <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Actions</th>
+                  <% } %>
                 </tr>
               </thead>
             </table>
@@ -289,7 +293,8 @@
 <script>
 
  $(document).ready(function() {
-    const apiUrl = "<%= baseUrl %>";
+   const apiUrl = "<%= baseUrl %>";
+  const isAdminUser = JSON.parse('<%- JSON.stringify(!!isAdmin) %>');
 
     const $computerModal = $('#computerModal');
     const $computerForm = $('#computerForm');
@@ -347,6 +352,70 @@
       $('#pc_status').val('active');
     }
 
+    const baseColumns = [
+      { data: 'pc_no' },
+      { data: 'brand' },
+      { data: 'model' },
+      { data: 'serial_number' },
+      { data: 'property_tag' },
+      { data: 'os_version' },
+      { data: 'procie' },
+      { data: 'ram' },
+      { data: 'os_license' },
+      { data: 'pc_user' },
+      { data: 'user_dept' },
+      { data: 'date_of_purchase' },
+      { data: 'date_of_entry' },
+      { data: 'office_license' },
+      { data: 'pc_status' },
+      { data: 'pc_location' }
+    ];
+
+    if (isAdminUser) {
+      baseColumns.push({
+        data: 'computer_id',
+        orderable: false,
+        searchable: false,
+        render: function (id) {
+          return `
+            <div class="flex gap-2">
+              <button class="editBtn bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Edit">
+                <i class="fas fa-edit"></i> Edit
+              </button>
+              <button class="fileBtn bg-white border-2 border-green-500 text-green-500 hover:bg-green-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Upload File">
+                <i class="fas fa-file-upload"></i> File
+              </button>
+              <button class="deleteBtn bg-red-500 border-2 border-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Delete">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          `;
+        }
+      });
+    }
+
+    const baseColumnDefs = [
+      { width: '60px', targets: 0 },  // PC Number
+      { width: '80px', targets: 1 },  // Brand
+      { width: '80px', targets: 2 },  // Model
+      { width: '120px', targets: 3 }, // Serial
+      { width: '100px', targets: 4 }, // Property Tag
+      { width: '100px', targets: 5 }, // OS Version
+      { width: '120px', targets: 6 }, // Processor
+      { width: '60px', targets: 7 },  // RAM
+      { width: '100px', targets: 8 }, // OS License
+      { width: '120px', targets: 9 }, // User
+      { width: '150px', targets: 10 }, // Department
+      { width: '110px', targets: 11 }, // Date of Purchase
+      { width: '110px', targets: 12 }, // Date of Entry
+      { width: '180px', targets: 13 }, // Office License
+      { width: '100px', targets: 14 }, // PC Status
+      { width: '100px', targets: 15 }  // PC Location
+    ];
+    if (isAdminUser) {
+      baseColumnDefs.push({ width: '100px', targets: 16, className: 'text-center' });
+    }
+
     const table = new DataTable('#dashboardTable', {
       processing: true,
        serverSide: true,
@@ -355,46 +424,7 @@
         type: 'POST',
         dataType: 'json'
       },
-      columns: [
-        { data: 'pc_no' },
-        { data: 'brand' },
-        { data: 'model' },
-        { data: 'serial_number' },
-        { data: 'property_tag' },
-        { data: 'os_version' },
-        { data: 'procie' },
-        { data: 'ram' },
-        { data: 'os_license' },
-        { data: 'pc_user' },
-        { data: 'user_dept' },
-        { data: 'date_of_purchase' },
-        { data: 'date_of_entry' },
-        { data: 'office_license' },
-        { data: 'pc_status' },
-        { data: 'pc_location' },
-
-        // Actions column (buttons)
-        {
-          data: 'computer_id',
-          orderable: false,
-          searchable: false,
-          render: function (id) {
-            return `
-              <div class="flex gap-2">
-                <button class="editBtn bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Edit">
-                  <i class="fas fa-edit"></i> Edit
-                </button>
-                <button class="fileBtn bg-white border-2 border-green-500 text-green-500 hover:bg-green-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Upload File">
-                  <i class="fas fa-file-upload"></i> File
-                </button>
-                <button class="deleteBtn bg-red-500 border-2 border-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200" data-id="${id}" title="Delete">
-                  <i class="fas fa-trash"></i> Delete
-                </button>
-              </div>
-            `;
-          }
-        }
-      ],
+      columns: baseColumns,
       pageLength: 10,
       ordering: true,
       searching: true,
@@ -403,25 +433,7 @@
       scrollCollapse: true,
       responsive: false,
       autoWidth: false,
-      columnDefs: [
-        { width: '60px', targets: 0 },  // PC Number
-        { width: '80px', targets: 1 },  // Brand
-        { width: '80px', targets: 2 },  // Model
-        { width: '120px', targets: 3 }, // Serial
-        { width: '100px', targets: 4 }, // Property Tag
-        { width: '100px', targets: 5 }, // OS Version
-        { width: '120px', targets: 6 }, // Processor
-        { width: '60px', targets: 7 },  // RAM
-        { width: '100px', targets: 8 }, // OS License
-        { width: '120px', targets: 9 }, // User
-        { width: '150px', targets: 10 }, // Department
-        { width: '110px', targets: 11 }, // Date of Purchase
-        { width: '110px', targets: 12 }, // Date of Entry
-        { width: '180px', targets: 13 }, // Office License
-        { width: '100px', targets: 14 }, // PC Status
-        { width: '100px', targets: 15 }, // PC Location
-        { width: '100px', targets: 16, className: 'text-center' }  // Actions
-      ],
+      columnDefs: baseColumnDefs,
       language: {
         search: 'Search:',
         lengthMenu: 'Show _MENU_ entries',
@@ -434,24 +446,28 @@
       }
     });
 
-    $('#openComputerModal').on('click', function() {
-      // Force clear form before opening in Add mode
-      $computerForm[0].reset();
-      $('#pc_status').val('active');
-      $('#pc_location').val('');
-      $('#user_dept').val('');
-      editComputerId = null;
-      isEditMode = false;
-      
-      // Then open modal
-      openComputerModal(false);
-    });
+    if (isAdminUser) {
+      $('#openComputerModal').on('click', function() {
+        // Force clear form before opening in Add mode
+        $computerForm[0].reset();
+        $('#pc_status').val('active');
+        $('#pc_location').val('');
+        $('#user_dept').val('');
+        editComputerId = null;
+        isEditMode = false;
+        
+        // Then open modal
+        openComputerModal(false);
+      });
+    }
     
     $('#closeComputerModal, #computerModalBackdrop').on('click', closeComputerModal);
 
-    // Inactive button handler
+    // Inactive button handler (Admin only)
     const $inactiveModal = $('#inactiveModal');
-    const inactiveTable = new DataTable('#inactiveTable', {
+    let inactiveTable = null;
+    if (isAdminUser) {
+      inactiveTable = new DataTable('#inactiveTable', {
       processing: true,
       serverSide: true,
       ajax: {
@@ -505,13 +521,14 @@
         emptyTable: 'No inactive computers',
         paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
       }
-    });
+      });
 
-    $('#openInactiveModal').on('click', function() {
-      $inactiveModal.removeClass('hidden');
-      $('body').addClass('overflow-hidden');
-      inactiveTable.ajax.reload(null, false);
-    });
+      $('#openInactiveModal').on('click', function() {
+        $inactiveModal.removeClass('hidden');
+        $('body').addClass('overflow-hidden');
+        inactiveTable.ajax.reload(null, false);
+      });
+    }
     
     $('#closeInactiveModal, #inactiveModalBackdrop').on('click', function() {
       $inactiveModal.addClass('hidden');
@@ -525,8 +542,9 @@
       }
     });
 
-    // Activate button handler
+    // Activate button handler (Admin only)
     $('#inactiveTable').on('click', '.activateBtn', function () {
+      if (!isAdminUser) return;
       const id = $(this).data('id');
       
       Swal.fire({
@@ -585,8 +603,9 @@
       $('#pc_status').val('active');
     });
 
-    // Edit button handler
+    // Edit button handler (Admin only)
     $('#dashboardTable').on('click', '.editBtn', function () {
+      if (!isAdminUser) return;
       const id = $(this).data('id');
       editComputerId = id;
       
@@ -629,8 +648,9 @@
     });
 
 
-    //  delete button with SweetAlert
+    //  delete button with SweetAlert (Admin only)
     $('#dashboardTable').on('click', '.deleteBtn', function () {
+      if (!isAdminUser) return;
       const id = $(this).data('id');
 
       Swal.fire({
@@ -696,6 +716,7 @@
 
 
 $(document).on('submit', '#computerForm', function (e) {
+  if (!isAdminUser) return;
     e.preventDefault();
 
     const fileInput = document.getElementById('computer_file');
