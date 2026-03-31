@@ -200,6 +200,8 @@ exports.addComputer = async (req, res) => {
         const result = await computerModel.addComputer(req.body);
 
         if (result && result.affectedRows === 1) {
+      const io = req.app.get("io");
+      if (io) io.emit("reports:refresh");
             res.json({
                 success: true,
                 message: "Computer added successfully"
@@ -225,6 +227,8 @@ exports.updateComputer = async (req, res) => {
     const result = await computerModel.updateComputer(req.body);
 
     if (result && result.affectedRows === 1) {
+      const io = req.app.get("io");
+      if (io) io.emit("reports:refresh");
       res.json({
         success: true,
         message: "Computer updated successfully"
@@ -260,6 +264,8 @@ exports.deleteComputer = async (req, res) => {
         const { computer_id } = req.body;
         console.log("received data:", computer_id);
         await computerModel.deleteComputer(computer_id);
+    const io = req.app.get("io");
+    if (io) io.emit("reports:refresh");
         res.json({ success: true, message: "Computer deleted successfully" });
     } catch (error) {
         console.error("Error deleting computer:", error);
@@ -271,6 +277,8 @@ exports.deleteComputer = async (req, res) => {
     try {
       const { computer_id } = req.body;
       await computerModel.activateComputer(computer_id);
+      const io = req.app.get("io");
+      if (io) io.emit("reports:refresh");
       res.json({ success: true, message: "Computer activated successfully" });
     } catch (error) {
       console.error("Error activating computer:", error);

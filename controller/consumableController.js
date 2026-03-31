@@ -17,6 +17,8 @@ exports.insertConsumables = async (req, res) => {
         console.log("Received consumable data:", { item, item_classification, starting_stock, brand, model, batch_number, date_of_purchase, date_of_delivery});
             await consumableModel.insertConsumables(item, item_classification, starting_stock, brand, model, batch_number, date_of_purchase, date_of_delivery);
         // Simulate successful insertion
+    const io = req.app.get("io");
+    if (io) io.emit("reports:refresh");
         res.status(200).json({ message: "Consumable item inserted successfully" });
     }   
     catch (error) {
@@ -213,6 +215,8 @@ exports.recordRequest = async (req, res) => {
 
     }
 
+    const io = req.app.get("io");
+    if (io) io.emit("reports:refresh");
     res.status(200).json({ message: "Consumable request recorded successfully" });
 
   } catch (error) {
@@ -344,6 +348,8 @@ exports.undoTransaction = async (req, res) => {
 
     await consumableModel.deleteConsumableLog(id);
 
+    const io = req.app.get("io");
+    if (io) io.emit("reports:refresh");
     res.status(200).json({ message: "Transaction undone successfully." });
   } catch (error) {
     console.error("Error undoing transaction:", error);
@@ -356,6 +362,8 @@ exports.updateConsumable = async (req, res) => {
     const { stock_no, item, item_classification, current_stock, date_of_purchase, brand, model, batch_number } = req.body;
     await consumableModel.updateConsumable(stock_no, item, item_classification, current_stock, date_of_purchase, brand, model, batch_number);
     await consumableModel.insertIntoConsumableStatuses(stock_no, item, item_classification, current_stock, date_of_purchase, brand, model, batch_number);
+    const io = req.app.get("io");
+    if (io) io.emit("reports:refresh");
     res.status(200).json({ success: true, message: "Consumable item updated successfully" });
   } catch (error) {
     console.error("Error updating consumable item:", error);
@@ -367,6 +375,8 @@ exports.deleteConsumable = async (req, res) => {
   try {
     const { consumable_id } = req.body;
     await consumableModel.deleteConsumable(consumable_id);
+    const io = req.app.get("io");
+    if (io) io.emit("reports:refresh");
     res.json({ success: true, message: "Consumable item deleted successfully" });
   } catch (error) {
     console.error("Error deleting consumable:", error);
@@ -378,6 +388,8 @@ exports.activateConsumable = async (req, res) => {
   try {
     const { consumable_id } = req.body;
     await consumableModel.activateConsumable(consumable_id);
+    const io = req.app.get("io");
+    if (io) io.emit("reports:refresh");
     res.json({ success: true, message: "Consumable item activated successfully" });
   } catch (error) {
     console.error("Error activating consumable:", error);
@@ -408,7 +420,8 @@ exports.returnItem = async (req, res) => {
 
     const updateConsumableLogs = await consumableModel.updateConsumableLogs(transaction_id, return_quantity);
 
-    
+    const io = req.app.get("io");
+    if (io) io.emit("reports:refresh");
     res.status(200).json({ message: "Item returned successfully" });
   } 
   catch (error) {

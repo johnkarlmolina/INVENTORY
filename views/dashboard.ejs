@@ -7,6 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://kit.fontawesome.com/ec23f4a8b0.js" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
   <link rel="icon" type="image/png" href="/Images/ndh-it.png">
 </head>
 <body class="bg-gray-100">
@@ -15,10 +17,221 @@
     
     <main class="ml-72 flex-1 p-8">
       <h1 style="color: #0F828C;" class="text-3xl font-semibold">Dashboard</h1>
-      <div class="flex items-center justify-center" style="min-height: 60vh;">
-        <h2 class="text-5xl font-bold text-gray-500">Coming Soon</h2>
+
+      <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-6">
+        <section class="bg-white rounded-xl shadow p-5 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-semibold text-gray-700">Inventory Status (Computers)</h2>
+            <span id="inventoryChartMeta" class="text-xs text-gray-500"></span>
+          </div>
+          <div class="h-96">
+            <canvas id="inventoryChart"></canvas>
+          </div>
+        </section>
+
+        <section class="bg-white rounded-xl shadow p-5 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-semibold text-gray-700">Peripherals by Type</h2>
+            <span id="peripheralsChartMeta" class="text-xs text-gray-500"></span>
+          </div>
+          <div class="h-96">
+            <canvas id="peripheralsChart"></canvas>
+          </div>
+        </section>
+
+        <section class="bg-white rounded-xl shadow p-5 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-base font-semibold text-gray-700">Consumables Stock by Classification</h2>
+            <span id="consumablesChartMeta" class="text-xs text-gray-500"></span>
+          </div>
+          <div class="h-96">
+            <canvas id="consumablesChart"></canvas>
+          </div>
+        </section>
       </div>
     </main>
   </div>
+
+  <script>
+    let inventoryChart = null;
+    let peripheralsChart = null;
+    let consumablesChart = null;
+
+    let socketRefreshTimer;
+
+    const meta = {
+      inventory: document.getElementById("inventoryChartMeta"),
+      peripherals: document.getElementById("peripheralsChartMeta"),
+      consumables: document.getElementById("consumablesChartMeta")
+    };
+
+    async function fetchData(url) {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          draw: 1,
+          start: 0,
+          length: 100000,
+          search: { value: "" },
+          order: [{ column: 0, dir: "asc" }]
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${url}`);
+      }
+
+      const payload = await response.json();
+      return Array.isArray(payload.data) ? payload.data : [];
+    }
+
+    function countBy(items, keyGetter) {
+      const counts = {};
+      items.forEach((item) => {
+        const key = (keyGetter(item) || "Unknown").toString().trim() || "Unknown";
+        counts[key] = (counts[key] || 0) + 1;
+      });
+      return counts;
+    }
+
+    function sumBy(items, keyGetter, valueGetter) {
+      const sums = {};
+      items.forEach((item) => {
+        const key = (keyGetter(item) || "Unknown").toString().trim() || "Unknown";
+        sums[key] = (sums[key] || 0) + (Number(valueGetter(item)) || 0);
+      });
+      return sums;
+    }
+
+    function drawChart(existingChart, canvasId, type, labels, values, colorSet, datasetLabel) {
+      const chartCanvas = document.getElementById(canvasId);
+      if (!chartCanvas) return existingChart;
+
+      if (existingChart) {
+        existingChart.destroy();
+      }
+
+      return new Chart(chartCanvas, {
+        type,
+        data: {
+          labels,
+          datasets: [{
+            label: datasetLabel,
+            data: values,
+            backgroundColor: colorSet,
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: "bottom" }
+          }
+        }
+      });
+    }
+
+    function setMeta(el, text) {
+      if (!el) return;
+      el.textContent = text || "";
+    }
+
+    async function loadDashboardCharts() {
+      try {
+        setMeta(meta.inventory, "Loading...");
+        setMeta(meta.peripherals, "Loading...");
+        setMeta(meta.consumables, "Loading...");
+
+        const [computers, peripherals, consumables] = await Promise.all([
+          fetchData("/computers/computerDataTable"),
+          fetchData("/peripherals/peripheralDataTable"),
+          fetchData("/consumable/showConsumables")
+        ]);
+
+        const inventoryStatusCount = countBy(computers, (item) => item.pc_status || "Unknown");
+        const peripheralTypeCount = countBy(peripherals, (item) => item.kind_of_peripheral || "Unknown");
+        const consumableStockByClass = sumBy(consumables, (item) => item.item_classification || "Unknown", (item) => item.current_stock || 0);
+
+        inventoryChart = drawChart(
+          inventoryChart,
+          "inventoryChart",
+          "doughnut",
+          Object.keys(inventoryStatusCount),
+          Object.values(inventoryStatusCount),
+          ["#0F828C", "#22c55e", "#f59e0b", "#ef4444", "#6b7280", "#14b8a6"],
+          "Inventory Status"
+        );
+
+        peripheralsChart = drawChart(
+          peripheralsChart,
+          "peripheralsChart",
+          "bar",
+          Object.keys(peripheralTypeCount),
+          Object.values(peripheralTypeCount),
+          ["#0ea5e9", "#2563eb", "#8b5cf6", "#06b6d4", "#6366f1", "#14b8a6"],
+          "Peripheral Count"
+        );
+
+        consumablesChart = drawChart(
+          consumablesChart,
+          "consumablesChart",
+          "bar",
+          Object.keys(consumableStockByClass),
+          Object.values(consumableStockByClass),
+          ["#10b981", "#84cc16", "#22c55e", "#16a34a", "#65a30d", "#4d7c0f"],
+          "Current Stock"
+        );
+
+        setMeta(meta.inventory, `${computers.length} items`);
+        setMeta(meta.peripherals, `${peripherals.length} items`);
+        setMeta(meta.consumables, `${consumables.length} items`);
+      } catch (error) {
+        console.error(error);
+        setMeta(meta.inventory, "Load failed");
+        setMeta(meta.peripherals, "Load failed");
+        setMeta(meta.consumables, "Load failed");
+
+        if (window.Swal) {
+          Swal.fire({
+            icon: "error",
+            title: "Load failed",
+            text: "Unable to load dashboard charts. Please try again."
+          });
+        }
+      }
+    }
+
+    function scheduleSocketRefresh() {
+      clearTimeout(socketRefreshTimer);
+      socketRefreshTimer = setTimeout(() => {
+        loadDashboardCharts();
+      }, 600);
+    }
+
+    function setupSocket() {
+      if (typeof io !== "function") return;
+
+      const socket = io();
+
+      socket.on("connect", () => {
+        console.log("Dashboard socket connected");
+      });
+
+      socket.on("reports:refresh", () => {
+        scheduleSocketRefresh();
+      });
+
+      socket.on("disconnect", () => {
+        console.log("Dashboard socket disconnected");
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setupSocket();
+      loadDashboardCharts();
+    });
+  </script>
 </body>
 </html>
