@@ -94,7 +94,7 @@
           </div>
         </div>
 
-        <% if (isAdmin) { %>
+   
         <!-- Request Inventory Table -->
         <div class="mb-8">
           <div class="bg-white rounded-lg shadow-lg p-6">
@@ -160,7 +160,7 @@
             </div>
           </div>
         </div>
-        <% } %>
+  
       </main>
   </div>
 
@@ -587,7 +587,7 @@
 
         // Request Inventory DataTable (Admin only)
         let requestsTable = null;
-        if (isAdminUser) {
+        //if (isAdminUser) {
           requestsTable = new DataTable('#requestsTable', {
           pageLength: 10,
           ordering: true,
@@ -621,7 +621,7 @@
             paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
           }
           });
-        }
+        //}
 $('#addItemForm').on('submit', function (e) {
   e.preventDefault();
   e.stopPropagation();
@@ -721,14 +721,23 @@ const consumableColumns = [
   { data: 'model' },
   { data: 'batch_number'}
 ];
+ consumableColumns.push({
+  data: 'stock_no',
+  render: function (data, type, row) {
+    return `
+        <button class="add-request bg-white border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${row.stock_no}" title="Add">
+          <i class="fas fa-plus"></i> Add
+        </button>
+    `;
+  }
+
+ });
 if (isAdminUser) {
   consumableColumns.push({
     data: 'stock_no',
     render: function (data, type, row) {
       return `
-        <button class="add-request bg-white border-2 border-yellow-500 text-yellow-500 hover:bg-yellow-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${row.stock_no}" title="Add">
-          <i class="fas fa-plus"></i> Add
-        </button>
+     
         <button class="edit-btn bg-white border-2 border-blue-500 text-blue-500 hover:bg-blue-50 px-4 py-2 rounded-lg transition-all duration-200" data-id="${row.stock_no}" title="Edit">
           <i class="fas fa-edit"></i> Edit
         </button>
@@ -832,7 +841,7 @@ const consumablesTable = $('#consumablesTable').DataTable({
         });
 
         $('#consumablesTable tbody').on('click', '.add-request', function () {
-          if (!isAdminUser || !requestsTable) return;
+          //if (!isAdminUser || !requestsTable) return;
 
           const now = new Date();
           const formatted = now.toLocaleString('sv-SE').slice(0,16);
@@ -860,7 +869,7 @@ const consumablesTable = $('#consumablesTable').DataTable({
         });
 
         $('#recordRequestBtn').click(function () {
-          if (!isAdminUser || !requestsTable) return;
+          //if (!isAdminUser || !requestsTable) return;
 
           let requestItems = [];
 
@@ -926,7 +935,7 @@ const consumablesTable = $('#consumablesTable').DataTable({
         });
 
         $('#requestsTable tbody').on('click', '.remove-btn', function () {
-            if (!isAdminUser || !requestsTable) return;
+           // if (!isAdminUser || !requestsTable) return;
             requestsTable.row($(this).parents('tr')).remove().draw();
           });
 
