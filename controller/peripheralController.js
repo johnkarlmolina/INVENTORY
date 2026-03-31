@@ -211,6 +211,8 @@ exports.addPeripheral = async (req, res) => {
                 peripheral_status, 
                 peripheral_location, computer_id} = req.body;    
         const result = await peripheralModel.addPeripheral(brand, model, date_of_purchase, peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location, computer_id);
+    const io = req.app.get("io");
+    if (io) io.emit("reports:refresh");
         res.json({ success: true, message: "Peripheral added successfully" });
     }
     catch (error) {
@@ -224,6 +226,8 @@ exports.updatePeripheral = async (req, res) => {
     const result = await peripheralModel.updatePeripheral(req.body);
 
     if (result && result.affectedRows === 1) {
+      const io = req.app.get("io");
+      if (io) io.emit("reports:refresh");
       res.json({
         success: true,
         message: "Peripheral updated successfully"
@@ -245,6 +249,8 @@ exports.deletePeripheral = async (req, res) => {
     try {
         const { peripheral_id } = req.body;
         await peripheralModel.deletePeripheral(peripheral_id);
+    const io = req.app.get("io");
+    if (io) io.emit("reports:refresh");
         res.json({ success: true, message: "Peripheral deleted successfully" });
     } catch (error) {
         console.error("Error deleting peripheral:", error);
@@ -256,6 +262,8 @@ exports.deletePeripheral = async (req, res) => {
       try {
         const { peripheral_id } = req.body;
         await peripheralModel.activatePeripheral(peripheral_id);
+        const io = req.app.get("io");
+        if (io) io.emit("reports:refresh");
         res.json({ success: true, message: "Peripheral activated successfully" });
       } catch (error) {
         console.error("Error activating peripheral:", error);
