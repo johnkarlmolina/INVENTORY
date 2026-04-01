@@ -13,9 +13,52 @@
   <link href="https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.min.css" rel="stylesheet">
   <script src="https://cdn.datatables.net/2.1.2/js/dataTables.min.js"></script>
   <link rel="icon" type="image/png" href="/Images/ndh-it.png">
+
+  <style>
+    /* Hide DataTables' default processing overlay; we use a skeleton loader instead. */
+    .dt-processing {
+      display: none !important;
+    }
+  </style>
 </head>
 
 <body class="bg-gray-100 overflow-x-hidden">
+  <!-- Page Skeleton Loader (initial page/data load) - main content only (keeps sidebar visible) -->
+  <div id="pageSkeleton" class="fixed inset-0 z-[60] hidden pointer-events-none">
+    <div id="pageSkeletonContent" class="h-full bg-gray-100 overflow-auto">
+      <main class="p-8" style="min-width: 0; max-width: 100%;">
+      <div class="animate-pulse">
+        <div class="mb-6">
+          <div class="h-10 w-80 bg-gray-200 rounded mb-3"></div>
+          <div class="h-5 w-64 bg-gray-200 rounded"></div>
+        </div>
+
+        <div class="flex justify-end mb-4 gap-4">
+          <div class="h-12 w-40 bg-gray-200 rounded-xl"></div>
+          <div class="h-12 w-36 bg-gray-200 rounded-xl"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full overflow-x-auto">
+          <div class="flex items-center justify-between mb-6">
+            <div class="h-6 w-64 bg-gray-200 rounded"></div>
+            <div class="h-9 w-40 bg-gray-200 rounded"></div>
+          </div>
+          <div class="space-y-3">
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  </div>
+
   <div class="flex min-h-screen">
     <%- include('partials/sidebar', { page: 'inventory', baseUrl: baseUrl, accessLevel: accessLevel }) %>
 
@@ -42,8 +85,29 @@
           <% } %>
         </div>
           
-        <div class="bg-white rounded-lg shadow-lg p-6 w-full overflow-x-auto">
-          <div class="w-full overflow-x-auto">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full overflow-x-auto relative" id="inventoryTableCard" aria-busy="true">
+          <!-- Skeleton Loader (shown while DataTables is fetching) -->
+          <div id="inventorySkeleton" class="absolute inset-0 z-10 bg-white/80 backdrop-blur-[1px] rounded-lg">
+            <div class="p-6 animate-pulse">
+              <div class="flex items-center justify-between mb-6">
+                <div class="h-6 w-64 bg-gray-200 rounded"></div>
+                <div class="h-9 w-40 bg-gray-200 rounded"></div>
+              </div>
+
+              <div class="space-y-3">
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+                <div class="h-10 w-full bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="w-full overflow-x-auto opacity-0" id="inventoryTableHost">
             <table id="dashboardTable" class="display nowrap" style="width:100%">
               <thead style="background-color: #0F828C;">
                 <tr>
@@ -72,6 +136,7 @@
           </div>
         </div>
       </main>
+    </div>
   </div>
 
   <div id="computerModal" class="fixed inset-0 z-50 hidden">
@@ -296,6 +361,49 @@
    const apiUrl = "<%= baseUrl %>";
   const isAdminUser = JSON.parse('<%- JSON.stringify(!!isAdmin) %>');
 
+    // Full-page skeleton (initial load only)
+    const $pageSkeleton = $('#pageSkeleton');
+    let initialLoadComplete = false;
+    function syncPageSkeletonOffset() {
+      const mainEl = document.querySelector('main');
+      const contentEl = document.getElementById('pageSkeletonContent');
+      if (!mainEl || !contentEl) return;
+      const ml = window.getComputedStyle(mainEl).marginLeft;
+      contentEl.style.marginLeft = ml;
+    }
+
+    function showPageSkeleton() {
+      syncPageSkeletonOffset();
+      $pageSkeleton.removeClass('hidden');
+      $('body').attr('aria-busy', 'true');
+    }
+    function hidePageSkeleton() {
+      $pageSkeleton.addClass('hidden');
+      $('body').attr('aria-busy', 'false');
+    }
+
+    // Keep skeleton aligned if sidebar width/margins change.
+    window.addEventListener('resize', syncPageSkeletonOffset);
+
+    // Skeleton loader helpers for the main inventory table
+    const $inventorySkeleton = $('#inventorySkeleton');
+    const $inventoryTableHost = $('#inventoryTableHost');
+    const $inventoryTableCard = $('#inventoryTableCard');
+    function showInventorySkeleton() {
+      $inventorySkeleton.removeClass('hidden');
+      $inventoryTableHost.addClass('opacity-0');
+      $inventoryTableCard.attr('aria-busy', 'true');
+    }
+    function hideInventorySkeleton() {
+      $inventorySkeleton.addClass('hidden');
+      $inventoryTableHost.removeClass('opacity-0');
+      $inventoryTableCard.attr('aria-busy', 'false');
+    }
+
+    // Start in loading state until the first DataTables response arrives.
+    showInventorySkeleton();
+    showPageSkeleton();
+
     const $computerModal = $('#computerModal');
     const $computerForm = $('#computerForm');
     let isEditMode = false;
@@ -445,6 +553,50 @@
         paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
       }
     });
+
+    // Toggle skeleton during server-side DataTables AJAX requests.
+    // DataTables v2 instantiated via `new DataTable()` may not emit the jQuery `*.dt` events,
+    // so we bind to the DataTables instance events and keep a jQuery fallback.
+    if (table && typeof table.on === 'function') {
+      table.on('preXhr', function () {
+        if (!initialLoadComplete) {
+          showPageSkeleton();
+        } else {
+          showInventorySkeleton();
+        }
+      });
+      table.on('xhr', function () {
+        hideInventorySkeleton();
+        hidePageSkeleton();
+        initialLoadComplete = true;
+      });
+      table.on('error', function () {
+        // If the request fails, stop showing the skeleton to avoid a stuck state.
+        hideInventorySkeleton();
+        hidePageSkeleton();
+        initialLoadComplete = true;
+      });
+    }
+
+    $('#dashboardTable')
+      .on('preXhr.dt', function () {
+        if (!initialLoadComplete) {
+          showPageSkeleton();
+        } else {
+          showInventorySkeleton();
+        }
+      })
+      .on('xhr.dt', function () {
+        hideInventorySkeleton();
+        hidePageSkeleton();
+        initialLoadComplete = true;
+      })
+      .on('error.dt', function () {
+        // If the request fails, stop showing the skeleton to avoid a stuck state.
+        hideInventorySkeleton();
+        hidePageSkeleton();
+        initialLoadComplete = true;
+      });
 
     if (isAdminUser) {
       $('#openComputerModal').on('click', function() {

@@ -13,9 +13,58 @@
   <link href="https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.min.css" rel="stylesheet">
   <script src="https://cdn.datatables.net/2.1.2/js/dataTables.min.js"></script>
   <link rel="shortcut icon" type="image/png" href="/Images/ndh-it.png?v=1">
+
+  <style>
+    /* Hide DataTables' default processing overlay; we use a skeleton loader instead. */
+    .dt-processing {
+      display: none !important;
+    }
+  </style>
 </head>
 
 <body class="bg-gray-100 overflow-x-hidden">
+  <!-- Page Skeleton Loader (initial page/data load) - main content only (keeps sidebar visible) -->
+  <div id="pageSkeleton" class="fixed inset-0 z-[60] hidden pointer-events-none">
+    <div id="pageSkeletonContent" class="h-full bg-gray-100 overflow-auto">
+      <main class="p-8" style="min-width: 0; max-width: 100%;">
+      <div class="animate-pulse">
+        <div class="mb-6">
+          <div class="h-10 w-80 bg-gray-200 rounded mb-3"></div>
+          <div class="h-5 w-72 bg-gray-200 rounded"></div>
+        </div>
+
+        <div class="flex justify-end mb-4 gap-4">
+          <div class="h-12 w-44 bg-gray-200 rounded-xl"></div>
+          <div class="h-12 w-36 bg-gray-200 rounded-xl"></div>
+          <div class="h-12 w-32 bg-gray-200 rounded-xl"></div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full overflow-x-auto mb-8">
+          <div class="h-6 w-56 bg-gray-200 rounded mb-4"></div>
+          <div class="space-y-3">
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full overflow-x-auto">
+          <div class="h-6 w-48 bg-gray-200 rounded mb-4"></div>
+          <div class="space-y-3">
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+      </main>
+    </div>
+  </div>
+
   <div class="flex min-h-screen">
     <%- include('partials/sidebar', { page: 'consumable', baseUrl: baseUrl, accessLevel: accessLevel }) %>
 
@@ -47,9 +96,28 @@
         </div>
         <!-- Consumables Inventory Table -->
         <div class="mb-8">
-          <div class="bg-white rounded-lg shadow-lg p-6">
+          <div class="bg-white rounded-lg shadow-lg p-6 relative" id="consumablesTableCard" aria-busy="true">
             <h2 class="text-xl font-semibold text-gray-800 mb-4">Consumables Inventory</h2>
-            <div class="w-full overflow-x-auto">
+            <!-- Skeleton Loader (shown while DataTables is fetching) -->
+            <div id="consumablesSkeleton" class="absolute inset-0 z-10 bg-white/80 backdrop-blur-[1px] rounded-lg">
+              <div class="p-6 animate-pulse">
+                <div class="flex items-center justify-between mb-6">
+                  <div class="h-6 w-56 bg-gray-200 rounded"></div>
+                  <div class="h-9 w-40 bg-gray-200 rounded"></div>
+                </div>
+                <div class="space-y-3">
+                  <div class="h-10 w-full bg-gray-200 rounded"></div>
+                  <div class="h-10 w-full bg-gray-200 rounded"></div>
+                  <div class="h-10 w-full bg-gray-200 rounded"></div>
+                  <div class="h-10 w-full bg-gray-200 rounded"></div>
+                  <div class="h-10 w-full bg-gray-200 rounded"></div>
+                  <div class="h-10 w-full bg-gray-200 rounded"></div>
+                  <div class="h-10 w-full bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="w-full overflow-x-auto opacity-0" id="consumablesTableHost">
               <table id="consumablesTable" class="display nowrap" style="width:100%">
                 <thead style="background-color: #0F828C;">
                   <tr>
@@ -460,6 +528,68 @@
       const apiUrl = "<%= baseUrl %>";
       const isAdminUser = JSON.parse('<%- JSON.stringify(!!isAdmin) %>');
 
+      // Page/table skeleton helpers
+      const $pageSkeleton = $('#pageSkeleton');
+      let initialLoadComplete = false;
+      function syncPageSkeletonOffset() {
+        const mainEl = document.querySelector('main');
+        const contentEl = document.getElementById('pageSkeletonContent');
+        if (!mainEl || !contentEl) return;
+        const ml = window.getComputedStyle(mainEl).marginLeft;
+        contentEl.style.marginLeft = ml;
+      }
+
+      function showPageSkeleton() {
+        syncPageSkeletonOffset();
+        $pageSkeleton.removeClass('hidden');
+        $('body').attr('aria-busy', 'true');
+      }
+      function hidePageSkeleton() {
+        $pageSkeleton.addClass('hidden');
+        $('body').attr('aria-busy', 'false');
+      }
+
+      window.addEventListener('resize', syncPageSkeletonOffset);
+
+      const $consumablesSkeleton = $('#consumablesSkeleton');
+      const $consumablesHost = $('#consumablesTableHost');
+      const $consumablesCard = $('#consumablesTableCard');
+      function showConsumablesSkeleton() {
+        $consumablesSkeleton.removeClass('hidden');
+        $consumablesHost.addClass('opacity-0');
+        $consumablesCard.attr('aria-busy', 'true');
+      }
+      function hideConsumablesSkeleton() {
+        $consumablesSkeleton.addClass('hidden');
+        $consumablesHost.removeClass('opacity-0');
+        $consumablesCard.attr('aria-busy', 'false');
+      }
+
+      // Start in loading state until the first DataTables response arrives.
+      showPageSkeleton();
+      showConsumablesSkeleton();
+
+      // Bind DataTables events before initialization so we catch the first load.
+      const $consumablesTableEl = $('#consumablesTable');
+      $consumablesTableEl
+        .on('preXhr.dt', function () {
+          if (!initialLoadComplete) {
+            showPageSkeleton();
+          } else {
+            showConsumablesSkeleton();
+          }
+        })
+        .on('xhr.dt', function () {
+          hideConsumablesSkeleton();
+          hidePageSkeleton();
+          initialLoadComplete = true;
+        })
+        .on('error.dt', function () {
+          hideConsumablesSkeleton();
+          hidePageSkeleton();
+          initialLoadComplete = true;
+        });
+
  
         // Modal functionality (Admin only)
         const addItemModal = $('#addItemModal');
@@ -749,7 +879,7 @@ if (isAdminUser) {
   });
 }
 
-const consumablesTable = $('#consumablesTable').DataTable({
+const consumablesTable = $consumablesTableEl.DataTable({
           serverSide: true,
           processing: true,
           ajax: {
