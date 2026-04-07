@@ -9,6 +9,8 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
+  <link href="https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.min.css" rel="stylesheet">
+  <script src="https://cdn.datatables.net/2.1.2/js/dataTables.min.js"></script>
   <link rel="icon" type="image/png" href="/Images/ndh-it.png">
 </head>
 <body class="bg-gray-100">
@@ -83,6 +85,25 @@
           </div>
         </section>
       </div>
+
+      <section class="mt-8 bg-white rounded-xl shadow p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base font-semibold text-gray-700">Charts Summary</h2>
+          <span class="text-xs text-gray-500">Auto-updates with charts</span>
+        </div>
+        <div class="w-full overflow-x-auto">
+          <table id="dashboardSummaryTable" class="display nowrap" style="width:100%">
+            <thead style="background-color: #0F828C;">
+              <tr>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Category</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Label</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Value</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -90,6 +111,7 @@
     let inventoryChart = null;
     let peripheralsChart = null;
     let consumablesChart = null;
+    let dashboardSummaryDt = null;
 
     const pageSkeleton = document.getElementById('pageSkeleton');
     let initialLoadComplete = false;
@@ -196,6 +218,88 @@
       el.textContent = text || "";
     }
 
+    function formatNumber(value) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return "0";
+      return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(n);
+    }
+
+    function buildSummaryRows(inventoryStatusCount, peripheralTypeCount, consumableStockByClass) {
+      const rows = [];
+
+      Object.entries(inventoryStatusCount || {}).forEach(([label, value]) => {
+        rows.push({ category: "Computers - Status", label, value: Number(value) || 0 });
+      });
+      Object.entries(peripheralTypeCount || {}).forEach(([label, value]) => {
+        rows.push({ category: "Peripherals - Type", label, value: Number(value) || 0 });
+      });
+      Object.entries(consumableStockByClass || {}).forEach(([label, value]) => {
+        rows.push({ category: "Consumables - Classification", label, value: Number(value) || 0 });
+      });
+
+      return rows;
+    }
+
+    function renderSummaryTable(rows) {
+      const tableEl = document.getElementById("dashboardSummaryTable");
+      if (!tableEl) return;
+
+      try {
+        if (dashboardSummaryDt) {
+          dashboardSummaryDt.destroy();
+          dashboardSummaryDt = null;
+        }
+      } catch (e) {
+        dashboardSummaryDt = null;
+      }
+
+      const tbody = tableEl.querySelector("tbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      (rows || []).forEach((row) => {
+        const tr = document.createElement("tr");
+
+        const tdCategory = document.createElement("td");
+        tdCategory.className = "px-4 py-3 whitespace-nowrap";
+        tdCategory.textContent = row.category || "";
+
+        const tdLabel = document.createElement("td");
+        tdLabel.className = "px-4 py-3 whitespace-nowrap";
+        tdLabel.textContent = row.label || "";
+
+        const tdValue = document.createElement("td");
+        tdValue.className = "px-4 py-3 whitespace-nowrap";
+        tdValue.textContent = formatNumber(row.value);
+
+        tr.appendChild(tdCategory);
+        tr.appendChild(tdLabel);
+        tr.appendChild(tdValue);
+        tbody.appendChild(tr);
+      });
+
+      dashboardSummaryDt = new DataTable("#dashboardSummaryTable", {
+        pageLength: 10,
+        ordering: true,
+        searching: true,
+        info: true,
+        scrollX: true,
+        scrollCollapse: true,
+        responsive: false,
+        autoWidth: false,
+        language: {
+          search: 'Search:',
+          lengthMenu: 'Show _MENU_ entries',
+          info: 'Showing _START_ to _END_ of _TOTAL_ entries',
+          infoEmpty: 'Showing 0 to 0 of 0 entries',
+          infoFiltered: '(filtered from _MAX_ total entries)',
+          zeroRecords: 'No matching records found',
+          emptyTable: 'No data available in table',
+          paginate: { first: 'First', last: 'Last', next: 'Next', previous: 'Previous' }
+        }
+      });
+    }
+
     async function loadDashboardCharts() {
       try {
         if (!initialLoadComplete) {
@@ -215,6 +319,8 @@
         const inventoryStatusCount = countBy(computers, (item) => item.pc_status || "Unknown");
         const peripheralTypeCount = countBy(peripherals, (item) => item.kind_of_peripheral || "Unknown");
         const consumableStockByClass = sumBy(consumables, (item) => item.item_classification || "Unknown", (item) => item.current_stock || 0);
+
+        renderSummaryTable(buildSummaryRows(inventoryStatusCount, peripheralTypeCount, consumableStockByClass));
 
         inventoryChart = drawChart(
           inventoryChart,
