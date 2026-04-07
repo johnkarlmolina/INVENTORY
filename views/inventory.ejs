@@ -153,17 +153,17 @@
           </button>
         </div>
 
-        <form id="computerForm" class="px-6 py-6">
+        <form id="computerForm" class="px-6 py-6" novalidate>
           <section class="mb-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label for="brand" class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
-                <input id="brand" name="brand" type="text"
+                <input id="brand" name="brand" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
               <div>
                 <label for="model" class="block text-sm font-medium text-gray-700 mb-2">Model</label>
-                <input id="model" name="model" type="text"
+                <input id="model" name="model" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
               <div>
@@ -193,19 +193,19 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
                 <label for="pc_no" class="block text-sm font-medium text-gray-700 mb-2">PC Number</label>
-                <input id="pc_no" name="pc_no" type="text"
+                <input id="pc_no" name="pc_no" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
               <div>
                 <label for="property_tag" class="block text-sm font-medium text-gray-700 mb-2">Property Tag</label>
-                <input id="property_tag" name="property_tag" type="text"
+                <input id="property_tag" name="property_tag" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label for="serial_number" class="block text-sm font-medium text-gray-700 mb-2">Serial Number</label>
-                <input id="serial_number" name="serial_number" type="text"
+                <input id="serial_number" name="serial_number" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
             </div>
@@ -215,9 +215,10 @@
             <div class="rounded-2xl border border-gray-200 p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label for="pc_status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                <select id="pc_status" name="pc_status"
+                <select id="pc_status" name="pc_status" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
-                  <option value="active" selected>Active</option>
+                  <option value="" selected disabled>Select status...</option>
+                  <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
                   <option value="inrepair">In Repair</option>
                   <option value="condemned">Condemned</option>
@@ -225,9 +226,10 @@
               </div>
               <div>
                 <label for="pc_location" class="block text-sm font-medium text-gray-700 mb-2">PC Location</label>
-                <select id="pc_location" name="pc_location"
+                <select id="pc_location" name="pc_location" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
-                <option value="Floor" selected>Floor</option>
+                <option value="" selected disabled>Select location...</option>
+                <option value="Floor">Floor</option>
                   <option value="1st Floor">1st Floor</option>
                   <option value="2nd Floor">2nd Floor</option>
                   <option value="3rd Floor">3rd Floor</option>
@@ -241,12 +243,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label for="pc_user" class="block text-sm font-medium text-gray-700 mb-2">PC User</label>
-                <input id="pc_user" name="pc_user" type="text"
+                <input id="pc_user" name="pc_user" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
               <div>
                 <label for="user_dept" class="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                <select id="user_dept" name="user_dept"
+                <select id="user_dept" name="user_dept" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
                   <option value="">Select department...</option>
                   <option value="IT Department">IT Department</option>
@@ -724,6 +726,7 @@
                   confirmButtonColor: '#22c55e'
                 });
                 inactiveTable.ajax.reload(null, false);
+                table.ajax.reload(null, false);
               } else {
                 Swal.fire({
                   icon: 'error',
@@ -871,6 +874,12 @@ $(document).on('submit', '#computerForm', function (e) {
   if (!isAdminUser) return;
     e.preventDefault();
 
+    if (this.checkValidity && !this.checkValidity()) {
+      if (this.reportValidity) this.reportValidity();
+      Swal.fire({ icon: 'error', title: 'Missing fields', text: 'Please fill out all required fields.', confirmButtonColor: '#0F828C' });
+      return;
+    }
+
     const fileInput = document.getElementById('computer_file');
     const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : null;
 
@@ -878,7 +887,7 @@ $(document).on('submit', '#computerForm', function (e) {
     const formDataArray = $(this).serializeArray();
     let data = {};
     formDataArray.forEach(item => {
-        data[item.name] = item.value.trim() === '' ? null : item.value.trim();
+      data[item.name] = item.value.trim() === '' ? null : item.value.trim();
     });
 
     // Add filename manually

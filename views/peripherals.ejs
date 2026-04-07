@@ -174,22 +174,22 @@
           </button>
         </div>
 
-        <form id="peripheralForm" class="px-6 py-6">
+        <form id="peripheralForm" class="px-6 py-6" novalidate>
           <section class="mb-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label for="brand" class="block text-sm font-medium text-gray-700 mb-2">Brand</label>
-                <input id="brand" name="brand" type="text"
+                <input id="brand" name="brand" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
               <div>
                 <label for="model" class="block text-sm font-medium text-gray-700 mb-2">Model</label>
-                <input id="model" name="model" type="text"
+                <input id="model" name="model" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
               <div>
                 <label for="kind_of_peripheral" class="block text-sm font-medium text-gray-700 mb-2">Peripheral Type</label>
-                <select id="kind_of_peripheral" name="kind_of_peripheral"
+                <select id="kind_of_peripheral" name="kind_of_peripheral" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
                   <option value="">Select type...</option>
                   <option value="Keyboard">Keyboard</option>
@@ -210,17 +210,17 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label for="peripheral_no" class="block text-sm font-medium text-gray-700 mb-2">Peripheral Number</label>
-                <input id="peripheral_no" name="peripheral_no" type="text" 
+                <input id="peripheral_no" name="peripheral_no" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
               <div>
                 <label for="property_tag" class="block text-sm font-medium text-gray-700 mb-2">Property Tag</label>
-                <input id="property_tag" name="property_tag" type="text" 
+                <input id="property_tag" name="property_tag" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
               <div>
                 <label for="serial_no" class="block text-sm font-medium text-gray-700 mb-2">Serial Number</label>
-                <input id="serial_no" name="serial_no" type="text"
+                <input id="serial_no" name="serial_no" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
             </div>
@@ -243,12 +243,12 @@
               </div>
               <div>
                 <label for="peripheral_user" class="block text-sm font-medium text-gray-700 mb-2">User</label>
-                <input id="peripheral_user" name="peripheral_user" type="text" 
+                <input id="peripheral_user" name="peripheral_user" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
               <div>
                 <label for="user_dept" class="block text-sm font-medium text-gray-700 mb-2">Department</label>
-                <select id="user_dept" name="user_dept"
+                <select id="user_dept" name="user_dept" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
                   <option value="">Select department...</option>
                   <option value="IT Department">IT Department</option>
@@ -267,9 +267,10 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label for="peripheral_status" class="block text-sm font-medium text-gray-700 mb-2">Peripheral Status</label>
-                <select id="peripheral_status" name="peripheral_status"
+                <select id="peripheral_status" name="peripheral_status" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
-                  <option value="active" selected>Active</option>
+                  <option value="" selected disabled>Select status...</option>
+                  <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
                   <option value="inrepair">In Repair</option>
                   <option value="condemned">Condemned</option>
@@ -277,9 +278,10 @@
               </div>
                <div>
                 <label for="peripheral_status" class="block text-sm font-medium text-gray-700 mb-2">Peripheral Location</label>
-                <select id="peripheral_location" name="peripheral_location"
+                <select id="peripheral_location" name="peripheral_location" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
-                  <option value="Floor" selected>Floor</option>
+                  <option value="" selected disabled>Select location...</option>
+                  <option value="Floor">Floor</option>
                   <option value="1st Floor">1st Floor</option>
                   <option value="2nd Floor">2nd Floor</option>
                   <option value="3rd Floor">3rd Floor</option>
@@ -770,15 +772,19 @@
       $peripheralForm.on('submit', function (event) {
     event.preventDefault();
 
+    if (this.checkValidity && !this.checkValidity()) {
+      if (this.reportValidity) this.reportValidity();
+      Swal.fire({ icon: 'error', title: 'Missing fields', text: 'Please fill out all required fields.', confirmButtonColor: '#0F828C' });
+      return;
+    }
+
     // Convert form to object
     const formArray = $(this).serializeArray();
     let data = {};
     formArray.forEach(item => {
-        data[item.name] = item.value || 'test'; // default to 'test' if empty
+        const v = typeof item.value === 'string' ? item.value.trim() : item.value;
+        data[item.name] = v === '' ? null : v;
     });
-
-    // Optional: sample Peripheral No if empty
-    if (!data.peripheral_no) data.peripheral_no = 'PER-1001';
 
     // Determine if edit mode
     const isUpdate = isEditMode && editPeripheralId;

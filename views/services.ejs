@@ -126,7 +126,7 @@
           </button>
         </div>
 
-        <form id="serviceForm" class="px-6 py-6">
+        <form id="serviceForm" class="px-6 py-6" novalidate>
           
           <section class="mb-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -168,7 +168,7 @@
           <section class="mb-6">
             <div>
               <label for="problem" class="block text-sm font-medium text-gray-700 mb-2">Problem Description</label>
-              <textarea id="problem" name="problem" rows="4"
+                <textarea id="problem" name="problem" rows="4" required
                 class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20 resize-none"></textarea>
             </div>
           </section>
@@ -385,6 +385,12 @@
       $serviceForm.on('submit', function (e) {
         e.preventDefault();
 
+        if (this.checkValidity && !this.checkValidity()) {
+          if (this.reportValidity) this.reportValidity();
+          Swal.fire({ icon: 'error', title: 'Missing fields', text: 'Problem is required.', confirmButtonColor: '#0F828C' });
+          return;
+        }
+
         if (!isAdminUser && isEditMode) {
           Swal.fire({ icon: 'error', title: 'Forbidden', text: 'You are not allowed to update services.', confirmButtonColor: '#0F828C' });
           return;
@@ -396,6 +402,11 @@
           problem: $('#problem').val().trim(),
           remarks: $('#remarks').val().trim(),
         };
+
+        if (!payload.serial_number && !payload.property_tag) {
+          Swal.fire({ icon: 'error', title: 'Missing fields', text: 'Please provide Serial Number or Property Tag.', confirmButtonColor: '#0F828C' });
+          return;
+        }
 
         const url = isEditMode && editServiceId
           ? `${apiUrl}/services/${editServiceId}`

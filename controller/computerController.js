@@ -1,4 +1,5 @@
 const computerModel = require("../model/computerModel");
+const { missingFields, trimObjectStrings } = require("../utils/validation");
 
 exports.computerDataTable = async (req, res) => {
   try {
@@ -196,8 +197,27 @@ exports.inactiveComputerDataTable = async (req, res) => {
 
 exports.addComputer = async (req, res) => {
     try {
+        const body = trimObjectStrings(req.body);
+        const required = [
+          "pc_no",
+          "brand",
+          "model",
+          "serial_number",
+          "property_tag",
+          "pc_user",
+          "user_dept",
+          "pc_status",
+          "pc_location",
+        ];
+        const missing = missingFields(body, required);
+        if (missing.length) {
+          return res.status(400).json({
+            success: false,
+            message: `Missing required fields: ${missing.join(", ")}`,
+          });
+        }
 
-        const result = await computerModel.addComputer(req.body);
+        const result = await computerModel.addComputer(body);
 
         if (result && result.affectedRows === 1) {
       const io = req.app.get("io");
@@ -276,6 +296,9 @@ exports.deleteComputer = async (req, res) => {
   exports.activateComputer = async (req, res) => {
     try {
       const { computer_id } = req.body;
+      if (!computer_id) {
+        return res.status(400).json({ success: false, message: "computer_id is required" });
+      }
       await computerModel.activateComputer(computer_id);
       const io = req.app.get("io");
       if (io) io.emit("reports:refresh");
