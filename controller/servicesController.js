@@ -1,5 +1,6 @@
 const serviceModel = require("../model/serviceModel");
 const { getAccessLevel } = require("../middleware/authMiddleware");
+const { isBlank, requireAtLeastOne, trimObjectStrings } = require("../utils/validation");
 
 exports.servicesPageRender = async (req, res) => {
     try {
@@ -116,7 +117,15 @@ exports.getServiceById = async (req, res) => {
 
 exports.createService = async (req, res) => {
     try {
-        const { serial_number, property_tag, problem, remarks } = req.body;
+        const body = trimObjectStrings(req.body);
+        const { serial_number, property_tag, problem, remarks } = body;
+
+        if (isBlank(problem)) {
+            return res.status(400).json({ success: false, message: "Problem is required" });
+        }
+        if (!requireAtLeastOne(body, ["serial_number", "property_tag"])) {
+            return res.status(400).json({ success: false, message: "Serial number or Property tag is required" });
+        }
         await serviceModel.createComputerService({ serial_number, property_tag, problem, remarks });
         return res.json({ success: true });
     } catch (error) {
@@ -132,7 +141,14 @@ exports.updateService = async (req, res) => {
             return res.status(400).json({ success: false, message: "Invalid service id" });
         }
 
-        const { serial_number, property_tag, problem, remarks } = req.body;
+        const body = trimObjectStrings(req.body);
+        const { serial_number, property_tag, problem, remarks } = body;
+        if (isBlank(problem)) {
+            return res.status(400).json({ success: false, message: "Problem is required" });
+        }
+        if (!requireAtLeastOne(body, ["serial_number", "property_tag"])) {
+            return res.status(400).json({ success: false, message: "Serial number or Property tag is required" });
+        }
         await serviceModel.updateComputerService(serviceId, { serial_number, property_tag, problem, remarks });
         return res.json({ success: true });
     } catch (error) {

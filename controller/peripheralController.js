@@ -1,4 +1,5 @@
 const peripheralModel = require("../model/peripheralModel");
+const { missingFields, trimObjectStrings } = require("../utils/validation");
 const { getAccessLevel } = require("../middleware/authMiddleware");
 exports.peripheralPageRender = async (req, res) => {    
     try {
@@ -205,7 +206,9 @@ exports.inactivePeripheralDataTable = async (req, res) => {
 
 exports.addPeripheral = async (req, res) => {
     try {
-        const { brand, 
+        const body = trimObjectStrings(req.body);
+        const { 
+                brand, 
                 model, 
                 date_of_purchase, 
                 peripheral_user, 
@@ -215,7 +218,29 @@ exports.addPeripheral = async (req, res) => {
                 property_tag, 
                 peripheral_no, 
                 peripheral_status, 
-                peripheral_location, computer_id} = req.body;    
+                peripheral_location,
+                computer_id
+        } = body;
+        const required = [
+          "brand",
+          "model",
+          "kind_of_peripheral",
+          "serial_no",
+          "property_tag",
+          "peripheral_no",
+          "peripheral_user",
+          "user_dept",
+          "peripheral_status",
+          "peripheral_location",
+        ];
+        const missing = missingFields(body, required);
+        if (missing.length) {
+          return res.status(400).json({
+            success: false,
+            message: `Missing required fields: ${missing.join(", ")}`,
+          });
+        }
+
         const result = await peripheralModel.addPeripheral(brand, model, date_of_purchase, peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location, computer_id);
     const io = req.app.get("io");
     if (io) io.emit("reports:refresh");

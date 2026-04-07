@@ -1,5 +1,6 @@
 const userModel = require("../model/userManagement");
 const { getAccessLevel } = require("../middleware/authMiddleware");
+const { missingFields, trimObjectStrings } = require("../utils/validation");
 exports.renderUserManagement = async (req, res) => {
     try {
         const accessLevel = getAccessLevel(req);
@@ -76,7 +77,15 @@ exports.userDataTable = async (req, res) => {
 
 exports.addUser = async (req, res) => {
     try {
-        const { full_name, username, password, access_level, department } = req.body;      
+        const body = trimObjectStrings(req.body);
+        const { full_name, username, password, access_level, department } = body;
+
+        const required = ["full_name", "department", "username", "password", "access_level"];
+        const missing = missingFields(body, required);
+        if (missing.length) {
+            return res.status(400).json({ success: false, message: `Missing required fields: ${missing.join(", ")}` });
+        }
+
         await userModel.addUser(full_name, department, username, password, access_level);
         res.status(200).json({ success: true, message: "User added successfully" });
     }

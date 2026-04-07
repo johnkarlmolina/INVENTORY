@@ -1,5 +1,6 @@
 const consumableModel = require("../model/consumableModel");
 const { getAccessLevel } = require("../middleware/authMiddleware");
+const { isBlank, parseNonNegativeInt, trimObjectStrings } = require("../utils/validation");
 exports.consumablePageRender = async (req, res) => {    
     try {
     const accessLevel = getAccessLevel(req);
@@ -18,10 +19,20 @@ exports.consumablePageRender = async (req, res) => {
 }
 exports.insertConsumables = async (req, res) => {
     try {
-        const { item, item_classification, starting_stock, brand, model, batch_number, date_of_purchase, date_of_delivery} = req.body; 
+    const body = trimObjectStrings(req.body);
+    const { item, item_classification, starting_stock, brand, model, batch_number, date_of_purchase, date_of_delivery} = body; 
+
+    if (isBlank(item) || isBlank(item_classification) || isBlank(starting_stock)) {
+      return res.status(400).json({ message: "Item, classification, and starting stock are required." });
+    }
+    const stock = parseNonNegativeInt(starting_stock);
+    if (stock === null) {
+      return res.status(400).json({ message: "Starting stock must be a non-negative whole number." });
+    }
+
         // Here you would typically insert the data into your database
         console.log("Received consumable data:", { item, item_classification, starting_stock, brand, model, batch_number, date_of_purchase, date_of_delivery});
-            await consumableModel.insertConsumables(item, item_classification, starting_stock, brand, model, batch_number, date_of_purchase, date_of_delivery);
+      await consumableModel.insertConsumables(item, item_classification, stock, brand, model, batch_number, date_of_purchase, date_of_delivery);
         // Simulate successful insertion
     const io = req.app.get("io");
     if (io) io.emit("reports:refresh");
