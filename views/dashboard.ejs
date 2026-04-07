@@ -12,6 +12,13 @@
   <link href="https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.min.css" rel="stylesheet">
   <script src="https://cdn.datatables.net/2.1.2/js/dataTables.min.js"></script>
   <link rel="icon" type="image/png" href="/Images/ndh-it.png">
+
+  <style>
+    /* Hide DataTables' default processing overlay; we use skeleton loaders instead. */
+    .dt-processing {
+      display: none !important;
+    }
+  </style>
 </head>
 <body class="bg-gray-100">
   <!-- Page Skeleton Loader (initial page/data load) - main content only (keeps sidebar visible) -->
@@ -43,6 +50,21 @@
             <div class="h-96 bg-gray-200/60 rounded"></div>
           </section>
         </div>
+
+        <section class="bg-white rounded-xl shadow p-5 mt-8">
+          <div class="flex items-center justify-between mb-4">
+            <div class="h-5 w-40 bg-gray-200 rounded"></div>
+            <div class="h-4 w-36 bg-gray-200 rounded"></div>
+          </div>
+          <div class="space-y-3">
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+            <div class="h-10 w-full bg-gray-200 rounded"></div>
+          </div>
+        </section>
       </div>
       </main>
     </div>
@@ -86,12 +108,30 @@
         </section>
       </div>
 
-      <section class="mt-8 bg-white rounded-xl shadow p-5">
+      <section id="dashboardSummaryCard" class="mt-8 bg-white rounded-xl shadow p-5 relative" aria-busy="true">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-base font-semibold text-gray-700">Charts Summary</h2>
           <span class="text-xs text-gray-500">Auto-updates with charts</span>
         </div>
-        <div class="w-full overflow-x-auto">
+        <!-- Skeleton Loader (shown while table is being rebuilt) -->
+        <div id="dashboardSummarySkeleton" class="absolute inset-0 z-10 bg-white/80 backdrop-blur-[1px] rounded-xl hidden pointer-events-none">
+          <div class="p-5 animate-pulse">
+            <div class="flex items-center justify-between mb-5">
+              <div class="h-5 w-40 bg-gray-200 rounded"></div>
+              <div class="h-9 w-36 bg-gray-200 rounded"></div>
+            </div>
+            <div class="space-y-3">
+              <div class="h-10 w-full bg-gray-200 rounded"></div>
+              <div class="h-10 w-full bg-gray-200 rounded"></div>
+              <div class="h-10 w-full bg-gray-200 rounded"></div>
+              <div class="h-10 w-full bg-gray-200 rounded"></div>
+              <div class="h-10 w-full bg-gray-200 rounded"></div>
+              <div class="h-10 w-full bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="dashboardSummaryHost" class="w-full overflow-x-auto">
           <table id="dashboardSummaryTable" class="display nowrap" style="width:100%">
             <thead style="background-color: #0F828C;">
               <tr>
@@ -115,6 +155,25 @@
 
     const pageSkeleton = document.getElementById('pageSkeleton');
     let initialLoadComplete = false;
+
+    const summarySkeleton = document.getElementById('dashboardSummarySkeleton');
+    const summaryHost = document.getElementById('dashboardSummaryHost');
+    const summaryCard = document.getElementById('dashboardSummaryCard');
+    let summarySkeletonShownAt = 0;
+    const SUMMARY_SKELETON_MIN_MS = 250;
+    function showSummarySkeleton() {
+      if (summarySkeleton) summarySkeleton.classList.remove('hidden');
+      if (summaryCard) summaryCard.setAttribute('aria-busy', 'true');
+      summarySkeletonShownAt = Date.now();
+    }
+    function hideSummarySkeleton() {
+      const elapsed = Date.now() - summarySkeletonShownAt;
+      const delay = Math.max(0, SUMMARY_SKELETON_MIN_MS - elapsed);
+      setTimeout(() => {
+        if (summarySkeleton) summarySkeleton.classList.add('hidden');
+        if (summaryCard) summaryCard.setAttribute('aria-busy', 'false');
+      }, delay);
+    }
     function syncPageSkeletonOffset() {
       const mainEl = document.querySelector('main');
       const contentEl = document.getElementById('pageSkeletonContent');
@@ -306,6 +365,8 @@
           showPageSkeleton();
         }
 
+        showSummarySkeleton();
+
         setMeta(meta.inventory, "Loading...");
         setMeta(meta.peripherals, "Loading...");
         setMeta(meta.consumables, "Loading...");
@@ -321,6 +382,7 @@
         const consumableStockByClass = sumBy(consumables, (item) => item.item_classification || "Unknown", (item) => item.current_stock || 0);
 
         renderSummaryTable(buildSummaryRows(inventoryStatusCount, peripheralTypeCount, consumableStockByClass));
+        hideSummarySkeleton();
 
         inventoryChart = drawChart(
           inventoryChart,
@@ -368,6 +430,8 @@
             text: "Unable to load dashboard charts. Please try again."
           });
         }
+
+        hideSummarySkeleton();
       }
 
       if (!initialLoadComplete) {
@@ -403,6 +467,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       setupSocket();
+      showSummarySkeleton();
       loadDashboardCharts();
     });
   </script>

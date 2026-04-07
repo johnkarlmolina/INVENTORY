@@ -157,15 +157,32 @@
               <div>
                 <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
                 <input id="username" name="username" type="text" required
+                  aria-describedby="usernameHelp"
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20"
                   placeholder="Enter username">
+                <p id="usernameHelp" class="mt-1 text-xs text-gray-500">
+                  3-20 characters, alphanumeric and underscore only
+                </p>
               </div>
 
                <div>
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
                 <input id="password" name="password" type="password" required
+                    aria-describedby="passwordHelp"
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20"
                   placeholder="Enter password">
+                  <p id="passwordHelp" class="mt-1 text-xs text-gray-500">
+                    Min 8 chars, 1 uppercase, 1 number. Leave blank to keep current when editing
+                  </p>
+                  <div id="passwordStrengthWrap" class="mt-2 hidden" aria-live="polite">
+                    <div id="passwordStrengthBar" class="flex gap-2" aria-hidden="true">
+                      <div data-seg="1" class="h-1 flex-1 rounded bg-gray-200"></div>
+                      <div data-seg="2" class="h-1 flex-1 rounded bg-gray-200"></div>
+                      <div data-seg="3" class="h-1 flex-1 rounded bg-gray-200"></div>
+                      <div data-seg="4" class="h-1 flex-1 rounded bg-gray-200"></div>
+                    </div>
+                    <p id="passwordStrengthLabel" class="mt-1 text-xs text-gray-500"></p>
+                  </div>
               </div>
             </div>
           </section>
@@ -405,6 +422,70 @@
       let isEditMode = false;
       let editUserId = null;
 
+      function evaluatePasswordStrength(password) {
+          const value = String(password || '');
+        if (value.trim() === '') return { label: '', colorClass: 'text-gray-500', fillClass: 'bg-gray-200', score: 0 };
+
+          const hasUpper = /[A-Z]/.test(value);
+          const hasLower = /[a-z]/.test(value);
+          const hasNumber = /\d/.test(value);
+          const hasSymbol = /[^A-Za-z0-9]/.test(value);
+          const length = value.length;
+
+          // Must meet the policy first, otherwise it's Weak.
+          if (length < 8 || !hasUpper || !hasNumber) {
+            return { label: 'Weak', colorClass: 'text-red-600', fillClass: 'bg-red-500', score: 1 };
+          }
+
+          // Meets your policy => at least Fair.
+          const isStrong = length >= 12 && hasUpper && hasLower && hasNumber && hasSymbol;
+          if (isStrong) {
+            return { label: 'Strong', colorClass: 'text-green-600', fillClass: 'bg-green-500', score: 4 };
+          }
+
+          const isGood = length >= 10 && hasUpper && hasLower && hasNumber;
+          if (isGood) {
+            return { label: 'Good', colorClass: 'text-blue-600', fillClass: 'bg-blue-500', score: 3 };
+          }
+
+          return { label: 'Fair', colorClass: 'text-yellow-600', fillClass: 'bg-yellow-500', score: 2 };
+      }
+
+      function updatePasswordStrengthIndicator() {
+        const $wrap = $('#passwordStrengthWrap');
+        const $label = $('#passwordStrengthLabel');
+        const $bar = $('#passwordStrengthBar');
+        if (!$wrap.length || !$label.length || !$bar.length) return;
+
+        const passwordVal = String($('#password').val() || '');
+
+        // Blank password => plain state (hide strength UI)
+        // (In edit mode, blank also means "keep current").
+        if (passwordVal.trim() === '') {
+          $wrap.addClass('hidden');
+          $label.attr('class', 'mt-1 text-xs text-gray-500').text('');
+          $bar.find('[data-seg]').each(function () {
+            $(this).attr('class', 'h-1 flex-1 rounded bg-gray-200');
+          });
+          return;
+        }
+
+        $wrap.removeClass('hidden');
+
+        const result = evaluatePasswordStrength(passwordVal);
+        $label.attr('class', `mt-1 text-xs ${result.colorClass}`).text(result.label);
+
+        $bar.find('[data-seg]').each(function () {
+          $(this).attr('class', 'h-1 flex-1 rounded bg-gray-200');
+        });
+
+        if (result.score > 0) {
+          for (let i = 1; i <= result.score; i++) {
+            $bar.find(`[data-seg="${i}"]`).attr('class', `h-1 flex-1 rounded ${result.fillClass}`);
+          }
+        }
+      }
+
       let inactiveUsersTable = null;
       if (isAdminUser) {
         inactiveUsersTable = new DataTable('#inactiveUsersTable', {
@@ -460,8 +541,10 @@
       function resetUserForm() {
         addUserForm[0].reset();
         $('#user_no').val('');
+        $('#password').prop('required', true).attr('placeholder', 'Enter password');
         isEditMode = false;
         editUserId = null;
+        updatePasswordStrengthIndicator();
       }
 
       function openAddUserModal(editMode = false, rowData = null) {
@@ -478,14 +561,16 @@
           $('#full_name').val(rowData.fname || '');
           $('#department').val(rowData.department || '');
           $('#username').val(rowData.uname || '');
-          $('#password').val(rowData.upassword || '');
+          $('#password').val('').prop('required', false).attr('placeholder', 'Leave blank to keep current');
           const normalizedAccess = rowData.access_lvl === 'Staff' ? 'IT Technician' : rowData.access_lvl;
           $('#access_level').val(normalizedAccess || '');
+          updatePasswordStrengthIndicator();
         } else {
           resetUserForm();
           addUserModalTitle.text('Add New User');
           saveUserBtnIcon.removeClass('fa-save').addClass('fa-user-plus');
           saveUserBtnText.text('Save User');
+          updatePasswordStrengthIndicator();
         }
 
         addUserModal.removeClass('hidden');
@@ -505,6 +590,9 @@
         if (!isAdminUser) return;
         openAddUserModal(false);
       });
+
+      // Live password strength indicator (shows only when typing)
+      $(document).on('input', '#password', updatePasswordStrengthIndicator);
 
       $('#openInactiveUsersModal').on('click', function () {
         if (!isAdminUser || !inactiveUsersTable) return;
@@ -534,8 +622,35 @@
     return;
   }
 
-  var form = $(this);
+  var usernameVal = String($('#username').val() || '').trim();
+  var passwordVal = String($('#password').val() || '');
   var isUpdate = isEditMode && editUserId;
+
+  var usernameRegex = /^[A-Za-z0-9_]{3,20}$/;
+  if (!usernameRegex.test(usernameVal)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid username',
+      text: '3-20 characters, alphanumeric and underscore only',
+      confirmButtonColor: '#0F828C'
+    });
+    return;
+  }
+
+  if (!isUpdate || passwordVal.trim() !== '') {
+    var passwordOk = passwordVal.length >= 8 && /[A-Z]/.test(passwordVal) && /\d/.test(passwordVal);
+    if (!passwordOk) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid password',
+        text: 'Min 8 chars, 1 uppercase, 1 number.',
+        confirmButtonColor: '#0F828C'
+      });
+      return;
+    }
+  }
+
+  var form = $(this);
   var actionText = isUpdate ? 'update' : 'add';
   var apiEndpoint = isUpdate ? apiUrl + '/user-management/updateUser' : apiUrl + '/user-management/addUser';
   var successTitle = isUpdate ? 'User Updated' : 'User Added';
@@ -571,7 +686,7 @@
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'An error occurred while adding the user. Please try again.'
+            text: 'An error occurred while saving the user. Please try again.'
           });
         }
 

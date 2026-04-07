@@ -46,5 +46,9 @@ const getUserById = async (id) => {
 
 module.exports = {
     getUserByUsername,
-    getUserById
+    getUserById,
+    updateUserPassword: async (id, hashedPassword) => {
+        const sql = `UPDATE users SET upassword = ? WHERE user_no = ?`;
+        return query(sql, [hashedPassword, id]);
+    }
 };

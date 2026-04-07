@@ -15,6 +15,12 @@ exports.addUser = async (full_name, department, username, password, access_level
 };
 
 exports.updateUser = async (user_no, full_name, department, username, password, access_level) => {
+    if (password === undefined || password === null || String(password).trim() === '') {
+        const sql = `UPDATE users SET fname = ?, department = ?, uname = ?, access_lvl = ? WHERE user_no = ?`;
+        const values = [full_name, department, username, access_level, user_no];
+        return query(sql, values);
+    }
+
     const sql = `UPDATE users SET fname = ?, department = ?, uname = ?, upassword = ?, access_lvl = ? WHERE user_no = ?`;
     const values = [full_name, department, username, password, access_level, user_no];
     return query(sql, values);
