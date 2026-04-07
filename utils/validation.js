@@ -33,6 +33,22 @@ function parseNonNegativeInt(value) {
   return n;
 }
 
+function validateUsername(username) {
+  const value = typeof username === 'string' ? username.trim() : String(username ?? '').trim();
+  if (value === '') return 'Username is required.';
+  if (value.length < 3 || value.length > 20) return 'Username must be 3–20 characters.';
+  if (!/^[A-Za-z0-9_]+$/.test(value)) return 'Username must be alphanumeric and underscore only.';
+  return null;
+}
+
+function validatePassword(password) {
+  const value = typeof password === 'string' ? password : String(password ?? '');
+  if (value.trim() === '') return 'Password is required.';
+  if (value.length < 8) return 'Password must be at least 8 characters.';
+  if (!/[A-Z]/.test(value) || !/\d/.test(value)) return 'Password must contain at least 1 uppercase letter and 1 number.';
+  return null;
+}
+
 module.exports = {
   isBlank,
   trimToNull,
@@ -40,4 +56,6 @@ module.exports = {
   missingFields,
   requireAtLeastOne,
   parseNonNegativeInt,
+  validateUsername,
+  validatePassword,
 };

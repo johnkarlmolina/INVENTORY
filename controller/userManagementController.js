@@ -1,6 +1,8 @@
 const userModel = require("../model/userManagement");
 const { getAccessLevel } = require("../middleware/authMiddleware");
-const { missingFields, trimObjectStrings } = require("../utils/validation");
+const bcrypt = require("bcryptjs");
+const { missingFields, trimObjectStrings, validateUsername, validatePassword } = require("../utils/validation");
+
 exports.renderUserManagement = async (req, res) => {
     try {
         const accessLevel = getAccessLevel(req);
@@ -37,7 +39,7 @@ exports.userDataTable = async (req, res) => {
             fname: item.fname,
             department: item.department,
             uname: item.uname,
-            upassword: item.upassword,
+            upassword: item.upassword ? "********" : "",
             access_lvl: item.access_lvl
         }));
 
@@ -49,8 +51,8 @@ exports.userDataTable = async (req, res) => {
         });
 
         const sortableColumns = ["user_no", "fname", "department", "uname", "upassword", "access_lvl"];
-        const orderColumn = Number(order[0].column) || 0;
-        const orderDirection = order[0].dir === "desc" ? -1 : 1;
+        const orderColumn = Number(order[0]?.column) || 0;
+        const orderDirection = order[0]?.dir === "desc" ? -1 : 1;
         const sortKey = sortableColumns[orderColumn] || "user_no";
 
         const sortedData = filteredData.sort((a, b) => {
@@ -75,6 +77,60 @@ exports.userDataTable = async (req, res) => {
     }
 };
 
+exports.inactiveUserDataTable = async (req, res) => {
+    try {
+        const {
+            draw = 1,
+            start = 0,
+            length = 10,
+            search = {},
+            order = [{ column: 0, dir: "asc" }]
+        } = req.body;
+
+        const parsedStart = Number(start) || 0;
+        const parsedLength = Number(length) || 10;
+
+        const data = await userModel.inactiveUserDataTable();
+        const userList = data.map((item) => ({
+            user_no: item.user_no,
+            fname: item.fname,
+            uname: item.uname || ""
+        }));
+
+        const searchValue = String(search.value || "").toLowerCase();
+        const filteredData = userList.filter((item) => {
+            return Object.values(item).some((value) =>
+                String(value ?? "").toLowerCase().includes(searchValue)
+            );
+        });
+
+        const sortableColumns = ["user_no", "fname", "uname"];
+        const orderColumn = Number(order[0]?.column) || 0;
+        const orderDirection = order[0]?.dir === "desc" ? -1 : 1;
+        const sortKey = sortableColumns[orderColumn] || "user_no";
+
+        const sortedData = filteredData.sort((a, b) => {
+            const aValue = a[sortKey];
+            const bValue = b[sortKey];
+            if (aValue < bValue) return -1 * orderDirection;
+            if (aValue > bValue) return 1 * orderDirection;
+            return 0;
+        });
+
+        const paginatedData = sortedData.slice(parsedStart, parsedStart + parsedLength);
+
+        res.json({
+            draw: Number(draw) || 1,
+            recordsTotal: userList.length,
+            recordsFiltered: filteredData.length,
+            data: paginatedData
+        });
+    } catch (error) {
+        console.error("Error loading inactive user DataTable:", error);
+        res.status(500).json({ error: "DB error" });
+    }
+};
+
 exports.addUser = async (req, res) => {
     try {
         const body = trimObjectStrings(req.body);
@@ -86,10 +142,17 @@ exports.addUser = async (req, res) => {
             return res.status(400).json({ success: false, message: `Missing required fields: ${missing.join(", ")}` });
         }
 
-        await userModel.addUser(full_name, department, username, password, access_level);
+        const usernameError = validateUsername(username);
+        if (usernameError) return res.status(400).json({ success: false, message: usernameError });
+
+        const passwordError = validatePassword(password);
+        if (passwordError) return res.status(400).json({ success: false, message: passwordError });
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await userModel.addUser(full_name, department, username, hashedPassword, access_level);
+
         res.status(200).json({ success: true, message: "User added successfully" });
-    }
-    catch (error) {
+    } catch (error) {
         console.error("Error adding user:", error);
         res.status(500).json({ success: false, message: "An error occurred while adding the user." });
     }
@@ -97,13 +160,32 @@ exports.addUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
     try {
-        const { user_no, full_name, username, password, access_level, department } = req.body;
+        const body = trimObjectStrings(req.body);
+        const { user_no, full_name, username, password, access_level, department } = body;
 
         if (!user_no) {
             return res.status(400).json({ success: false, message: "User ID is required." });
         }
 
-        const result = await userModel.updateUser(user_no, full_name, department, username, password, access_level);
+        const required = ["full_name", "department", "username", "access_level"];
+        const missing = missingFields(body, required);
+        if (missing.length) {
+            return res.status(400).json({ success: false, message: `Missing required fields: ${missing.join(", ")}` });
+        }
+
+        const usernameError = validateUsername(username);
+        if (usernameError) return res.status(400).json({ success: false, message: usernameError });
+
+        const hasNewPassword = typeof password === 'string' ? password.trim() !== '' : !!password;
+
+        let hashedPassword = null;
+        if (hasNewPassword) {
+            const passwordError = validatePassword(password);
+            if (passwordError) return res.status(400).json({ success: false, message: passwordError });
+            hashedPassword = await bcrypt.hash(String(password), 10);
+        }
+
+        const result = await userModel.updateUser(user_no, full_name, department, username, hashedPassword, access_level);
 
         if (result && result.affectedRows === 1) {
             return res.status(200).json({ success: true, message: "User updated successfully" });
@@ -134,59 +216,6 @@ exports.deleteUser = async (req, res) => {
     } catch (error) {
         console.error("Error deleting user:", error);
         res.status(500).json({ success: false, message: "An error occurred while deleting the user." });
-    }
-};
-
-exports.inactiveUserDataTable = async (req, res) => {
-    try {
-        const {
-            draw = 1,
-            start = 0,
-            length = 10,
-            search = {},
-            order = [{ column: 0, dir: "asc" }]
-        } = req.body;
-
-        const parsedStart = Number(start) || 0;
-        const parsedLength = Number(length) || 10;
-
-        const data = await userModel.inactiveUserDataTable();
-        const userList = data.map((item) => ({
-            user_no: item.user_no,
-            fname: item.fname || "",
-            uname: item.uname || ""
-        }));
-
-        const searchValue = String(search.value || "").toLowerCase();
-        const filteredData = userList.filter((item) =>
-            item.fname.toLowerCase().includes(searchValue) ||
-            item.uname.toLowerCase().includes(searchValue)
-        );
-
-        const sortableColumns = ["fname", "uname"];
-        const orderColumn = Number(order[0]?.column) || 0;
-        const orderDirection = order[0]?.dir === "desc" ? -1 : 1;
-        const sortKey = sortableColumns[orderColumn] || "fname";
-
-        const sortedData = filteredData.sort((a, b) => {
-            const aValue = a[sortKey];
-            const bValue = b[sortKey];
-            if (aValue < bValue) return -1 * orderDirection;
-            if (aValue > bValue) return 1 * orderDirection;
-            return 0;
-        });
-
-        const paginatedData = sortedData.slice(parsedStart, parsedStart + parsedLength);
-
-        res.json({
-            draw: Number(draw) || 1,
-            recordsTotal: userList.length,
-            recordsFiltered: filteredData.length,
-            data: paginatedData
-        });
-    } catch (error) {
-        console.error("Error loading inactive user DataTable:", error);
-        res.status(500).json({ error: "DB error" });
     }
 };
 
