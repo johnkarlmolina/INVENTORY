@@ -1,6 +1,17 @@
 const peripheralModel = require("../model/peripheralModel");
 const { missingFields, trimObjectStrings } = require("../utils/validation");
 const { getAccessLevel } = require("../middleware/authMiddleware");
+const path = require("path");
+const fs = require("fs");
+
+function sanitizeNumericId(value) {
+  const cleaned = String(value || "").replace(/[^0-9]/g, "");
+  return cleaned || "0";
+}
+
+function getPeripheralUploadsDir() {
+  return path.join(__dirname, "..", "uploads", "peripherals");
+}
 exports.peripheralPageRender = async (req, res) => {    
     try {
     const accessLevel = getAccessLevel(req);
@@ -242,9 +253,13 @@ exports.addPeripheral = async (req, res) => {
         }
 
         const result = await peripheralModel.addPeripheral(brand, model, date_of_purchase, peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location, computer_id);
-    const io = req.app.get("io");
-    if (io) io.emit("reports:refresh");
-        res.json({ success: true, message: "Peripheral added successfully" });
+    		const io = req.app.get("io");
+    		if (io) io.emit("reports:refresh");
+    		res.json({
+    			success: true,
+    			message: "Peripheral added successfully",
+    			peripheral_id: result && result.insertId ? result.insertId : null
+    		});
     }
     catch (error) {
         console.error("Error adding peripheral:", error);
@@ -301,3 +316,49 @@ exports.deletePeripheral = async (req, res) => {
         res.status(500).json({ success: false, message: "An error occurred while activating the peripheral." });
       }
     }
+
+exports.uploadPeripheralPdf = async (req, res) => {
+  try {
+    const peripheralId = sanitizeNumericId(req.params.peripheralId);
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No PDF file uploaded" });
+    }
+    const io = req.app.get("io");
+    if (io) io.emit("reports:refresh");
+    return res.json({ success: true, message: "PDF uploaded successfully", peripheral_id: peripheralId });
+  } catch (error) {
+    console.error("Error uploading peripheral PDF:", error);
+    return res.status(500).json({ success: false, message: "An error occurred while uploading the PDF." });
+  }
+};
+
+exports.peripheralPdfStatus = async (req, res) => {
+  try {
+    const peripheralId = sanitizeNumericId(req.params.peripheralId);
+    const pdfPath = path.join(getPeripheralUploadsDir(), `peripheral-${peripheralId}.pdf`);
+    const exists = fs.existsSync(pdfPath);
+    return res.json({
+      success: true,
+      peripheral_id: peripheralId,
+      exists,
+      urlPath: exists ? `/peripherals/viewPeripheralPdf/${peripheralId}` : null
+    });
+  } catch (error) {
+    console.error("Error checking peripheral PDF status:", error);
+    return res.status(500).json({ success: false, message: "Failed to check PDF status." });
+  }
+};
+
+exports.viewPeripheralPdf = async (req, res) => {
+  try {
+    const peripheralId = sanitizeNumericId(req.params.peripheralId);
+    const pdfPath = path.join(getPeripheralUploadsDir(), `peripheral-${peripheralId}.pdf`);
+    if (!fs.existsSync(pdfPath)) {
+      return res.status(404).send("PDF not found");
+    }
+    return res.sendFile(pdfPath);
+  } catch (error) {
+    console.error("Error viewing peripheral PDF:", error);
+    return res.status(500).send("Failed to view PDF");
+  }
+};
