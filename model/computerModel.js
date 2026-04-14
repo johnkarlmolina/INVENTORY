@@ -100,3 +100,7 @@ exports.deleteComputer = async (computer_id) => {
 exports.activateComputer = async (computer_id) => {
     return query(`update main_inventory set pc_status = ? WHERE computer_id = ?`, ['active', computer_id]);
 }
+
+exports.updateComputerPicture = async (computer_id, picture_of_pc) => {
+	return query(`update main_inventory set picture_of_pc = ? WHERE computer_id = ?`, [picture_of_pc || null, computer_id]);
+}

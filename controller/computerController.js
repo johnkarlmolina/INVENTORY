@@ -1,5 +1,16 @@
 const computerModel = require("../model/computerModel");
 const { missingFields, trimObjectStrings } = require("../utils/validation");
+const path = require("path");
+const fs = require("fs");
+
+function sanitizeNumericId(value) {
+  const cleaned = String(value || "").replace(/[^0-9]/g, "");
+  return cleaned || "0";
+}
+
+function getComputerUploadsDir() {
+  return path.join(__dirname, "..", "uploads", "computers");
+}
 
 exports.computerDataTable = async (req, res) => {
   try {
@@ -224,7 +235,8 @@ exports.addComputer = async (req, res) => {
       if (io) io.emit("reports:refresh");
             res.json({
                 success: true,
-                message: "Computer added successfully"
+            message: "Computer added successfully",
+            computer_id: result.insertId || null
             });
         } else {
             res.status(400).json({
@@ -308,3 +320,70 @@ exports.deleteComputer = async (req, res) => {
       res.status(500).json({ success: false, message: "An error occurred while activating the computer." });
     }
   };
+
+exports.uploadComputerPdf = async (req, res) => {
+  try {
+    const computerId = sanitizeNumericId(req.params.computerId);
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No PDF file uploaded" });
+    }
+    const io = req.app.get("io");
+    if (io) io.emit("reports:refresh");
+    return res.json({ success: true, message: "PDF uploaded successfully", computer_id: computerId });
+  } catch (error) {
+    console.error("Error uploading computer PDF:", error);
+    return res.status(500).json({ success: false, message: "An error occurred while uploading the PDF." });
+  }
+};
+
+exports.computerPdfStatus = async (req, res) => {
+  try {
+    const computerId = sanitizeNumericId(req.params.computerId);
+    const pdfPath = path.join(getComputerUploadsDir(), `computer-${computerId}.pdf`);
+    const exists = fs.existsSync(pdfPath);
+    return res.json({
+      success: true,
+      computer_id: computerId,
+      exists,
+      urlPath: exists ? `/computers/viewComputerPdf/${computerId}` : null
+    });
+  } catch (error) {
+    console.error("Error checking computer PDF status:", error);
+    return res.status(500).json({ success: false, message: "Failed to check PDF status." });
+  }
+};
+
+exports.viewComputerPdf = async (req, res) => {
+  try {
+    const computerId = sanitizeNumericId(req.params.computerId);
+    const pdfPath = path.join(getComputerUploadsDir(), `computer-${computerId}.pdf`);
+    if (!fs.existsSync(pdfPath)) {
+      return res.status(404).send("PDF not found");
+    }
+    return res.sendFile(pdfPath);
+  } catch (error) {
+    console.error("Error viewing computer PDF:", error);
+    return res.status(500).send("Failed to view PDF");
+  }
+};
+
+exports.uploadComputerImage = async (req, res) => {
+  try {
+    const computerId = sanitizeNumericId(req.params.computerId);
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No image file uploaded" });
+    }
+    await computerModel.updateComputerPicture(computerId, req.file.filename);
+    const io = req.app.get("io");
+    if (io) io.emit("reports:refresh");
+    return res.json({
+      success: true,
+      message: "Image uploaded successfully",
+      fileName: req.file.filename,
+      computer_id: computerId
+    });
+  } catch (error) {
+    console.error("Error uploading computer image:", error);
+    return res.status(500).json({ success: false, message: "An error occurred while uploading the image." });
+  }
+};

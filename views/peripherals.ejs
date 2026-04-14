@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Peripherals - IT Inventory</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://kit.fontawesome.com/ec23f4a8b0.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <!-- DataTables (Default) -->
@@ -202,6 +202,16 @@
                   <option value="Scanner">Scanner</option>
                   <option value="Other">Other</option>
                 </select>
+              </div>
+            </div>
+          </section>
+
+          <section class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="peripheral_pdf" class="block text-sm font-medium text-gray-700 mb-2">Upload PDF</label>
+                <input id="peripheral_pdf" name="peripheral_pdf" type="file" accept="application/pdf"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
             </div>
           </section>
@@ -505,6 +515,30 @@
         tsLocation.setValue('Floor');
       }
 
+      function getSelectedPeripheralPdfFile() {
+        const input = document.getElementById('peripheral_pdf');
+        return input && input.files && input.files.length ? input.files[0] : null;
+      }
+
+      function isPdfFile(file) {
+        if (!file) return false;
+        const nameOk = (file.name || '').toLowerCase().endsWith('.pdf');
+        const mimeOk = file.type === 'application/pdf' || file.type === '';
+        return nameOk && mimeOk;
+      }
+
+      function uploadPeripheralPdf(peripheralId, file) {
+        const fd = new FormData();
+        fd.append('pdf', file);
+        return $.ajax({
+          url: apiUrl + '/peripherals/uploadPeripheralPdf/' + encodeURIComponent(peripheralId),
+          method: 'POST',
+          data: fd,
+          processData: false,
+          contentType: false
+        });
+      }
+
       const peripheralColumns = [
         { data: 'brand' },
         { data: 'model' },
@@ -769,90 +803,154 @@
         openPeripheralModal(true);
       });
 
-      $peripheralForm.on('submit', function (event) {
-    event.preventDefault();
+      // File button handler (preview uploaded PDF)
+      $('#peripheralsTable').on('click', '.filePeripheralBtn', function () {
+        if (!isAdminUser) return;
+        const id = $(this).data('id');
 
-    if (this.checkValidity && !this.checkValidity()) {
-      if (this.reportValidity) this.reportValidity();
-      Swal.fire({ icon: 'error', title: 'Missing fields', text: 'Please fill out all required fields.', confirmButtonColor: '#0F828C' });
-      return;
-    }
-
-    // Convert form to object
-    const formArray = $(this).serializeArray();
-    let data = {};
-    formArray.forEach(item => {
-        const v = typeof item.value === 'string' ? item.value.trim() : item.value;
-        data[item.name] = v === '' ? null : v;
-    });
-
-    // Determine if edit mode
-    const isUpdate = isEditMode && editPeripheralId;
-    const title = isUpdate ? 'Update Peripheral?' : 'Are you sure?';
-    const text = isUpdate ? 'Do you want to update this peripheral?' : 'Do you want to add this peripheral?';
-    const confirmText = isUpdate ? 'Yes, update it!' : 'Yes, add it!';
-    const successTitle = isUpdate ? 'Peripheral Updated' : 'Peripheral Added';
-    const apiEndpoint = isUpdate ? apiUrl + '/peripherals/updatePeripheral' : apiUrl + '/peripherals/addPeripheral';
-    
-    // Add ID if editing
-    if (isUpdate) {
-        data.peripheral_id = editPeripheralId;
-    }
-
-    // SweetAlert confirmation
-    Swal.fire({
-        title: title,
-        text: text,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: confirmText,
-        cancelButtonText: 'Cancel',
-        confirmButtonColor: '#0F828C',
-        cancelButtonColor: '#d33'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // AJAX POST request
-            $.ajax({
-                url: apiEndpoint,
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(data),
-                success: function(response) {
-                    if (response.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: successTitle,
-                            text: response.message,
-                            confirmButtonColor: '#0F828C'
-                        });
-                        $peripheralForm[0].reset();
-                        $('#kind_of_peripheral').val('');
-                        $('#computer_id').val('');
-                        $('#user_dept').val('');
-                        $('#peripheral_status').val('active');
-                        $('#peripheral_location').val('');
-                        peripheralsDt.ajax.reload(null, false); // reload DataTable
-                        closePeripheralModal();
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Failed',
-                            text: response.message || 'Something went wrong.'
-                        });
-                    }
-                },
-                error: function(xhr, status, error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'An error occurred while submitting the form.'
-                    });
-                    console.error(error);
+        $.ajax({
+          url: apiUrl + '/peripherals/peripheralPdfStatus/' + encodeURIComponent(id),
+          method: 'GET',
+          dataType: 'json',
+          success: function (r) {
+            if (r && r.success && r.exists && r.urlPath) {
+              const pdfUrl = apiUrl + r.urlPath;
+              Swal.fire({
+                title: 'Peripheral PDF',
+                width: '90vw',
+                showCloseButton: true,
+                showConfirmButton: false,
+                html: `
+                  <div style="width:100%;height:75vh;">
+                    <iframe src="${pdfUrl}" style="width:100%;height:100%;border:0;" title="Peripheral PDF"></iframe>
+                  </div>
+                `,
+                didOpen: () => {
+                  const popup = Swal.getPopup();
+                  if (popup) popup.style.maxWidth = '1100px';
                 }
+              });
+            } else {
+              Swal.fire({
+                icon: 'info',
+                title: 'No PDF',
+                text: 'No PDF uploaded yet for this peripheral.',
+                confirmButtonColor: '#0F828C'
+              });
+            }
+          },
+          error: function () {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Failed to check/view the PDF.',
+              confirmButtonColor: '#0F828C'
             });
+          }
+        });
+      });
+
+      $peripheralForm.on('submit', function (event) {
+        event.preventDefault();
+
+        if (this.checkValidity && !this.checkValidity()) {
+          if (this.reportValidity) this.reportValidity();
+          Swal.fire({ icon: 'error', title: 'Missing fields', text: 'Please fill out all required fields.', confirmButtonColor: '#0F828C' });
+          return;
         }
-    });
-});
+
+        const pdfFile = getSelectedPeripheralPdfFile();
+        if (pdfFile && !isPdfFile(pdfFile)) {
+          Swal.fire({ icon: 'error', title: 'Invalid file', text: 'PDF files only.', confirmButtonColor: '#0F828C' });
+          return;
+        }
+
+        // Convert form to object
+        const formArray = $(this).serializeArray();
+        let data = {};
+        formArray.forEach(item => {
+          const v = typeof item.value === 'string' ? item.value.trim() : item.value;
+          data[item.name] = v === '' ? null : v;
+        });
+
+        const isUpdate = isEditMode && editPeripheralId;
+        const title = isUpdate ? 'Update Peripheral?' : 'Add Peripheral?';
+        const text = isUpdate ? 'Do you want to update this peripheral?' : 'Do you want to add this peripheral?';
+        const confirmText = isUpdate ? 'Yes, update it!' : 'Yes, add it!';
+        const successTitle = isUpdate ? 'Peripheral Updated' : 'Peripheral Added';
+        const apiEndpoint = isUpdate ? apiUrl + '/peripherals/updatePeripheral' : apiUrl + '/peripherals/addPeripheral';
+
+        if (isUpdate) {
+          data.peripheral_id = editPeripheralId;
+        }
+
+        Swal.fire({
+          title,
+          text,
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: confirmText,
+          cancelButtonText: 'Cancel',
+          confirmButtonColor: '#0F828C',
+          cancelButtonColor: '#d33'
+        }).then((result) => {
+          if (!result.isConfirmed) return;
+
+          $.ajax({
+            url: apiEndpoint,
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            success: function (response) {
+              if (!response.success) {
+                Swal.fire({ icon: 'error', title: 'Failed', text: response.message || 'Something went wrong.' });
+                return;
+              }
+
+              const peripheralId = isUpdate ? editPeripheralId : (response.peripheral_id || null);
+
+              const finalize = (extraText) => {
+                Swal.fire({
+                  icon: 'success',
+                  title: successTitle,
+                  text: extraText ? `${response.message} ${extraText}` : response.message,
+                  confirmButtonColor: '#0F828C'
+                });
+                $peripheralForm[0].reset();
+                tsKind.clear(); tsKind.setValue('');
+                if (tsComputerId) { tsComputerId.clear(); tsComputerId.setValue(''); }
+                tsDept.clear(); tsDept.setValue('');
+                tsStatus.setValue('active');
+                tsLocation.setValue('Floor');
+                peripheralsDt.ajax.reload(null, false);
+                closePeripheralModal();
+              };
+
+              if (pdfFile && peripheralId) {
+                Swal.fire({ title: 'Uploading PDF...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), confirmButtonColor: '#0F828C' });
+                uploadPeripheralPdf(peripheralId, pdfFile)
+                  .done(function (uploadRes) {
+                    if (uploadRes && uploadRes.success) {
+                      finalize('(PDF uploaded)');
+                    } else {
+                      Swal.fire({ icon: 'error', title: 'Upload failed', text: (uploadRes && uploadRes.message) ? uploadRes.message : 'Failed to upload PDF.', confirmButtonColor: '#0F828C' });
+                    }
+                  })
+                  .fail(function (xhr) {
+                    const msg = (xhr && xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to upload PDF.';
+                    Swal.fire({ icon: 'error', title: 'Upload failed', text: msg, confirmButtonColor: '#0F828C' });
+                  });
+              } else {
+                finalize('');
+              }
+            },
+            error: function (xhr, status, error) {
+              Swal.fire({ icon: 'error', title: 'Error', text: 'An error occurred while submitting the form.' });
+              console.error(error);
+            }
+          });
+        });
+      });
 
 
       // SweetAlert delete 
