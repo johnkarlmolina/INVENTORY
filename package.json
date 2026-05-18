@@ -40,9 +40,10 @@
     "util": "^0.12.5"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0",
     "autoprefixer": "^10.4.24",
     "nodemon": "^3.1.11",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.3.0"
   }
 }
