@@ -57,6 +57,7 @@ app.use(compression());
 app.use(morgan("combined"));
 app.set("trust proxy", 1);
 app.set("view engine", "ejs");
+app.use('/ldn', express.static(path.join(__dirname, 'ldn')));
 
 app.use("/", authRoutes);
 app.use("/login", loginRoute);
