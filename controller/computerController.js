@@ -51,26 +51,31 @@ exports.computerDataTable = async (req, res) => {
     const recordsTotal = computerList.length;
 
     // 🔍 SEARCH
-    const searchValue = (search.value || "").toLowerCase();
+   const searchValue = (search.value || "").toLowerCase().trim();
+   const searchTerms = searchValue.split(/\s+/); // split by spaces
 
-    let filteredData = computerList.filter(item =>
-      item.brand.toLowerCase().includes(searchValue) ||
-      item.model.toLowerCase().includes(searchValue) ||
-      item.serial_number.toLowerCase().includes(searchValue) ||
-      item.property_tag.toLowerCase().includes(searchValue) ||
-      item.os_version.toLowerCase().includes(searchValue) ||
-      item.procie.toLowerCase().includes(searchValue) ||
-      item.ram.toLowerCase().includes(searchValue) ||
-      item.os_license.toLowerCase().includes(searchValue) ||
-      item.pc_user.toLowerCase().includes(searchValue) ||
-      item.user_dept.toLowerCase().includes(searchValue) ||
-      item.office_license.toLowerCase().includes(searchValue) ||
-      item.pc_no.toLowerCase().includes(searchValue) ||
-      item.pc_status.toLowerCase().includes(searchValue) ||
-      item.pc_location.toLowerCase().includes(searchValue) ||
-      item.date_of_purchase.toString().toLowerCase().includes(searchValue) ||
-      item.date_of_entry.toString().toLowerCase().includes(searchValue)
-    );
+    let filteredData = computerList.filter(item => {
+      const haystack = `
+        ${item.brand}
+        ${item.model}
+        ${item.serial_number}
+        ${item.property_tag}
+        ${item.os_version}
+        ${item.procie}
+        ${item.ram}
+        ${item.os_license}
+        ${item.pc_user}
+        ${item.user_dept}
+        ${item.office_license}
+        ${item.pc_no}
+        ${item.pc_status}
+        ${item.pc_location}
+        ${item.date_of_purchase}
+        ${item.date_of_entry}
+      `.toLowerCase();
+
+      return searchTerms.every(term => haystack.includes(term));
+    });
 
     const recordsFiltered = filteredData.length;
 
