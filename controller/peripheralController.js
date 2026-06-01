@@ -66,22 +66,27 @@ exports.peripheralDataTable = async (req, res) => {
     const recordsTotal = peripheralList.length;
 
     // 🔍 SEARCH
-    const searchValue = (search.value || "").toLowerCase();
+    const searchValue = (search.value || "").toLowerCase().trim();
+    const searchTerms = searchValue.split(/\s+/);
 
-    let filteredData = peripheralList.filter(item =>
-      item.brand.toLowerCase().includes(searchValue) ||
-      item.model.toLowerCase().includes(searchValue) ||
-      item.peripheral_user.toLowerCase().includes(searchValue) ||
-      item.user_dept.toLowerCase().includes(searchValue) ||
-      item.kind_of_peripheral.toLowerCase().includes(searchValue) ||
-      item.serial_no.toLowerCase().includes(searchValue) ||
-      item.property_tag.toLowerCase().includes(searchValue) ||
-      item.peripheral_no.toLowerCase().includes(searchValue) ||
-      item.peripheral_status.toLowerCase().includes(searchValue) ||
-      item.peripheral_location.toLowerCase().includes(searchValue) ||
-      item.date_of_purchase.toString().toLowerCase().includes(searchValue) ||
-      item.date_of_entry.toString().toLowerCase().includes(searchValue)
-    );
+    let filteredData = peripheralList.filter(item => {
+      const haystack = `
+        ${item.brand}
+        ${item.model}
+        ${item.peripheral_user}
+        ${item.user_dept}
+        ${item.kind_of_peripheral}
+        ${item.serial_no}
+        ${item.property_tag}
+        ${item.peripheral_no}
+        ${item.peripheral_status}
+        ${item.peripheral_location}
+        ${item.date_of_purchase}
+        ${item.date_of_entry}
+      `.toLowerCase();
+
+      return searchTerms.every(term => haystack.includes(term));
+    });
 
     const recordsFiltered = filteredData.length;
 
