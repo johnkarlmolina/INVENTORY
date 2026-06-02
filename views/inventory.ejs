@@ -72,8 +72,8 @@
         </div>
 
         <!-- Button Container -->
-        <div class="flex justify-end mb-4">
-          <select class="bg-white border border-gray-300 text-gray-700 py-2 px-4 focus:outline-none focus:ring-2 focus:ring-[#0F828C]" id="statusFilter">
+        <div class="flex flex-wrap gap-3 justify-start sm:justify-end mb-6">
+          <select class="bg-white border border-gray-300 text-gray-700 py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-[#0F828C] rounded-xl shadow-sm text-sm" id="statusFilter">
             <option value="">All Statuses</option>
             <option value="condemned">Condemned</option>
             <option value="inrepair">In Repair</option>
@@ -82,13 +82,13 @@
           </select>
           <% if (isAdmin) { %>
             <button id="openComputerModal"
-              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
-              <i class="fas fa-plus text-lg"></i>
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-5 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2.5 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 text-sm">
+              <i class="fas fa-plus text-base"></i>
               <span class="font-semibold">Add Computer</span>
             </button>
 
-            <button id="openInactiveModal" class="ml-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50">
-              <i class="fas fa-ban text-lg"></i>
+            <button id="openInactiveModal" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-5 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2.5 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50 text-sm">
+              <i class="fas fa-ban text-base"></i>
               <span class="font-semibold">Inactive</span>
             </button>
           <% } %>
@@ -353,15 +353,15 @@
             </div>
           </section>
 
-          <div class="flex items-center gap-4">
+          <div class="flex flex-wrap items-center gap-3">
             <button type="submit" id="submitComputerForm"
-              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 font-semibold">
               <i class="fas fa-plus text-lg"></i>
-              <span class="font-semibold">Add Computer</span>
+              <span>Add Computer</span>
             </button>
 
             <button id="clearComputerForm" type="button"
-              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 font-semibold">
               Clear Form
             </button>
           </div>

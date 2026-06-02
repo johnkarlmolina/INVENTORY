@@ -3,21 +3,86 @@
 
 <style>
   /* Only keeping main margin override since it's global */
-  main {
-    margin-left: 5rem !important;
+  @media (min-width: 768px) {
+    main {
+      margin-left: 5rem !important;
+    }
+  }
+
+  /* Responsive styles for Mobile Viewports */
+  @media (max-width: 767px) {
+    main {
+      margin-left: 0 !important;
+      padding-top: 4.5rem !important; /* clear fixed mobile top header bar */
+    }
+
+    #sidebar {
+      width: 16rem !important;
+      left: -16rem !important;
+      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    #sidebar.open {
+      left: 0 !important;
+    }
+
+    /* Disable hover-to-expand width on mobile */
+    #sidebar:hover {
+      width: 16rem !important;
+    }
+
+    /* Force collapsed text & headers to show inside mobile drawer */
+    #sidebar #sidebarTitle,
+    #sidebar .sidebar-text,
+    #sidebar #sidebarHeader .flex-col > span {
+      opacity: 1 !important;
+      width: auto !important;
+      overflow: visible !important;
+      display: inline-block !important;
+    }
+
+    #sidebar .sidebar-link {
+      padding-left: 1.5rem !important;
+      padding-right: 1.5rem !important;
+      justify-content: flex-start !important;
+    }
+
+    #sidebar .sidebar-icon {
+      margin-right: 1rem !important;
+    }
+
+    #sidebar #sidebarHeader {
+      justify-content: space-between !important;
+    }
   }
 </style>
 
+<% 
+  const roleLabel = ((typeof accessLevel !== 'undefined' ? accessLevel : '') || '').toString().trim();
+  const roleText = roleLabel || 'User';
+  const roleIconClass = roleText === 'Admin'
+    ? 'fa-user-shield'
+    : (roleText === 'IT Technician' ? 'fa-screwdriver-wrench' : 'fa-user');
+%>
+
+<!-- Mobile Top Header Bar (Hidden on desktop) -->
+<div id="mobileHeader" style="background-color: #0F828C; z-index: 999;" class="md:hidden fixed top-0 left-0 right-0 h-16 flex items-center justify-between px-4 text-white shadow-md">
+  <button id="mobileSidebarToggle" class="p-2 focus:outline-none hover:bg-white/10 rounded-lg transition-colors" aria-label="Toggle Navigation">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+    </svg>
+  </button>
+  <span class="text-lg font-bold tracking-wider">IT INVENTORY</span>
+  <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/15">
+    <i class="fas <%= roleIconClass %> text-white text-sm"></i>
+  </span>
+</div>
+
+<!-- Backdrop Overlay for Mobile Drawer (Hidden on desktop) -->
+<div id="sidebarBackdrop" style="z-index: 998;" class="fixed inset-0 bg-black/50 hidden md:hidden transition-all duration-300 opacity-0 pointer-events-none"></div>
+
 <nav id="sidebar" style="background-color: #0F828C; z-index: 1000;" class="group w-20 hover:w-72 transition-all duration-300 text-white h-screen fixed left-0 top-0 overflow-y-auto overflow-x-hidden shadow-xl">
   <div id="sidebarHeader" class="p-6 border-b border-white/10 flex items-center justify-center group-hover:justify-between transition-all">
-    <% 
-      const roleLabel = ((typeof accessLevel !== 'undefined' ? accessLevel : '') || '').toString().trim();
-      const roleText = roleLabel || 'User';
-      const roleIconClass = roleText === 'Admin'
-        ? 'fa-user-shield'
-        : (roleText === 'IT Technician' ? 'fa-screwdriver-wrench' : 'fa-user');
-    %>
-
     <div class="flex items-center gap-3">
       <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white/15">
         <i class="fas <%= roleIconClass %> text-white"></i>
@@ -32,6 +97,11 @@
         </span>
       </div>
     </div>
+
+    <!-- Mobile Close Button (Hidden on desktop) -->
+    <button id="mobileSidebarClose" class="md:hidden p-2 text-white/80 hover:text-white hover:bg-white/10 rounded-lg transition-colors focus:outline-none" aria-label="Close sidebar">
+      <i class="fas fa-times text-lg"></i>
+    </button>
   </div>
   
   <ul class="py-5">
@@ -114,6 +184,56 @@
   $(document).ready(function() {
     const apiUrl = "<%= baseUrl %>";
 
+    // Mobile Sidebar Drawer toggling
+    const $sidebar = $('#sidebar');
+    const $backdrop = $('#sidebarBackdrop');
+
+    function openMobileSidebar() {
+      $backdrop.removeClass('hidden');
+      $sidebar.addClass('open');
+      setTimeout(() => {
+        $backdrop.addClass('opacity-100').removeClass('pointer-events-none');
+      }, 50);
+      $('body').addClass('overflow-hidden');
+    }
+
+    function closeMobileSidebar() {
+      $sidebar.removeClass('open');
+      $backdrop.removeClass('opacity-100').addClass('pointer-events-none');
+      setTimeout(() => {
+        if (!$sidebar.hasClass('open')) {
+          $backdrop.addClass('hidden');
+        }
+      }, 300);
+      $('body').removeClass('overflow-hidden');
+    }
+
+    $(document).on('click', '#mobileSidebarToggle', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openMobileSidebar();
+    });
+
+    $(document).on('click', '#mobileSidebarClose, #sidebarBackdrop', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeMobileSidebar();
+    });
+
+    // Close on escape key
+    $(document).on('keyup', function(e) {
+      if (e.key === 'Escape' && $sidebar.hasClass('open')) {
+        closeMobileSidebar();
+      }
+    });
+
+    // Handle AJAX page loads (ensure drawer closes on click)
+    $(document).on('click', '#sidebar .sidebar-link', function() {
+      if ($(window).width() < 768) {
+        closeMobileSidebar();
+      }
+    });
+
     $(document).on('click', "#dashboard", function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -129,67 +249,67 @@
       });
     });
 
-  $(document).on('click', "#inventory", function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    $.ajax({
-      url: apiUrl+'/inventory',
-      method: 'GET',
-      success: function() {
-        window.location.href = '/inventory';
-      },
-      error: function() {
-        alert('Failed to load inventory. Please try again.');
-      }
+    $(document).on('click', "#inventory", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      $.ajax({
+        url: apiUrl+'/inventory',
+        method: 'GET',
+        success: function() {
+          window.location.href = '/inventory';
+        },
+        error: function() {
+          alert('Failed to load inventory. Please try again.');
+        }
+      });
     });
-  });
 
-  $(document).on('click', "#peripherals", function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    $.ajax({
-      url: apiUrl+'/peripherals/peripheralPageRender',
-      method: 'GET',
-      success: function() {
-        window.location.href = '/peripherals/peripheralPageRender';
-      },
-      error: function() {
-        alert('Failed to load dashboard. Please try again.');
-      }
+    $(document).on('click', "#peripherals", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      $.ajax({
+        url: apiUrl+'/peripherals/peripheralPageRender',
+        method: 'GET',
+        success: function() {
+          window.location.href = '/peripherals/peripheralPageRender';
+        },
+        error: function() {
+          alert('Failed to load dashboard. Please try again.');
+        }
+      });
     });
-  });
 
-  // Logout with SweetAlert2 confirmation
-  $(document).on('click', "#logout", function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    Swal.fire({
-      title: 'Logout Confirmation',
-      text: 'Are you sure you want to logout?',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonColor: '#0F828C',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Yes, Logout',
-      cancelButtonText: 'Cancel',
-      reverseButtons: true
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Show success message
-        Swal.fire({
-          icon: 'success',
-          title: 'Logged Out Successfully!',
-          text: 'You have been logged out.',
-          confirmButtonColor: '#0F828C',
-          timer: 1500,
-          showConfirmButton: false
-        }).then(() => {
-          window.location.href = '/login/logout';
-        });
-      }
+    // Logout with SweetAlert2 confirmation
+    $(document).on('click', "#logout", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      Swal.fire({
+        title: 'Logout Confirmation',
+        text: 'Are you sure you want to logout?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#0F828C',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Logout',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Show success message
+          Swal.fire({
+            icon: 'success',
+            title: 'Logged Out Successfully!',
+            text: 'You have been logged out.',
+            confirmButtonColor: '#0F828C',
+            timer: 1500,
+            showConfirmButton: false
+          }).then(() => {
+            window.location.href = '/login/logout';
+          });
+        }
+      });
     });
-  });
 
   });
 </script>
