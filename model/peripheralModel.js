@@ -2,19 +2,32 @@ const { query } = require("../config/db");
 
 const DELETED_STATUS = "inactive_deleted";
 
-exports.peripheralDataTable = async (req, res) => {
+exports.peripheralDataTable = async (status) => {
     try {
-        const peripheralsData = await query(`SELECT * FROM peripherals where COALESCE(LOWER(peripheral_status), '') != ?`, [DELETED_STATUS]);
+        let sql = `
+            SELECT * 
+            FROM peripherals 
+           
+        `;
+
+        const params = [];
+
+        if (status) {
+            sql += ` where LOWER(peripheral_status) = ?`;
+            params.push(status.toLowerCase());
+        }
+
+        const peripheralsData = await query(sql, params);
         return peripheralsData;
     }   
     catch (error) {
         console.error("Error fetching peripherals data:", error);
         throw new Error("An error occurred while fetching peripherals data.");
     }
-}
+};
 
 exports.inactivePeripheralDataTable = async () => {
-    return query(`SELECT * FROM peripherals WHERE COALESCE(LOWER(peripheral_status), '') = ?`, [DELETED_STATUS]);
+    return query(`SELECT * FROM peripherals WHERE COALESCE(LOWER(peripheral_status), '') = ? or COALESCE(LOWER(peripheral_status), '') = ?`, [DELETED_STATUS, 'inactive']);
 }
 
 exports.addPeripheral = async (brand, model, date_of_purchase,  peripheral_user, user_dept, kind_of_peripheral, serial_no, property_tag, peripheral_no, peripheral_status, peripheral_location, computer_id) => { 
