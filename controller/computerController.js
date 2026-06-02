@@ -14,6 +14,7 @@ function getComputerUploadsDir() {
 
 exports.computerDataTable = async (req, res) => {
   try {
+    const {status} = req.body;
     const {
       draw = 1,
       start = 0,
@@ -22,8 +23,9 @@ exports.computerDataTable = async (req, res) => {
       order = [{ column: 0, dir: "asc" }]
     } = req.body;
 
+
     // Fetch data
-    const computers = await computerModel.computerDataTable();
+    const computers = await computerModel.computerDataTable(status);
 
     // Map safely (NO Date objects ❗)
     const computerList = computers.map(item => ({
@@ -44,7 +46,9 @@ exports.computerDataTable = async (req, res) => {
       picture_of_pc: item.picture_of_pc || "",
       pc_no: item.pc_no || "",
       pc_status: item.pc_status || "",
-      pc_location: item.pc_location || ""
+      pc_location: item.pc_location || "",
+      ip_address: item.ip_address || "",
+      mac_address: item.mac_address || ""
     }));
 
     // TOTAL BEFORE FILTER
@@ -70,6 +74,8 @@ exports.computerDataTable = async (req, res) => {
         ${item.pc_no}
         ${item.pc_status}
         ${item.pc_location}
+        ${item.ip_address}
+        ${item.mac_address}
         ${item.date_of_purchase}
         ${item.date_of_entry}
       `.toLowerCase();
@@ -96,7 +102,9 @@ exports.computerDataTable = async (req, res) => {
       "office_license",
       "pc_no",
       "pc_status",
-      "pc_location"
+      "pc_location",
+      "ip_address",
+      "mac_address"
     ];
 
     const columnIndex = order[0]?.column ?? 0;
@@ -223,7 +231,8 @@ exports.addComputer = async (req, res) => {
           "pc_user",
           "user_dept",
           "pc_status",
-          "pc_location",
+          "pc_location"
+          
         ];
         const missing = missingFields(body, required);
         if (missing.length) {
