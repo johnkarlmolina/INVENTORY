@@ -76,20 +76,20 @@
           <p class="text-gray-600">Manage consumable items and requests</p>
         </div>
         <!-- Button Container -->
-        <div class="flex justify-end mb-4">
+        <div class="flex flex-wrap gap-3 justify-start sm:justify-end mb-6">
           <% if (isAdmin) { %>
             <button id="ConsumableLogsBtn"
-              class="bg-gradient-to-r from-[#2e5558] to-[#0F828C] hover:from-[#0F828C] hover:to-[#2e5558] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
-              <i class="fas fa-history text-lg"></i>
+              class="bg-gradient-to-r from-[#2e5558] to-[#0F828C] hover:from-[#0F828C] hover:to-[#2e5558] text-white px-5 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2.5 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 text-sm">
+              <i class="fas fa-history text-base"></i>
               <span class="font-semibold">Consumable Logs</span>
             </button>
             <button id="AddItemBtn"
-              class="ml-4 bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
-              <i class="fas fa-plus text-lg"></i>
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-5 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2.5 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 text-sm">
+              <i class="fas fa-plus text-base"></i>
               <span class="font-semibold">Add Item</span>
             </button>
-            <button id="openInactiveConsumablesModal" class="ml-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50">
-              <i class="fas fa-ban text-lg"></i>
+            <button id="openInactiveConsumablesModal" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-5 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2.5 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50 text-sm">
+              <i class="fas fa-ban text-base"></i>
               <span class="font-semibold">Inactive</span>
             </button>
           <% } %>
@@ -322,15 +322,15 @@
             </div>
           </section>
 
-          <div class="flex items-center gap-4">
+          <div class="flex flex-wrap items-center gap-3">
             <button type="submit"
-              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 font-semibold">
               <i class="fas fa-plus text-lg"></i>
-              <span class="font-semibold">Add Item</span>
+              <span>Add Item</span>
             </button>
 
             <button id="clearAddItemForm" type="button"
-              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 font-semibold">
               Clear Form
             </button>
           </div>
@@ -497,15 +497,15 @@
             </div>
           </section>
 
-          <div class="flex items-center gap-4">
+          <div class="flex flex-wrap items-center gap-3">
             <button id="submitReturnForm" type="button"
-              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 font-semibold">
               <i class="fas fa-reply text-lg"></i>
-              <span class="font-semibold">Submit Return</span>
+              <span>Submit Return</span>
             </button>
 
             <button id="cancelReturnForm" type="button"
-              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 font-semibold">
               Cancel
             </button>
           </div>

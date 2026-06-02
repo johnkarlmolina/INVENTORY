@@ -24,17 +24,17 @@
 
       <section class="bg-white rounded-xl shadow p-5 mb-6">
         <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <button id="refreshBtn" class="px-4 py-2 rounded-lg text-white font-medium" style="background-color:#0F828C;">
+          <div class="flex flex-wrap items-center gap-3">
+            <button id="refreshBtn" class="px-5 py-2.5 rounded-xl text-white font-semibold text-sm transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5" style="background-color:#0F828C;">
               <i class="fa-solid fa-rotate-right mr-2"></i>Refresh Data
             </button>
-            <select id="excelExportType" class="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <select id="excelExportType" class="px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0F828C] text-sm shadow-sm bg-white">
               <option value="all">All Data</option>
               <option value="inventory">Inventory Only</option>
               <option value="peripherals">Peripherals Only</option>
               <option value="consumables">Consumables Only</option>
             </select>
-            <button id="exportExcelBtn" class="px-4 py-2 rounded-lg text-white font-medium bg-emerald-600 hover:bg-emerald-700 transition">
+            <button id="exportExcelBtn" class="px-5 py-2.5 rounded-xl text-white font-semibold text-sm bg-emerald-600 hover:bg-emerald-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
               <i class="fa-solid fa-file-excel mr-2"></i>Save as Excel
             </button>
           </div>
