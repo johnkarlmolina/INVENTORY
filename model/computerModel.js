@@ -3,17 +3,17 @@ const { query } = require("../config/db");
 const DELETED_STATUS = "inactive_deleted";
 
 exports.computerDataTable = async (status) => {
-    const params = [];
+    const params = [DELETED_STATUS];
 
     let sql = `
         SELECT *
-        FROM main_inventory
+        FROM main_inventory where COALESCE(LOWER(pc_status), '') != ?
         
     `;
 
     // apply filter if status is selected
     if (status) {
-        sql += ` where LOWER(pc_status) = ?`;
+        sql += ` and LOWER(pc_status) = ?`;
         params.push(status.toLowerCase());
     }
 

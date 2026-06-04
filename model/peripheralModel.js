@@ -4,16 +4,17 @@ const DELETED_STATUS = "inactive_deleted";
 
 exports.peripheralDataTable = async (status) => {
     try {
+        const params = [DELETED_STATUS];
         let sql = `
             SELECT * 
-            FROM peripherals 
+            FROM peripherals where COALESCE(LOWER(peripheral_status), '') != ?
            
         `;
 
-        const params = [];
+        
 
         if (status) {
-            sql += ` where LOWER(peripheral_status) = ?`;
+            sql += ` and LOWER(peripheral_status) = ?`;
             params.push(status.toLowerCase());
         }
 
