@@ -70,6 +70,22 @@
 
         <!-- Button Container -->
         <div class="flex flex-wrap gap-3 justify-start sm:justify-end mb-6">
+          <!--filter-->
+          <select class="bg-white border border-gray-300 text-gray-700 py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-[#0F828C] rounded-xl shadow-sm text-sm" id="typeFilter">
+            <option value="">All Types</option>
+            <option value="Keyboard">Keyboard</option>
+            <option value="Mouse">Mouse</option>
+            <option value="Monitor">Monitor</option>
+            <option value="Printer">Printer</option>
+            <option value="Webcam">Webcam</option>
+            <option value="Headset">Headset</option>
+            <option value="Speaker">Speaker</option>
+            <option value="Scanner">Scanner</option>
+            <option value="External Storage">External Storage</option>
+            <option value="UPS">UPS</option>
+            <option value="AVR">AVR</option>
+            <option value="Other">Other</option>
+          </select>
           <select class="bg-white border border-gray-300 text-gray-700 py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-[#0F828C] rounded-xl shadow-sm text-sm" id="statusFilter">
             <option value="">All Statuses</option>
             <option value="condemned">Condemned</option>
@@ -635,7 +651,8 @@
        serverSide: true,
         ajax: { url: apiUrl+'/peripherals/peripheralDataTable', type:"post", dataType:"json", 
         data: function (d) {
-          d.status = $('#statusFilter').val();
+          d.status = $('#statusFilter').val(),
+          d.typeFilter = $('#typeFilter').val()
         } 
       
         },
@@ -667,6 +684,10 @@
       });
 
       $('#statusFilter').on('change', function () {
+        peripheralsDt.ajax.reload();
+      });
+
+      $('#typeFilter').on('change', function () {
         peripheralsDt.ajax.reload();
       });
 

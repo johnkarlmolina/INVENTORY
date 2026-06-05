@@ -34,6 +34,7 @@ exports.peripheralPageRender = async (req, res) => {
 exports.peripheralDataTable = async (req, res) => {
   try {
     const { status } = req.body;
+    const { typeFilter } = req.body;
     const {
       draw = 1,
       start = 0,
@@ -43,7 +44,7 @@ exports.peripheralDataTable = async (req, res) => {
     } = req.body;
 
     // Fetch data
-    const peripherals = await peripheralModel.peripheralDataTable(status);
+    const peripherals = await peripheralModel.peripheralDataTable(status, typeFilter);
 
     // Map data safely (NO Date objects ❗)
     const peripheralList = peripherals.map(item => ({

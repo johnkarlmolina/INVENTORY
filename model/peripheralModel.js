@@ -2,7 +2,7 @@ const { query } = require("../config/db");
 
 const DELETED_STATUS = "inactive_deleted";
 
-exports.peripheralDataTable = async (status) => {
+exports.peripheralDataTable = async (status, typeFilter) => {
     try {
         const params = [DELETED_STATUS];
         let sql = `
@@ -16,6 +16,11 @@ exports.peripheralDataTable = async (status) => {
         if (status) {
             sql += ` and LOWER(peripheral_status) = ?`;
             params.push(status.toLowerCase());
+        }
+
+        if (typeFilter) {
+            sql += ` and LOWER(kind_of_peripheral) = ?`;
+            params.push(typeFilter.toLowerCase());
         }
 
         const peripheralsData = await query(sql, params);
