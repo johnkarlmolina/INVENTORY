@@ -48,7 +48,8 @@ exports.computerDataTable = async (req, res) => {
       pc_status: item.pc_status || "",
       pc_location: item.pc_location || "",
       ip_address: item.ip_address || "",
-      mac_address: item.mac_address || ""
+      mac_address: item.mac_address || "",
+      port_alloc: item.port_alloc || ""
     }));
 
     // TOTAL BEFORE FILTER
@@ -76,6 +77,7 @@ exports.computerDataTable = async (req, res) => {
         ${item.pc_location}
         ${item.ip_address}
         ${item.mac_address}
+        ${item.port_alloc}
         ${item.date_of_purchase}
         ${item.date_of_entry}
       `.toLowerCase();
@@ -104,7 +106,8 @@ exports.computerDataTable = async (req, res) => {
       "pc_status",
       "pc_location",
       "ip_address",
-      "mac_address"
+      "mac_address",
+      "port_alloc"
     ];
 
     const columnIndex = order[0]?.column ?? 0;
