@@ -49,7 +49,8 @@ exports.computerDataTable = async (req, res) => {
       pc_location: item.pc_location || "",
       ip_address: item.ip_address || "",
       mac_address: item.mac_address || "",
-      port_alloc: item.port_alloc || ""
+      port_alloc: item.port_alloc || "",
+      computer_type:item.computer_type || ""
     }));
 
     // TOTAL BEFORE FILTER
@@ -80,6 +81,7 @@ exports.computerDataTable = async (req, res) => {
         ${item.port_alloc}
         ${item.date_of_purchase}
         ${item.date_of_entry}
+        ${item.computer_type}
       `.toLowerCase();
 
       return searchTerms.every(term => haystack.includes(term));
@@ -107,7 +109,8 @@ exports.computerDataTable = async (req, res) => {
       "pc_location",
       "ip_address",
       "mac_address",
-      "port_alloc"
+      "port_alloc",
+      "computer_type"
     ];
 
     const columnIndex = order[0]?.column ?? 0;
