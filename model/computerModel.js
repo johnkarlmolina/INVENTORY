@@ -26,12 +26,12 @@ exports.inactiveComputerDataTable = async () => {
 
 exports.addComputer = async (computerData) => {
 
-    const { brand, model, serial_number, property_tag, os_version, procie, ram, os_license, pc_user, user_dept, date_of_purchase, office_license, picture_of_pc, pc_no, pc_status, pc_location, ip_address, mac_address, port } = computerData;
+    const { brand, model, serial_number, property_tag, os_version, procie, ram, os_license, pc_user, user_dept, date_of_purchase, office_license, picture_of_pc, pc_no, pc_status, pc_location, ip_address, mac_address, port, computer_type } = computerData;
     const normalizedPcStatus = typeof pc_status === 'string' ? pc_status.trim().toLowerCase() : null;
     const sql = `INSERT INTO main_inventory (brand, model, serial_number, property_tag, os_version, procie, ram, os_license, pc_user, user_dept, 
-                                              date_of_purchase,  office_license, picture_of_pc, pc_no, pc_status, pc_location, ip_address, mac_address, port_alloc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+                                              date_of_purchase,  office_license, picture_of_pc, pc_no, pc_status, pc_location, ip_address, mac_address, port_alloc, computer_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
     
-    const values = [brand, model, serial_number, property_tag, os_version, procie, ram, os_license, pc_user, user_dept, date_of_purchase, office_license, picture_of_pc || null , pc_no || null , normalizedPcStatus, pc_location || null, ip_address || null, mac_address || null, port || null];
+    const values = [brand, model, serial_number, property_tag, os_version, procie, ram, os_license, pc_user, user_dept, date_of_purchase, office_license, picture_of_pc || null , pc_no || null , normalizedPcStatus, pc_location || null, ip_address || null, mac_address || null, port || null, computer_type || null];
     return query(sql, values);
 }
 
@@ -57,7 +57,8 @@ exports.updateComputer = async (computerData) => {
         pc_location,
         ip_address,
         mac_address,
-        port
+        port,
+        computer_type
     } = computerData;
     const normalizedPcStatus = typeof pc_status === 'string' ? pc_status.trim().toLowerCase() : null;
 
@@ -81,7 +82,8 @@ exports.updateComputer = async (computerData) => {
                      pc_location = ?,
                      ip_address = ?,
                      mac_address = ?,
-                     port_alloc = ?
+                     port_alloc = ?,
+                     computer_type = ?
                  WHERE computer_id = ?`;
 
     const values = [
@@ -105,6 +107,7 @@ exports.updateComputer = async (computerData) => {
         ip_address || null,
         mac_address || null,
         port || null,
+        computer_type || null,
         computer_id
     ];
 
