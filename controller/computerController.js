@@ -15,6 +15,7 @@ function getComputerUploadsDir() {
 exports.computerDataTable = async (req, res) => {
   try {
     const {status} = req.body;
+    const {typeFilter} = req.body;
     const {
       draw = 1,
       start = 0,
@@ -25,7 +26,7 @@ exports.computerDataTable = async (req, res) => {
 
 
     // Fetch data
-    const computers = await computerModel.computerDataTable(status);
+    const computers = await computerModel.computerDataTable(status, typeFilter);
 
     // Map safely (NO Date objects ❗)
     const computerList = computers.map(item => ({

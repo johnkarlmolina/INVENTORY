@@ -80,6 +80,14 @@
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
+
+          <select class="bg-white border border-gray-300 text-gray-700 py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-[#0F828C] rounded-xl shadow-sm text-sm" id="typeFilter">
+            <option value="">All Type</option>
+            <option value="Desktop">Desktop</option>
+            <option value="Laptop">Laptop</option>
+            <option value="Tablet">Tablet</option>
+            <option value="Mobile Phone">Mobile Phone</option>
+          </select>
           <% if (isAdmin) { %>
             <button id="openComputerModal"
               class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-5 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2.5 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 text-sm">
@@ -655,6 +663,10 @@
       });
     }
 
+    $('#typeFilter').on('change', function () {
+        table.ajax.reload();
+      });
+
     const baseColumnDefs = [
       { width: '60px', targets: 0 },  // PC Number
       { width: '80px', targets: 1 },  // Brand
@@ -689,7 +701,8 @@
         type: 'POST',
         dataType: 'json',
         data: function (d) {
-          d.status = $('#statusFilter').val();
+          d.status = $('#statusFilter').val(),
+          d.typeFilter = $('#typeFilter').val()
         }
       },
       columns: baseColumns,

@@ -2,7 +2,7 @@ const { query } = require("../config/db");
 
 const DELETED_STATUS = "inactive_deleted";
 
-exports.computerDataTable = async (status) => {
+exports.computerDataTable = async (status, typeFilter) => {
     const params = [DELETED_STATUS];
 
     let sql = `
@@ -16,6 +16,11 @@ exports.computerDataTable = async (status) => {
         sql += ` and LOWER(pc_status) = ?`;
         params.push(status.toLowerCase());
     }
+
+     if (typeFilter) {
+            sql += ` and LOWER(computer_type) = ?`;
+            params.push(typeFilter.toLowerCase());
+        }
 
     return query(sql, params);
 };
