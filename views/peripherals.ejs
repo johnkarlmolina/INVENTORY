@@ -15,6 +15,9 @@
   <!-- Tom Select -->
   <link href="../ldn/tom-select.css" rel="stylesheet">
   <script src="../ldn/tom-select.complete.min.js"></script>
+    <link rel="stylesheet" href="../ldn/buttons.dataTables.min.css">
+  <script src="../ldn/dataTables.buttons.min.js"></script>
+  <script src="../ldn/buttons.colVis.min.js"></script>
 
   <style>
     /* Hide DataTables' default processing overlay; we use a skeleton loader instead. */
@@ -673,12 +676,21 @@
         scrollCollapse: true,
         responsive: false,
         autoWidth: false,
-        columnDefs: peripheralColumnDefs,
+        columnDefs: [peripheralColumnDefs,
+                    {
+                      targets:[5,8,9],
+                      visible: false
+                    }
+        ],
         initComplete: function () {
           hidePeripheralsSkeleton();
           hidePageSkeleton();
           initialLoadComplete = true;
         },
+        dom: 'Bfrtip',
+        buttons: [
+            'colvis' // Column visibility button
+        ],
         language: {
           search: 'Search:',
           lengthMenu: 'Show _MENU_ entries',

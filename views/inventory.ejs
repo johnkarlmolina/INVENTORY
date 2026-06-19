@@ -13,6 +13,9 @@
   <link href="../ldn/dataTables.dataTables.min.css" rel="stylesheet">
   <script src="../ldn/dataTables.min.js"></script>
   <link rel="icon" type="image/png" href="/Images/ndh-it.png">
+  <link rel="stylesheet" href="../ldn/buttons.dataTables.min.css">
+  <script src="../ldn/dataTables.buttons.min.js"></script>
+  <script src="../ldn/buttons.colVis.min.js"></script>
 
   <style>
     /* Hide DataTables' default processing overlay; we use a skeleton loader instead. */
@@ -714,7 +717,16 @@
       scrollCollapse: true,
       responsive: false,
       autoWidth: false,
-      columnDefs: baseColumnDefs,
+      columnDefs: [baseColumnDefs,
+                   {
+                    targets:[5,6,7,8,9,10, 13, 14, 15, 16, 17],
+                    visible: false
+                   }
+      ],
+       dom: 'Bfrtip',
+        buttons: [
+            'colvis' // Column visibility button
+        ],
       language: {
         search: 'Search:',
         lengthMenu: 'Show _MENU_ entries',
