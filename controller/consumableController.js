@@ -349,7 +349,10 @@ exports.undoTransaction = async (req, res) => {
       return res.status(404).json({ message: "Transaction log not found." });
     }
     const log = consumableLogs[0];
-    await consumableModel.updateMainConsumableStock(log.stock_no, log.issued_quantity);
+
+    console.log("this is the quantity that should add", log.issued_quantity);
+    
+    await consumableModel.updateMainConsumableStockUndo(log.stock_no, log.issued_quantity);
 
     await consumableModel.insertIntoUndoLogs(
           log.item,
@@ -423,7 +426,7 @@ exports.returnItem = async (req, res) => {
       return res.status(404).json({ message: "Transaction log not found." });
     }
     const log = consumableLogs[0];
-    await consumableModel.updateMainConsumableStock(log.stock_no, return_quantity);
+    await consumableModel.updateMainConsumableStockUndo(log.stock_no, return_quantity);
     await consumableModel.insertIntoUndoLogs(
       log.item,
       return_quantity,

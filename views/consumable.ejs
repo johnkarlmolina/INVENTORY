@@ -1056,6 +1056,7 @@ const consumablesTable = $consumablesTableEl.DataTable({
               });
 
               requestsTable.clear().draw();
+              consumablesTable.ajax.reload();
             },
 
             error: function () {
