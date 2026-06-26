@@ -29,8 +29,8 @@ exports.getStockByItem = async (item) => {
     return result.length > 0 ? result[0].current_stock : null;
 }
 
-exports.updateMainConsumableStock = async (item, requested_qty) => {
-    const sql = `UPDATE main_consumables SET current_stock = current_stock - ? WHERE stock_no = ?`;
+exports.updateMainConsumableStockUndo = async (item, requested_qty) => {
+    const sql = `UPDATE main_consumables SET current_stock = current_stock + ? WHERE stock_no = ?`;
     const values = [requested_qty, item];
     return query(sql, values);
 }
