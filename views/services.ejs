@@ -7,7 +7,9 @@
   <link href="../ldn/output.css" rel="stylesheet">
   <link rel="stylesheet" href="/fontawesome/css/all.min.css">
   <script src="../ldn/jquery-3.7.1.min.js"></script>
-    <script src="../ldn/sweetalert2@11.js"></script>
+  <script src="../ldn/sweetalert2@11.js"></script>
+  <link href="../ldn/tom-select.css" rel="stylesheet">
+  <script src="../ldn/tom-select.complete.min.js"></script>
   <!-- DataTables (Default) -->
   <link href="../ldn/dataTables.dataTables.min.css" rel="stylesheet">
   <script src="../ldn/dataTables.min.js"></script>
@@ -493,47 +495,97 @@
           });
         });
       });
-          $(document).on('change', '#type_of_asset', function() {
-            const selectedType = $(this).val();
-            const $brandSerialSelect = $('#brand_serial');
+     
 
-            $brandSerialSelect.empty().append('<option value="">Select brand/serial</option>');
+      let assetMap = {};
+         
+      const brandSerial = new TomSelect('#brand_serial', {
+          create: false,
+          placeholder: "Select brand/serial...",
 
-            if (selectedType) {
-              $.ajax({
-                url: apiUrl + `/services/brandSerialOptions`,
-                data: { type_of_asset: selectedType },
-                method: 'GET',
-                success: function(resp) {
-                  if (resp && resp.success === true && Array.isArray(resp.options)) {
+          onChange: function(value) {
 
-                    resp.options.forEach(item => {
-                      let value = '';
-                      let text = '';
+              if (!value || !assetMap[value]) {
+                  $('#serial_number').val('');
+                  $('#property_tag').val('');
+                  return;
+              }
 
-                      if (resp.typeAsset === "peripheral") {
-                        value = item.peripheral_id;
-                        text = `${item.brand} ${item.model} ${item.serial_no} ${item.property_tag}`;
-                      } 
-                      else if (resp.typeAsset === "computer") {
-                        value = item.computer_id;
-                        text = `${item.brand} ${item.model} ${item.serial_number} ${item.property_tag}`;
-                      }
+              const item = assetMap[value];
 
-                      $brandSerialSelect.append(
-                        `<option value="${value}">${text}</option>`
-                      );
-                    });
+              $('#property_tag').val(item.property_tag);
 
-                  }
-                },
-                error: function(err) {
-                  console.error("AJAX error:", err);
-                  alert("Failed to load options");
-                }
-              });
-            }
+              // Peripheral vs Computer
+              $('#serial_number').val(
+                  item.serial_no || item.serial_number || ''
+              );
+          }
+      });
+      
+      
+      $(document).on('change', '#type_of_asset', function () {
+
+          const selectedType = $(this).val();
+
+          brandSerial.clear();
+          brandSerial.clearOptions();
+
+          brandSerial.addOption({
+              value: '',
+              text: 'Select brand/serial'
           });
+
+          if (!selectedType) {
+              brandSerial.refreshOptions(false);
+              return;
+          }
+
+          $.ajax({
+              url: apiUrl + '/services/brandSerialOptions',
+              method: 'GET',
+              data: {
+                  type_of_asset: selectedType
+              },
+        success: function (resp) {
+
+        assetMap = {}; // clear previous data
+
+        brandSerial.clear();
+        brandSerial.clearOptions();
+
+        if (resp.success && Array.isArray(resp.options)) {
+
+            resp.options.forEach(item => {
+
+                let value, text;
+
+                if (resp.typeAsset === "peripheral") {
+                    value = item.peripheral_id;
+                    text = `${item.brand} ${item.model} ${item.serial_no} ${item.property_tag}`;
+                } else {
+                    value = item.computer_id;
+                    text = `${item.brand} ${item.model} ${item.serial_number} ${item.property_tag}`;
+                }
+
+                // Save the complete record
+                assetMap[value] = item;
+
+                brandSerial.addOption({
+                    value: value,
+                    text: text
+                });
+            });
+
+            brandSerial.refreshOptions(false);
+        }
+      },
+              error: function (err) {
+                  console.error(err);
+              }
+          });
+      });
+
+          //const brand_serial = new TomSelect('#brand_serial', { create: false });
 
     });
   </script>

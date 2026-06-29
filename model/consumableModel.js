@@ -16,9 +16,9 @@ exports.inactiveConsumables = async () => {
   return query(sql, ['inactive']);
 }
 
-exports.recordRequest = async (item, transaction_date, issued_quantity, item_classification, stock_no, batch_number, issued_to) => {
-    const sql = `INSERT INTO consumable_logs (item, date_input, issued_quantity, item_class, stock_no, batch_number, issued_to) VALUES (?, ?, ?, ?, ?, ?, ?)`;
-    const values = [item, transaction_date, issued_quantity, item_classification, stock_no, batch_number, issued_to];
+exports.recordRequest = async (item, transaction_date, issued_quantity, item_classification, stock_no, batch_number, issued_to, peripheral_id) => {
+    const sql = `INSERT INTO consumable_logs (item, date_input, issued_quantity, item_class, stock_no, batch_number, issued_to, peripheral_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    const values = [item, transaction_date, issued_quantity, item_classification, stock_no, batch_number, issued_to, peripheral_id];
     return query(sql, values);
 }
 

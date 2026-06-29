@@ -369,3 +369,14 @@ exports.viewPeripheralPdf = async (req, res) => {
     return res.status(500).send("Failed to view PDF");
   }
 };
+
+exports.getPrintersList = async(req, res)=>{
+  try{
+
+    const peripheralID = await peripheralModel.peripheralPrinters();
+    res.json({data:peripheralID});
+
+  }catch(error){
+
+  }
+}

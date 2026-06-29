@@ -106,3 +106,8 @@ exports.activatePeripheral = async (peripheral_id) => {
     const sql = `update peripherals set peripheral_status = ? WHERE peripheral_id = ?`;
     return query(sql, ['active', peripheral_id]);
 }
+
+exports.peripheralPrinters = async()=>{
+    const sql = `select brand, model, peripheral_id, serial_no, property_tag from peripherals where kind_of_peripheral = ?`;
+    return query(sql, ['Printer']);
+}
