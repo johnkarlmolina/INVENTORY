@@ -220,7 +220,8 @@ exports.recordRequest = async (req, res) => {
         request.item_classification,
         request.stock_no,
         request.batch_number,
-        request.issued_to
+        request.issued_to,
+        request.peripheral_id
       );
 
       const currentStock = await consumableModel.getStockByItem(request.stock_no);

@@ -66,6 +66,7 @@ router.post("/addPeripheral", requireAdmin, peripheralController.addPeripheral);
 router.post("/updatePeripheral", requireAdmin, peripheralController.updatePeripheral);
 router.post("/deletePeripheral", requireAdmin, peripheralController.deletePeripheral);
 router.post("/activatePeripheral", requireAdmin, peripheralController.activatePeripheral);
+router.get("/getPrintersList", peripheralController.getPrintersList);
 
 // Uploads / files
 router.post(

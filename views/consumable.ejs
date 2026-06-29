@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="/fontawesome/css/all.min.css">
   <script src="../ldn/jquery-3.7.1.min.js"></script>
   <script src="../ldn/sweetalert2@11.js"></script>
+    <link href="../ldn/tom-select.css" rel="stylesheet">
+  <script src="../ldn/tom-select.complete.min.js"></script>
   <!-- DataTables -->
   <link href="../ldn/dataTables.dataTables.min.css" rel="stylesheet">
   <script src="../ldn/dataTables.min.js"></script>
@@ -206,6 +208,9 @@
                     <th
                       class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
                       Issued To:</th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
+                      Printer:</th>
                     <th
                       class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
                       Current Stock:</th>
@@ -568,6 +573,10 @@
       // Start in loading state until the first DataTables response arrives.
       showPageSkeleton();
       showConsumablesSkeleton();
+
+
+
+
 
       // Bind DataTables events before initialization so we catch the first load.
       const $consumablesTableEl = $('#consumablesTable');
@@ -976,6 +985,39 @@ const consumablesTable = $consumablesTableEl.DataTable({
           openAddItemModal(true);
         });
 
+        function loadPrinters(selectElement) {
+            $.ajax({
+                url: apiUrl + '/peripherals/getPrintersList',
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+
+                    $(selectElement).empty().append(
+                        '<option value="">Select Printer...</option>'
+                    );
+
+                    $.each(response.data, function (_, printer) {
+                        $(selectElement).append(
+                            `<option value="${printer.peripheral_id}">
+                                ${printer.brand} ${printer.model} ${printer.serial_no} ${printer.property_tag}
+                            </option>`
+                        );
+                    });
+
+                    // Initialize only once
+                    if (!selectElement.tomselect) {
+                        new TomSelect(selectElement, {
+                            create: false,
+                            placeholder: "Select printer..."
+                        });
+                    }
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+
         $('#consumablesTable tbody').on('click', '.add-request', function () {
           //if (!isAdminUser || !requestsTable) return;
 
@@ -984,7 +1026,7 @@ const consumablesTable = $consumablesTableEl.DataTable({
 
           const rowData = consumablesTable.row($(this).parents('tr')).data();
 
-          requestsTable.row.add([
+          const row = requestsTable.row.add([
             rowData.item,
             "Pending",
             `<input type="datetime-local" class="transaction-date border rounded px-2 py-1 w-48" value="${formatted}">`,
@@ -995,12 +1037,64 @@ const consumablesTable = $consumablesTableEl.DataTable({
             rowData.model,
             rowData.stock_no,
             rowData.batch_number || '',
-            '<input type="text" class="issued-to border rounded px-2 py-1 w-32" placeholder="Enter section/office">',
+            
+            `<select class="issued-to border rounded px-2 py-1 w-32" id="issuanceDept">
+               <option value="">Select department...</option>
+                  <option value="IT Section">IT Section</option>
+                  <option value="Accounting">Accounting</option>
+                  <option value="Nursing">Nursing</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="IPC">IPC</option>
+                  <option value="DO">DO</option>
+                  <option value="Laboratory">Laboratory</option>
+                  <option value="HIMS">HIMS</option>
+                  <option value="Pharmacy">Pharmacy</option>
+                  <option value="Radiology">Radiology</option>
+                  <option value="Admitting">Admitting</option>
+                  <option value="Billing & Claims">Billing & Claims</option>
+                  <option value="Cash Section">Cash Section</option>
+                  <option value="Dietary">Dietary</option>
+                  <option value="HR">HR</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Operations">Operations</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value = "HIMS">HIMS</option>
+                  <option value="Other">Other</option>
+                  <option value="Property & Supply">Property & Supply</option>
+                  <option value="MSS">MSS</option>
+                  <option value ="CSR">CSR</option>
+                  <option value="CQI">CQI</option>
+                  <option value="Pulmonary Units">Pulmonary Unit</option>
+                  <option value="Physical Therapy">Physical Therapy</option>
+                  <option value="OB">OB</option>
+                  <option value="Dental">Dental</option>
+                  <option value="OPD">OPD</option>
+            </select>`,
+
+            `<select class="printerSelect border rounded px-2 py-1 w-32">
+              
+             </select>`,
+
             rowData.current_stock,
             `<button class="remove-btn bg-red-500 border-2 border-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200" title="Remove">
               <i class="fas fa-times"></i> Remove
             </button>`
-          ]).draw();
+          ]).draw(false);
+
+          const rowNode = row.node();
+
+          // Initialize Tom Select only for the new row
+          const select = $(rowNode).find('.issued-to')[0];
+          const selectPrinter = $(rowNode).find('.printerSelect')[0];
+
+          new TomSelect(select, {
+              create: false,
+              placeholder: "Select department..."
+          });
+
+
+
+          loadPrinters(selectPrinter);
 
         });
 
@@ -1021,6 +1115,7 @@ const consumablesTable = $consumablesTableEl.DataTable({
             let stock_no = $(this).find('td:eq(7)').text();
             let batch_number = $(this).find('td:eq(8)').text();
             let issued_to = $(this).find('.issued-to').val();
+            let peripheral_id = $(this).find('.printerSelect').val();
             let current_stock = $(this).find('td:eq(10)').text();
 
             requestItems.push({
@@ -1033,7 +1128,8 @@ const consumablesTable = $consumablesTableEl.DataTable({
               model: model,
               stock_no: stock_no,
               batch_number: batch_number,
-              issued_to: issued_to
+              issued_to: issued_to,
+              peripheral_id:peripheral_id
             });
 
           });

@@ -25,6 +25,10 @@ function isAdmin(req) {
     return getAccessLevel(req) === "Admin";
 }
 
+function isTechnician(req){
+    return getAccessLevel(req) === "IT Technician";
+}
+
 function forbidden(req, res) {
     const preferred = req.accepts(["json", "html"]);
     if (preferred === "html") {
@@ -36,6 +40,12 @@ function forbidden(req, res) {
 function requireAdmin(req, res, next) {
     if (isAdmin(req)) return next();
     return forbidden(req, res);
+}
+
+function requireTechnician(req, res, next){
+    if(isAdmin(req)||isTechnician(req)) return next();
+    return forbidden(req, res);
+
 }
 
 // Middleware to check if user is already logged in (for login page)
@@ -52,5 +62,7 @@ module.exports = {
     normalizeAccessLevel,
     getAccessLevel,
     isAdmin,
-    requireAdmin
+    requireAdmin,
+    requireTechnician
+
 };
