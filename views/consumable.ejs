@@ -21,6 +21,22 @@
     .dt-processing {
       display: none !important;
     }
+
+    /* Fix TomSelect dropdown clipping inside overflow containers / DataTable rows.
+       dropdownParent:'body' appends .ts-dropdown directly to <body>, so we
+       must give it a high z-index and make it scrollable. */
+    body > .ts-dropdown {
+      z-index: 9999 !important;
+      max-height: 260px;
+      overflow-y: auto;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      border: 1px solid #cbd5e1;
+      border-radius: 0.5rem;
+    }
+    body > .ts-dropdown .ts-dropdown-content {
+      max-height: 240px;
+      overflow-y: auto;
+    }
   </style>
 </head>
 
@@ -1008,7 +1024,8 @@ const consumablesTable = $consumablesTableEl.DataTable({
                     if (!selectElement.tomselect) {
                         new TomSelect(selectElement, {
                             create: false,
-                            placeholder: "Select printer..."
+                            placeholder: "Select printer...",
+                            dropdownParent: 'body'
                         });
                     }
                 },
@@ -1089,10 +1106,9 @@ const consumablesTable = $consumablesTableEl.DataTable({
 
           new TomSelect(select, {
               create: false,
-              placeholder: "Select department..."
+              placeholder: "Select department...",
+              dropdownParent: 'body'
           });
-
-
 
           loadPrinters(selectPrinter);
 
