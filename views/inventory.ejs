@@ -272,12 +272,16 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
                 <label for="ip_address" class="block text-sm font-medium text-gray-700 mb-2">IP address</label>
-                <input id="ip_address" name="ip_address" type="text" required
+                <input id="ip_address" name="ip_address" type="text"  maxlength="15"
+                        placeholder="000.000.000.000"
+                        autocomplete="off" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
               <div>
                 <label for="mac_address" class="block text-sm font-medium text-gray-700 mb-2">Mac address</label>
-                <input id="mac_address" name="mac_address" type="text" required
+                <input id="mac_address" name="mac_address" type="text"  maxlength="17"
+                        placeholder="00:00:00:00:00:00"
+                        autocomplete="off" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
 
@@ -485,6 +489,41 @@
       $pageSkeleton.addClass('hidden');
       $('body').attr('aria-busy', 'false');
     }
+
+
+    const ipInput = document.getElementById("ip_address");
+
+    ipInput.addEventListener("input", function (e) {
+      // Remove everything except digits
+      let value = e.target.value.replace(/\D/g, "");
+
+      // Split into groups of up to 3 digits
+      let parts = [];
+      for (let i = 0; i < value.length && parts.length < 4; i += 3) {
+        parts.push(value.substring(i, i + 3));
+      }
+
+      e.target.value = parts.join(".");
+
+      });
+
+      const macInput = document.getElementById("mac_address");
+
+      macInput.addEventListener("input", function (e) {
+        // Remove everything except hex characters, then convert to uppercase
+        let value = e.target.value
+          .replace(/[^0-9a-fA-F]/g, "")
+          .toUpperCase();
+
+        // Split into groups of 2 characters
+        let parts = [];
+        for (let i = 0; i < value.length && parts.length < 6; i += 2) {
+          parts.push(value.substring(i, i + 2));
+        }
+
+        e.target.value = parts.join(":");
+      });
+
 
     // Keep skeleton aligned if sidebar width/margins change.
     window.addEventListener('resize', syncPageSkeletonOffset);
