@@ -15,6 +15,7 @@ function getComputerUploadsDir() {
 exports.computerDataTable = async (req, res) => {
   try {
     const {status} = req.body;
+    const {typeFilter} = req.body;
     const {
       draw = 1,
       start = 0,
@@ -25,7 +26,7 @@ exports.computerDataTable = async (req, res) => {
 
 
     // Fetch data
-    const computers = await computerModel.computerDataTable(status);
+    const computers = await computerModel.computerDataTable(status, typeFilter);
 
     // Map safely (NO Date objects ❗)
     const computerList = computers.map(item => ({
@@ -48,7 +49,9 @@ exports.computerDataTable = async (req, res) => {
       pc_status: item.pc_status || "",
       pc_location: item.pc_location || "",
       ip_address: item.ip_address || "",
-      mac_address: item.mac_address || ""
+      mac_address: item.mac_address || "",
+      port_alloc: item.port_alloc || "",
+      computer_type:item.computer_type || ""
     }));
 
     // TOTAL BEFORE FILTER
@@ -76,8 +79,10 @@ exports.computerDataTable = async (req, res) => {
         ${item.pc_location}
         ${item.ip_address}
         ${item.mac_address}
+        ${item.port_alloc}
         ${item.date_of_purchase}
         ${item.date_of_entry}
+        ${item.computer_type}
       `.toLowerCase();
 
       return searchTerms.every(term => haystack.includes(term));
@@ -104,7 +109,9 @@ exports.computerDataTable = async (req, res) => {
       "pc_status",
       "pc_location",
       "ip_address",
-      "mac_address"
+      "mac_address",
+      "port_alloc",
+      "computer_type"
     ];
 
     const columnIndex = order[0]?.column ?? 0;

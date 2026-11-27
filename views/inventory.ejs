@@ -13,6 +13,9 @@
   <link href="../ldn/dataTables.dataTables.min.css" rel="stylesheet">
   <script src="../ldn/dataTables.min.js"></script>
   <link rel="icon" type="image/png" href="/Images/ndh-it.png">
+  <link rel="stylesheet" href="../ldn/buttons.dataTables.min.css">
+  <script src="../ldn/dataTables.buttons.min.js"></script>
+  <script src="../ldn/buttons.colVis.min.js"></script>
 
   <style>
     /* Hide DataTables' default processing overlay; we use a skeleton loader instead. */
@@ -72,23 +75,31 @@
         </div>
 
         <!-- Button Container -->
-        <div class="flex justify-end mb-4">
-          <select class="bg-white border border-gray-300 text-gray-700 py-2 px-4 focus:outline-none focus:ring-2 focus:ring-[#0F828C]" id="statusFilter">
+        <div class="flex flex-wrap gap-3 justify-start sm:justify-end mb-6">
+          <select class="bg-white border border-gray-300 text-gray-700 py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-[#0F828C] rounded-xl shadow-sm text-sm" id="statusFilter">
             <option value="">All Statuses</option>
             <option value="condemned">Condemned</option>
             <option value="inrepair">In Repair</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>
+
+          <select class="bg-white border border-gray-300 text-gray-700 py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-[#0F828C] rounded-xl shadow-sm text-sm" id="typeFilter">
+            <option value="">All Type</option>
+            <option value="Desktop">Desktop</option>
+            <option value="Laptop">Laptop</option>
+            <option value="Tablet">Tablet</option>
+            <option value="Mobile Phone">Mobile Phone</option>
+          </select>
           <% if (isAdmin) { %>
             <button id="openComputerModal"
-              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
-              <i class="fas fa-plus text-lg"></i>
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-5 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2.5 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 text-sm">
+              <i class="fas fa-plus text-base"></i>
               <span class="font-semibold">Add Computer</span>
             </button>
 
-            <button id="openInactiveModal" class="ml-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50">
-              <i class="fas fa-ban text-lg"></i>
+            <button id="openInactiveModal" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-5 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2.5 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50 text-sm">
+              <i class="fas fa-ban text-base"></i>
               <span class="font-semibold">Inactive</span>
             </button>
           <% } %>
@@ -130,16 +141,19 @@
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">OS Version</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Processor</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">RAM</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Computer Type</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">OS License</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Office License</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">User</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Department</th>
+                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">IP Address</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">MAC Address</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Port</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Date of Purchase</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Date of Entry</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Office License</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">PC Status</th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">PC Location</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">IP Address</th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">MAC Address</th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">PC Status</th>
+                 
                   <% if (isAdmin) { %>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">Actions</th>
                   <% } %>
@@ -193,7 +207,24 @@
                 <label for="computer_pdf" class="block text-sm font-medium text-gray-700 mb-2">Upload PDF</label>
                 <input id="computer_pdf" name="computer_pdf" type="file" accept="application/pdf"
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+
+                   
               </div>
+
+              <div>
+                <label for="computer_type" class="block text-sm font-medium text-gray-700 mb-2">Computer Type</label>
+                   
+                   <select id="computer_type" name="computer_type" required
+                      class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+                      <option value="" selected disabled>Select status...</option>
+                      <option value="Desktop">Desktop</option>
+                      <option value="Laptop">Laptop</option>
+                      <option value="Tablet">Tablet</option>
+                      <option value="Mobile Phone">Mobile Phone</option>
+                    </select>
+              </div>
+               
+      
             </div>
           </section>
 
@@ -224,26 +255,39 @@
                 <input id="property_tag" name="property_tag" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
+
+               <div>
                 <label for="serial_number" class="block text-sm font-medium text-gray-700 mb-2">Serial Number</label>
                 <input id="serial_number" name="serial_number" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
+
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+             
             </div>
           </section>
 
           <section class="mb-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div>
-                <label for="ip_address" class="block text-sm font-medium text-gray-700 mb-2">Ipaddress</label>
-                <input id="ip_address" name="ip_address" type="text" required
+                <label for="ip_address" class="block text-sm font-medium text-gray-700 mb-2">IP address</label>
+                <input id="ip_address" name="ip_address" type="text"  maxlength="15"
+                        placeholder="000.000.000.000"
+                        autocomplete="off" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
               <div>
                 <label for="mac_address" class="block text-sm font-medium text-gray-700 mb-2">Mac address</label>
-                <input id="mac_address" name="mac_address" type="text" required
+                <input id="mac_address" name="mac_address" type="text"  maxlength="17"
+                        placeholder="00:00:00:00:00:00"
+                        autocomplete="off" required
+                  class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
+              </div>
+
+              <div>
+                <label for="port" class="block text-sm font-medium text-gray-700 mb-2">Port</label>
+                <input id="port" name="port" type="text" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
               </div>
             </div>
@@ -290,9 +334,7 @@
                 <select id="user_dept" name="user_dept" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
                   <option value="">Select department...</option>
-                  <option value="Personnel">Personnel</option>
-                  <option value="CQI">CQI</option>
-                  <option value="IT">IT</option>
+                  <option value="IT Section">IT Section</option>
                   <option value="Accounting">Accounting</option>
                   <option value="Nursing">Nursing</option>
                   <option value="Marketing">Marketing</option>
@@ -306,12 +348,24 @@
                   <option value="Billing & Claims">Billing & Claims</option>
                   <option value="Cash Section">Cash Section</option>
                   <option value="Dietary">Dietary</option>
+                  <option value="HR">HR</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Operations">Operations</option>
                   <option value="Engineering">Engineering</option>
+                  <option value = "HIMS">HIMS</option>
+                  <option value="Other">Other</option>
                   <option value="Property & Supply">Property & Supply</option>
                   <option value="MSS">MSS</option>
                   <option value ="CSR">CSR</option>
                   <option value="ER">ER</option>
+                  <option value="CQI">CQI</option>
+                  <option value="Pulmonary Units">Pulmonary Unit</option>
+                  <option value="Physical Therapy">Physical Therapy</option>
+                  <option value="OB">OB</option>
+                  <option value="Dental">Dental</option>
+                  <option value="OPD">OPD</option>
                 </select>
+
               </div>
             </div>
           </section>
@@ -351,15 +405,15 @@
             </div>
           </section>
 
-          <div class="flex items-center gap-4">
+          <div class="flex flex-wrap items-center gap-3">
             <button type="submit" id="submitComputerForm"
-              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 font-semibold">
               <i class="fas fa-plus text-lg"></i>
-              <span class="font-semibold">Add Computer</span>
+              <span>Add Computer</span>
             </button>
 
             <button id="clearComputerForm" type="button"
-              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 font-semibold">
               Clear Form
             </button>
           </div>
@@ -436,6 +490,41 @@
       $pageSkeleton.addClass('hidden');
       $('body').attr('aria-busy', 'false');
     }
+
+
+    const ipInput = document.getElementById("ip_address");
+
+    ipInput.addEventListener("input", function (e) {
+      // Remove everything except digits
+      let value = e.target.value.replace(/\D/g, "");
+
+      // Split into groups of up to 3 digits
+      let parts = [];
+      for (let i = 0; i < value.length && parts.length < 4; i += 3) {
+        parts.push(value.substring(i, i + 3));
+      }
+
+      e.target.value = parts.join(".");
+
+      });
+
+      const macInput = document.getElementById("mac_address");
+
+      macInput.addEventListener("input", function (e) {
+        // Remove everything except hex characters, then convert to uppercase
+        let value = e.target.value
+          .replace(/[^0-9a-fA-F]/g, "")
+          .toUpperCase();
+
+        // Split into groups of 2 characters
+        let parts = [];
+        for (let i = 0; i < value.length && parts.length < 6; i += 2) {
+          parts.push(value.substring(i, i + 2));
+        }
+
+        e.target.value = parts.join(":");
+      });
+
 
     // Keep skeleton aligned if sidebar width/margins change.
     window.addEventListener('resize', syncPageSkeletonOffset);
@@ -573,16 +662,25 @@
       { data: 'os_version' },
       { data: 'procie' },
       { data: 'ram' },
+      {data:'computer_type'},
       { data: 'os_license' },
+      { data: 'office_license' },
       { data: 'pc_user' },
       { data: 'user_dept' },
+      {data: 'ip_address' },
+      { data: 'mac_address' },
+      { data: 'port_alloc' },
       { data: 'date_of_purchase' },
       { data: 'date_of_entry' },
-      { data: 'office_license' },
-      { data: 'pc_status' },
       { data: 'pc_location' },
-      {data: 'ip_address' },
-      { data: 'mac_address' }
+      {
+        data: 'pc_status',
+        render: function (data) {
+          if (!data) return '';
+          return data.charAt(0).toUpperCase() + data.slice(1);
+        }
+      }
+    
     ];
 
     if (isAdminUser) {
@@ -608,6 +706,10 @@
       });
     }
 
+    $('#typeFilter').on('change', function () {
+        table.ajax.reload();
+      });
+
     const baseColumnDefs = [
       { width: '60px', targets: 0 },  // PC Number
       { width: '80px', targets: 1 },  // Brand
@@ -616,17 +718,19 @@
       { width: '100px', targets: 4 }, // Property Tag
       { width: '100px', targets: 5 }, // OS Version
       { width: '120px', targets: 6 }, // Processor
-      { width: '60px', targets: 7 },  // RAM
-      { width: '100px', targets: 8 }, // OS License
-      { width: '120px', targets: 9 }, // User
-      { width: '150px', targets: 10 }, // Department
-      { width: '110px', targets: 11 }, // Date of Purchase
-      { width: '110px', targets: 12 }, // Date of Entry
-      { width: '180px', targets: 13 }, // Office License
-      { width: '100px', targets: 14 }, // PC Status
-      { width: '100px', targets: 15 },  // PC Location
-      { width: '120px', targets: 16 }, // IP Address
-      { width: '150px', targets: 17 }  // MAC Address
+      { width: '60px', targets: 7 }, 
+      { width: '60px', targets: 8 }, // RAM
+      { width: '100px', targets: 9 }, // OS License
+      { width: '120px', targets: 10 }, // Office License
+      { width: '150px', targets: 11 }, // user
+      { width: '110px', targets: 12 }, // dept
+      { width: '110px', targets: 13 }, // ip address
+      { width: '180px', targets: 14 }, // mac address
+      {width: '80px', targets: 15 },  // port
+      { width: '100px', targets: 16 }, // date of purchase
+      { width: '100px', targets: 17 },  // date of entry
+      { width: '120px', targets: 18 }, // pc location
+      { width: '150px', targets: 19 }  // pc status
     ];
     if (isAdminUser) {
       baseColumnDefs.push({ width: '100px', targets: 18, className: 'text-center' });
@@ -640,7 +744,8 @@
         type: 'POST',
         dataType: 'json',
         data: function (d) {
-          d.status = $('#statusFilter').val();
+          d.status = $('#statusFilter').val(),
+          d.typeFilter = $('#typeFilter').val()
         }
       },
       columns: baseColumns,
@@ -652,7 +757,16 @@
       scrollCollapse: true,
       responsive: false,
       autoWidth: false,
-      columnDefs: baseColumnDefs,
+      columnDefs: [baseColumnDefs,
+                   {
+                    targets:[5,6,7,8,9,10, 13, 14, 15, 16, 17],
+                    visible: false
+                   }
+      ],
+       dom: 'Bfrtip',
+        buttons: [
+            'colvis' // Column visibility button
+        ],
       language: {
         search: 'Search:',
         lengthMenu: 'Show _MENU_ entries',
@@ -893,6 +1007,7 @@
       $('#pc_status').val((rowData.pc_status || 'active').toLowerCase());
       $('#ip_address').val(rowData.ip_address || '');
       $('#mac_address').val(rowData.mac_address || '');
+      $('#port').val(rowData.port_alloc || '');
       
       // Handle pc_location - add option if not exists
       if (rowData.pc_location && $('#pc_location option[value="' + rowData.pc_location + '"]').length === 0) {

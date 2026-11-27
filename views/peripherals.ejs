@@ -15,6 +15,9 @@
   <!-- Tom Select -->
   <link href="../ldn/tom-select.css" rel="stylesheet">
   <script src="../ldn/tom-select.complete.min.js"></script>
+    <link rel="stylesheet" href="../ldn/buttons.dataTables.min.css">
+  <script src="../ldn/dataTables.buttons.min.js"></script>
+  <script src="../ldn/buttons.colVis.min.js"></script>
 
   <style>
     /* Hide DataTables' default processing overlay; we use a skeleton loader instead. */
@@ -69,25 +72,39 @@
         </div>
 
         <!-- Button Container -->
-        <div class="flex justify-end mb-4">
-
-           <select class="bg-white border border-gray-300 text-gray-700 py-2 px-4 focus:outline-none focus:ring-2 focus:ring-[#0F828C]" id="statusFilter">
-              <option value="">All Statuses</option>
-              <option value="condemned">Condemned</option>
-              <option value="inrepair">In Repair</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-            
+        <div class="flex flex-wrap gap-3 justify-start sm:justify-end mb-6">
+          <!--filter-->
+          <select class="bg-white border border-gray-300 text-gray-700 py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-[#0F828C] rounded-xl shadow-sm text-sm" id="typeFilter">
+            <option value="">All Types</option>
+            <option value="Keyboard">Keyboard</option>
+            <option value="Mouse">Mouse</option>
+            <option value="Monitor">Monitor</option>
+            <option value="Printer">Printer</option>
+            <option value="Webcam">Webcam</option>
+            <option value="Headset">Headset</option>
+            <option value="Speaker">Speaker</option>
+            <option value="Scanner">Scanner</option>
+            <option value="External Storage">External Storage</option>
+            <option value="UPS">UPS</option>
+            <option value="AVR">AVR</option>
+            <option value="Other">Other</option>
+          </select>
+          <select class="bg-white border border-gray-300 text-gray-700 py-2.5 px-4 focus:outline-none focus:ring-2 focus:ring-[#0F828C] rounded-xl shadow-sm text-sm" id="statusFilter">
+            <option value="">All Statuses</option>
+            <option value="condemned">Condemned</option>
+            <option value="inrepair">In Repair</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
           <% if (isAdmin) { %>
             <button id="openPeripheralModal"
-              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
-              <i class="fas fa-plus text-lg"></i>
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-5 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2.5 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 text-sm">
+              <i class="fas fa-plus text-base"></i>
               <span class="font-semibold">Add Peripheral</span>
             </button>
 
-            <button id="openInactivePeripheralModal" class="ml-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50">
-              <i class="fas fa-ban text-lg"></i>
+            <button id="openInactivePeripheralModal" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-5 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2.5 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50 text-sm">
+              <i class="fas fa-ban text-base"></i>
               <span class="font-semibold">Inactive</span>
             </button>
           <% } %>
@@ -118,6 +135,10 @@
             <table id="peripheralsTable" class="display nowrap" style="width:100%">
               <thead style="background-color: #0F828C;">
                 <tr>
+
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
+                    Peripheral No.</th>
                   <th
                     class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
                     Brand</th>
@@ -126,34 +147,35 @@
                     Model</th>
                   <th
                     class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
-                    Date of Purchase</th>
-                  <th
-                    class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
-                    Date of Entry</th>
-                  <th
-                    class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
-                    User</th>
-                  <th
-                    class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
-                    Department</th>
-                  <th
-                    class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
-                    Type of Peripheral</th>
-                  <th
-                    class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
                     Serial No.</th>
                   <th
                     class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
                     Property Tag</th>
                   <th
                     class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
-                    Peripheral No.</th>
+                    Type of Peripheral</th>
+
                   <th
                     class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
-                    Peripheral Status</th>
+                    User</th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
+                    Department</th>
+
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
+                    Date of Purchase</th>
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
+                    Date of Entry</th>
                   <th
                     class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
                     Peripheral Location</th>
+
+                  <th
+                    class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
+                    Peripheral Status</th>
+
                   <% if (isAdmin) { %>
                     <th
                       class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
@@ -273,9 +295,7 @@
                 <select id="user_dept" name="user_dept" required
                   class="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white focus:border-[#0F828C] focus:outline-none focus:ring-2 focus:ring-[#0F828C]/20">
                   <option value="">Select department...</option>
-                  <option value="Personnel">Personnel</option>
-                  <option value="CQI">CQI</option>
-                  <option value="IT">IT</option>
+                  <option value="IT Section">IT Section</option>
                   <option value="Accounting">Accounting</option>
                   <option value="Nursing">Nursing</option>
                   <option value="Marketing">Marketing</option>
@@ -289,11 +309,22 @@
                   <option value="Billing & Claims">Billing & Claims</option>
                   <option value="Cash Section">Cash Section</option>
                   <option value="Dietary">Dietary</option>
+                  <option value="HR">HR</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Operations">Operations</option>
                   <option value="Engineering">Engineering</option>
+                  <option value = "HIMS">HIMS</option>
+                  <option value="Other">Other</option>
                   <option value="Property & Supply">Property & Supply</option>
                   <option value="MSS">MSS</option>
                   <option value ="CSR">CSR</option>
                   <option value="ER">ER</option>
+                  <option value="CQI">CQI</option>
+                  <option value="Pulmonary Units">Pulmonary Unit</option>
+                  <option value="Physical Therapy">Physical Therapy</option>
+                  <option value="OB">OB</option>
+                  <option value="Dental">Dental</option>
+                  <option value="OPD">OPD</option>
                 </select>
               </div>
             </div>
@@ -337,16 +368,15 @@
             </div>
           </section>
 
-          <div class="flex items-center gap-4">
-          
+          <div class="flex flex-wrap items-center gap-3">
             <button type="submit"
-              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 font-semibold">
               <i class="fas fa-plus text-lg"></i>
-              <span class="font-semibold">Add Peripheral</span>
+              <span>Add Peripheral</span>
             </button>
 
             <button id="clearPeripheralForm" type="button"
-              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 font-semibold">
               Clear Form
             </button>
           </div>
@@ -567,18 +597,23 @@
       }
 
       const peripheralColumns = [
+        { data: 'peripheral_no' },
         { data: 'brand' },
         { data: 'model' },
-        { data: 'date_of_purchase' },
-        { data: 'date_of_entry' },
-        { data: 'peripheral_user' },
-        { data: 'user_dept' },
-        { data: 'kind_of_peripheral' },
         { data: 'serial_no' },
         { data: 'property_tag' },
-        { data: 'peripheral_no' },
-        { data: 'peripheral_status' },
-        { data: 'peripheral_location' }
+        { data: 'kind_of_peripheral' },
+        { data: 'peripheral_user' },
+        { data: 'user_dept' },
+        { data: 'date_of_purchase' },
+        { data: 'date_of_entry' },
+        { data: 'peripheral_location' },
+        { data: 'peripheral_status',
+          render:function(data){
+             if (!data) return '';
+               return data.charAt(0).toUpperCase() + data.slice(1);
+          }
+        }
       ];
 
       if (isAdminUser) {
@@ -605,18 +640,19 @@
       }
 
       const peripheralColumnDefs = [
-        { width: '80px', targets: 0 },   // Brand
+        { width: '80px', targets: 0 },   // Peipheral No.
+        { width: '100px', targets: 1 },  // Brand
         { width: '100px', targets: 1 },  // Model
-        { width: '110px', targets: 2 },  // Date of Purchase
-        { width: '110px', targets: 3 },  // Date of Entry
-        { width: '120px', targets: 4 },  // User
-        { width: '150px', targets: 5 },  // Department
-        { width: '120px', targets: 6 },  // Type of Peripheral
-        { width: '120px', targets: 7 },  // Serial No.
-        { width: '100px', targets: 8 },  // Property Tag
-        { width: '100px', targets: 9 },  // Peripheral No.
-        { width: '120px', targets: 10 }, // Peripheral Status
-        { width: '120px', targets: 11 }  // Peripheral Location
+        { width: '110px', targets: 2 },  // serial
+        { width: '110px', targets: 3 },  // property tag
+        { width: '120px', targets: 4 },  // kind of peripheral
+        { width: '150px', targets: 5 },  // user
+        { width: '120px', targets: 6 },  // department
+        { width: '120px', targets: 7 },  // date of purchase
+        { width: '100px', targets: 8 },  // date of entry
+        { width: '100px', targets: 9 },  // location.
+        { width: '120px', targets: 10 }, // status
+        { width: '120px', targets: 11 }  // action
       ];
       if (isAdminUser) {
         peripheralColumnDefs.push({ width: '100px', targets: 12, className: 'text-center' });
@@ -627,7 +663,8 @@
        serverSide: true,
         ajax: { url: apiUrl+'/peripherals/peripheralDataTable', type:"post", dataType:"json", 
         data: function (d) {
-          d.status = $('#statusFilter').val();
+          d.status = $('#statusFilter').val(),
+          d.typeFilter = $('#typeFilter').val()
         } 
       
         },
@@ -640,12 +677,21 @@
         scrollCollapse: true,
         responsive: false,
         autoWidth: false,
-        columnDefs: peripheralColumnDefs,
+        columnDefs: [peripheralColumnDefs,
+                    {
+                      targets:[5,8,9],
+                      visible: false
+                    }
+        ],
         initComplete: function () {
           hidePeripheralsSkeleton();
           hidePageSkeleton();
           initialLoadComplete = true;
         },
+        dom: 'Bfrtip',
+        buttons: [
+            'colvis' // Column visibility button
+        ],
         language: {
           search: 'Search:',
           lengthMenu: 'Show _MENU_ entries',
@@ -659,6 +705,10 @@
       });
 
       $('#statusFilter').on('change', function () {
+        peripheralsDt.ajax.reload();
+      });
+
+      $('#typeFilter').on('change', function () {
         peripheralsDt.ajax.reload();
       });
 

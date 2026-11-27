@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="/fontawesome/css/all.min.css">
   <script src="../ldn/jquery-3.7.1.min.js"></script>
   <script src="../ldn/sweetalert2@11.js"></script>
+    <link href="../ldn/tom-select.css" rel="stylesheet">
+  <script src="../ldn/tom-select.complete.min.js"></script>
   <!-- DataTables -->
   <link href="../ldn/dataTables.dataTables.min.css" rel="stylesheet">
   <script src="../ldn/dataTables.min.js"></script>
@@ -18,6 +20,22 @@
     /* Hide DataTables' default processing overlay; we use a skeleton loader instead. */
     .dt-processing {
       display: none !important;
+    }
+
+    /* Fix TomSelect dropdown clipping inside overflow containers / DataTable rows.
+       dropdownParent:'body' appends .ts-dropdown directly to <body>, so we
+       must give it a high z-index and make it scrollable. */
+    body > .ts-dropdown {
+      z-index: 9999 !important;
+      max-height: 260px;
+      overflow-y: auto;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      border: 1px solid #cbd5e1;
+      border-radius: 0.5rem;
+    }
+    body > .ts-dropdown .ts-dropdown-content {
+      max-height: 240px;
+      overflow-y: auto;
     }
   </style>
 </head>
@@ -76,20 +94,20 @@
           <p class="text-gray-600">Manage consumable items and requests</p>
         </div>
         <!-- Button Container -->
-        <div class="flex justify-end mb-4">
+        <div class="flex flex-wrap gap-3 justify-start sm:justify-end mb-6">
           <% if (isAdmin) { %>
             <button id="ConsumableLogsBtn"
-              class="bg-gradient-to-r from-[#2e5558] to-[#0F828C] hover:from-[#0F828C] hover:to-[#2e5558] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
-              <i class="fas fa-history text-lg"></i>
+              class="bg-gradient-to-r from-[#2e5558] to-[#0F828C] hover:from-[#0F828C] hover:to-[#2e5558] text-white px-5 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2.5 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 text-sm">
+              <i class="fas fa-history text-base"></i>
               <span class="font-semibold">Consumable Logs</span>
             </button>
             <button id="AddItemBtn"
-              class="ml-4 bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
-              <i class="fas fa-plus text-lg"></i>
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-5 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2.5 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 text-sm">
+              <i class="fas fa-plus text-base"></i>
               <span class="font-semibold">Add Item</span>
             </button>
-            <button id="openInactiveConsumablesModal" class="ml-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50">
-              <i class="fas fa-ban text-lg"></i>
+            <button id="openInactiveConsumablesModal" class="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white px-5 py-2.5 rounded-xl transition-all duration-300 flex items-center gap-2.5 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-600 focus:ring-opacity-50 text-sm">
+              <i class="fas fa-ban text-base"></i>
               <span class="font-semibold">Inactive</span>
             </button>
           <% } %>
@@ -208,6 +226,9 @@
                       Issued To:</th>
                     <th
                       class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
+                      Printer:</th>
+                    <th
+                      class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
                       Current Stock:</th>
                     <th
                       class="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider whitespace-nowrap">
@@ -322,15 +343,15 @@
             </div>
           </section>
 
-          <div class="flex items-center gap-4">
+          <div class="flex flex-wrap items-center gap-3">
             <button type="submit"
-              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 font-semibold">
               <i class="fas fa-plus text-lg"></i>
-              <span class="font-semibold">Add Item</span>
+              <span>Add Item</span>
             </button>
 
             <button id="clearAddItemForm" type="button"
-              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 font-semibold">
               Clear Form
             </button>
           </div>
@@ -497,15 +518,15 @@
             </div>
           </section>
 
-          <div class="flex items-center gap-4">
+          <div class="flex flex-wrap items-center gap-3">
             <button id="submitReturnForm" type="button"
-              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50">
+              class="bg-gradient-to-r from-[#0F828C] to-[#2e5558] hover:from-[#2e5558] hover:to-[#0F828C] text-white px-6 py-3 rounded-xl transition-all duration-300 flex items-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-[#0F828C] focus:ring-opacity-50 font-semibold">
               <i class="fas fa-reply text-lg"></i>
-              <span class="font-semibold">Submit Return</span>
+              <span>Submit Return</span>
             </button>
 
             <button id="cancelReturnForm" type="button"
-              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300">
+              class="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 font-semibold">
               Cancel
             </button>
           </div>
@@ -568,6 +589,10 @@
       // Start in loading state until the first DataTables response arrives.
       showPageSkeleton();
       showConsumablesSkeleton();
+
+
+
+
 
       // Bind DataTables events before initialization so we catch the first load.
       const $consumablesTableEl = $('#consumablesTable');
@@ -976,6 +1001,40 @@ const consumablesTable = $consumablesTableEl.DataTable({
           openAddItemModal(true);
         });
 
+        function loadPrinters(selectElement) {
+            $.ajax({
+                url: apiUrl + '/peripherals/getPrintersList',
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+
+                    $(selectElement).empty().append(
+                        '<option value="">Select Printer...</option>'
+                    );
+
+                    $.each(response.data, function (_, printer) {
+                        $(selectElement).append(
+                            `<option value="${printer.peripheral_id}">
+                                ${printer.brand} ${printer.model} ${printer.serial_no} ${printer.property_tag}
+                            </option>`
+                        );
+                    });
+
+                    // Initialize only once
+                    if (!selectElement.tomselect) {
+                        new TomSelect(selectElement, {
+                            create: false,
+                            placeholder: "Select printer...",
+                            dropdownParent: 'body'
+                        });
+                    }
+                },
+                error: function (xhr) {
+                    console.log(xhr.responseText);
+                }
+            });
+        }
+
         $('#consumablesTable tbody').on('click', '.add-request', function () {
           //if (!isAdminUser || !requestsTable) return;
 
@@ -984,7 +1043,7 @@ const consumablesTable = $consumablesTableEl.DataTable({
 
           const rowData = consumablesTable.row($(this).parents('tr')).data();
 
-          requestsTable.row.add([
+          const row = requestsTable.row.add([
             rowData.item,
             "Pending",
             `<input type="datetime-local" class="transaction-date border rounded px-2 py-1 w-48" value="${formatted}">`,
@@ -995,12 +1054,63 @@ const consumablesTable = $consumablesTableEl.DataTable({
             rowData.model,
             rowData.stock_no,
             rowData.batch_number || '',
-            '<input type="text" class="issued-to border rounded px-2 py-1 w-32" placeholder="Enter section/office">',
+            
+            `<select class="issued-to border rounded px-2 py-1 w-32" id="issuanceDept">
+               <option value="">Select department...</option>
+                  <option value="IT Section">IT Section</option>
+                  <option value="Accounting">Accounting</option>
+                  <option value="Nursing">Nursing</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="IPC">IPC</option>
+                  <option value="DO">DO</option>
+                  <option value="Laboratory">Laboratory</option>
+                  <option value="HIMS">HIMS</option>
+                  <option value="Pharmacy">Pharmacy</option>
+                  <option value="Radiology">Radiology</option>
+                  <option value="Admitting">Admitting</option>
+                  <option value="Billing & Claims">Billing & Claims</option>
+                  <option value="Cash Section">Cash Section</option>
+                  <option value="Dietary">Dietary</option>
+                  <option value="HR">HR</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Operations">Operations</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value = "HIMS">HIMS</option>
+                  <option value="Other">Other</option>
+                  <option value="Property & Supply">Property & Supply</option>
+                  <option value="MSS">MSS</option>
+                  <option value ="CSR">CSR</option>
+                  <option value="CQI">CQI</option>
+                  <option value="Pulmonary Units">Pulmonary Unit</option>
+                  <option value="Physical Therapy">Physical Therapy</option>
+                  <option value="OB">OB</option>
+                  <option value="Dental">Dental</option>
+                  <option value="OPD">OPD</option>
+            </select>`,
+
+            `<select class="printerSelect border rounded px-2 py-1 w-32">
+              
+             </select>`,
+
             rowData.current_stock,
             `<button class="remove-btn bg-red-500 border-2 border-red-500 text-white hover:bg-red-600 px-4 py-2 rounded-lg transition-all duration-200" title="Remove">
               <i class="fas fa-times"></i> Remove
             </button>`
-          ]).draw();
+          ]).draw(false);
+
+          const rowNode = row.node();
+
+          // Initialize Tom Select only for the new row
+          const select = $(rowNode).find('.issued-to')[0];
+          const selectPrinter = $(rowNode).find('.printerSelect')[0];
+
+          new TomSelect(select, {
+              create: false,
+              placeholder: "Select department...",
+              dropdownParent: 'body'
+          });
+
+          loadPrinters(selectPrinter);
 
         });
 
@@ -1021,6 +1131,7 @@ const consumablesTable = $consumablesTableEl.DataTable({
             let stock_no = $(this).find('td:eq(7)').text();
             let batch_number = $(this).find('td:eq(8)').text();
             let issued_to = $(this).find('.issued-to').val();
+            let peripheral_id = $(this).find('.printerSelect').val();
             let current_stock = $(this).find('td:eq(10)').text();
 
             requestItems.push({
@@ -1033,7 +1144,8 @@ const consumablesTable = $consumablesTableEl.DataTable({
               model: model,
               stock_no: stock_no,
               batch_number: batch_number,
-              issued_to: issued_to
+              issued_to: issued_to,
+              peripheral_id:peripheral_id
             });
 
           });
@@ -1056,6 +1168,7 @@ const consumablesTable = $consumablesTableEl.DataTable({
               });
 
               requestsTable.clear().draw();
+              consumablesTable.ajax.reload();
             },
 
             error: function () {

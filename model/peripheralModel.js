@@ -2,19 +2,25 @@ const { query } = require("../config/db");
 
 const DELETED_STATUS = "inactive_deleted";
 
-exports.peripheralDataTable = async (status) => {
+exports.peripheralDataTable = async (status, typeFilter) => {
     try {
+        const params = [DELETED_STATUS];
         let sql = `
             SELECT * 
-            FROM peripherals 
+            FROM peripherals where COALESCE(LOWER(peripheral_status), '') != ?
            
         `;
 
-        const params = [];
+        
 
         if (status) {
-            sql += ` where LOWER(peripheral_status) = ?`;
+            sql += ` and LOWER(peripheral_status) = ?`;
             params.push(status.toLowerCase());
+        }
+
+        if (typeFilter) {
+            sql += ` and LOWER(kind_of_peripheral) = ?`;
+            params.push(typeFilter.toLowerCase());
         }
 
         const peripheralsData = await query(sql, params);
@@ -99,4 +105,9 @@ exports.deletePeripheral = async (peripheral_id) => {
 exports.activatePeripheral = async (peripheral_id) => {
     const sql = `update peripherals set peripheral_status = ? WHERE peripheral_id = ?`;
     return query(sql, ['active', peripheral_id]);
+}
+
+exports.peripheralPrinters = async()=>{
+    const sql = `select brand, model, peripheral_id, serial_no, property_tag from peripherals where kind_of_peripheral = ?`;
+    return query(sql, ['Printer']);
 }
